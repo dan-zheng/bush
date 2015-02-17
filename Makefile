@@ -1,36 +1,50 @@
 
 #Use GNU compiler
-cc = gcc -g
-CC = g++ -g
+cc = gcc
+CC = g++
 
 LEX=lex
 YACC=yacc
 
-all: shell cat_grep ctrl-c regular
+LFL = -lfl
+CFLAGS = -g
 
-lex.yy.o: shell.l 
+# OS detection, since -lfl on OS X is -ll
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	LFL = -ll
+	CFLAGS += -DOS_X
+endif
+
+all: no-clean clean-tmp
+
+no-clean: shell cat_grep ctrl-c regular
+
+lex.yy.o: shell.l
 	$(LEX) shell.l
-	$(CC) -c lex.yy.c
+	$(CC) $(CFLAGS) -c lex.yy.c
 
 y.tab.o: shell.y
 	$(YACC) -d shell.y
-	$(CC) -c y.tab.c
+	$(CC) $(CFLAGS) -c y.tab.c
 
 command.o: command.cc
 	$(CC) -c command.cc
 
 shell: y.tab.o lex.yy.o command.o
-	$(CC) -o shell lex.yy.o y.tab.o command.o -lfl
+	$(CC) $(CFLAGS) -o shell lex.yy.o y.tab.o command.o $(LFL)
 
 cat_grep: cat_grep.cc
-	$(CC) -o cat_grep cat_grep.cc
+	$(CC) $(CFLAGS) -o cat_grep cat_grep.cc
 
 ctrl-c: ctrl-c.cc
-	$(CC) -o ctrl-c ctrl-c.cc
+	$(CC) $(CFLAGS) -o ctrl-c ctrl-c.cc
 
 regular: regular.cc
-	$(CC) -o regular regular.cc 
+	$(CC) $(CFLAGS) -o regular regular.cc
 
-clean:
-	rm -f lex.yy.c y.tab.c  y.tab.h shell ctrl-c regular cat_grep *.o
+clean: clean-tmp
+	rm -f shell ctrl-c regular cat_grep
 
+clean-tmp:
+	rm -f lex.yy.* y.tab.* y.tab.* *.o
