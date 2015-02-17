@@ -18,7 +18,7 @@ endif
 
 all: no-clean clean-tmp
 
-no-clean: shell cat_grep ctrl-c regular
+no-clean: shell cat_grep ctrl-c regular mocha
 
 lex.yy.o: shell.l
 	$(LEX) shell.l
@@ -33,6 +33,9 @@ command.o: command.cc
 
 shell: y.tab.o lex.yy.o command.o
 	$(CC) $(CFLAGS) -o shell lex.yy.o y.tab.o command.o $(LFL)
+
+mocha: shell
+	-mocha --reporter nyan
 
 cat_grep: examples/cat_grep.cc
 	$(CC) $(CFLAGS) -o cat_grep examples/cat_grep.cc
