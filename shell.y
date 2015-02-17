@@ -30,25 +30,19 @@ int yylex();
 
 %%
 
-goal:	
-	commands
-	;
+goal: commands;
 
-commands: 
-	command
-	| commands command 
-	;
+commands: command | commands command;
 
-command: simple_command
-        ;
+command: simple_command;
 
-simple_command:	
+simple_command:
 	command_and_args iomodifier_opt NEWLINE {
 		printf("   Yacc: Execute command\n");
 		Command::_currentCommand.execute();
-	}
-	| NEWLINE 
-	| error NEWLINE { yyerrok; }
+	} |
+  NEWLINE |
+  error NEWLINE { yyerrok; }
 	;
 
 command_and_args:
@@ -65,18 +59,16 @@ arg_list:
 
 argument:
 	WORD {
-               printf("   Yacc: insert argument \"%s\"\n", $1);
-
-	       Command::_currentSimpleCommand->insertArgument( $1 );\
+    printf("   Yacc: insert argument \"%s\"\n", $1);
+	  Command::_currentSimpleCommand->insertArgument( $1 );
 	}
 	;
 
 command_word:
 	WORD {
-               printf("   Yacc: insert command \"%s\"\n", $1);
-	       
-	       Command::_currentSimpleCommand = new SimpleCommand();
-	       Command::_currentSimpleCommand->insertArgument( $1 );
+    printf("   Yacc: insert command \"%s\"\n", $1);
+    Command::_currentSimpleCommand = new SimpleCommand();
+    Command::_currentSimpleCommand->insertArgument( $1 );
 	}
 	;
 
@@ -85,20 +77,18 @@ iomodifier_opt:
 		printf("   Yacc: insert output \"%s\"\n", $2);
 		Command::_currentCommand._outFile = $2;
 	}
-	| /* can be empty */ 
+	| /* can be empty */
 	;
 
 %%
 
 void
-yyerror(const char * s)
-{
+yyerror(const char * s) {
 	fprintf(stderr,"%s", s);
 }
 
 #if 0
-main()
-{
+main() {
 	yyparse();
 }
 #endif

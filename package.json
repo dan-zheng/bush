@@ -1,0 +1,21 @@
+{
+  "name": "lab3-shell",
+  "version": "1.0.0",
+  "description": "CS252 Lab 03.. not a good place for Node.js package, is it?",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "make && mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://jluchiji@data.cs.purdue.edu/homes/cs252/sourcecontrol/work/jluchiji/lab3-src.git"
+  },
+  "author": "Denis Luchkin-Zhou <jluchiji@purdue.edu>",
+  "devDependencies": {
+    "chai": "^2.0.0",
+    "coffee-script": "^1.9.0"
+  }
+}

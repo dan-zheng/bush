@@ -34,14 +34,14 @@ command.o: command.cc
 shell: y.tab.o lex.yy.o command.o
 	$(CC) $(CFLAGS) -o shell lex.yy.o y.tab.o command.o $(LFL)
 
-cat_grep: cat_grep.cc
-	$(CC) $(CFLAGS) -o cat_grep cat_grep.cc
+cat_grep: examples/cat_grep.cc
+	$(CC) $(CFLAGS) -o cat_grep examples/cat_grep.cc
 
-ctrl-c: ctrl-c.cc
-	$(CC) $(CFLAGS) -o ctrl-c ctrl-c.cc
+ctrl-c: examples/ctrl-c.cc
+	$(CC) $(CFLAGS) -o ctrl-c examples/ctrl-c.cc
 
-regular: regular.cc
-	$(CC) $(CFLAGS) -o regular regular.cc
+regular: examples/regular.cc
+	$(CC) $(CFLAGS) -o regular examples/regular.cc
 
 clean: clean-tmp
 	rm -f shell ctrl-c regular cat_grep
