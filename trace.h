@@ -27,23 +27,23 @@
 
 #else
 
-  #define COLOR_BLACK
-  #define COLOR_BLUE
-  #define COLOR_GREEN
-  #define COLOR_CYAN
-  #define COLOR_RED
-  #define COLOR_PURPLE
-  #define COLOR_BROWN
-  #define COLOR_LGRAY
-  #define COLOR_DGRAY
-  #define COLOR_LBLUE
-  #define COLOR_LGREEN
-  #define COLOR_LCYAN
-  #define COLOR_LRED
-  #define COLOR_LPURPLE
-  #define COLOR_YELLOW
-  #define COLOR_WHITE
-  #define COLOR_NONE
+  #define COLOR_BLACK   ""
+  #define COLOR_BLUE    ""
+  #define COLOR_GREEN   ""
+  #define COLOR_CYAN    ""
+  #define COLOR_RED     ""
+  #define COLOR_PURPLE  ""
+  #define COLOR_BROWN   ""
+  #define COLOR_LGRAY   ""
+  #define COLOR_DGRAY   ""
+  #define COLOR_LBLUE   ""
+  #define COLOR_LGREEN  ""
+  #define COLOR_LCYAN   ""
+  #define COLOR_LRED    ""
+  #define COLOR_LPURPLE ""
+  #define COLOR_YELLOW  ""
+  #define COLOR_WHITE   ""
+  #define COLOR_NONE    ""
 
 #endif
 

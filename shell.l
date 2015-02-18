@@ -5,6 +5,7 @@
  * shell.l: lexical analyzer for shell
  * You have to extend it.
  *
+ * cmd [arg]* [ | cmd [arg]* ]* [ [> filename] [< filename] [ >& filename] [>> filename] [>>& filename] ]* [&]
  */
 
 %{
@@ -24,7 +25,20 @@ void myunputc(int c) { unput(c); }
 
 [ \t] 	    { /* discard */ }
 
+
+">>&"       { return AMP; }
+
+">>"        { return GTGT; }
+
+">&"        { return GTAMP; }
+
 ">"         { return GT; }
+
+"<"         { return LT; }
+
+"&"         { return AMP; }
+
+"|"         { return PIPE; }
 
 [^ \t\n][^ \t\n]* {
 	yylval.string_val = strdup(yytext);
