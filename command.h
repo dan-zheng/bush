@@ -22,6 +22,7 @@ public:
 	std::vector<SimpleCommand*>  *args;
 
 	int								bg;
+	int								nf;
 
 	char			 			 *in;
 	char			 			 *out;

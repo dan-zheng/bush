@@ -25,8 +25,7 @@ void myunputc(int c) { unput(c); }
 
 [ \t] 	    { /* discard */ }
 
-
-">>&"       { return AMP; }
+">>&"       { return GTGTAMP; }
 
 ">>"        { return GTGT; }
 

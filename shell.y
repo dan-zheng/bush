@@ -39,7 +39,7 @@
   command: simple_command;
 
   simple_command:
-  	command_and_args iomodifier_opt LF {
+  	command_and_args redirects background LF {
   		DBG_VERBOSE("Yacc: Execute command\n");
   		CompoundCommand::current -> execute();
   	} |
@@ -47,21 +47,12 @@
     error LF { yyerrok; }
   	;
 
+  // ----------------------------------------------------------------------- //
+  // Basic command and argument list                                         //
+  // ----------------------------------------------------------------------- //
   command_and_args:
-  	command_word arg_list {
+  	command_word arguments {
   		CompoundCommand::current -> pushArgument(SimpleCommand::current);
-  	}
-  	;
-
-  arg_list:
-  	arg_list argument
-  	| /* can be empty */
-  	;
-
-  argument:
-  	WORD {
-      DBG_VERBOSE("Yacc: insert argument \"%s\"\n", $1);
-  	  SimpleCommand::current -> pushArgument($1);
   	}
   	;
 
@@ -73,14 +64,60 @@
   	}
   	;
 
-  iomodifier_opt:
+  // ----------------------------------------------------------------------- //
+  // Argument list                                                           //
+  // ----------------------------------------------------------------------- //
+  arguments: argument | argument arguments |;
+  argument:
+    WORD {
+      DBG_VERBOSE("Yacc: insert argument \"%s\"\n", $1);
+      SimpleCommand::current -> pushArgument($1);
+    }
+    ;
+  
+  // ----------------------------------------------------------------------- //
+  // IO Redirects                                                            //
+  // ----------------------------------------------------------------------- //
+  redirects: redirect | redirect redirects |;
+  redirect:
   	GT WORD {
-      DBG_VERBOSE("Yacc: insert output \"%s\"\n", $2);
+      DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", $2);
+      CompoundCommand::current -> nf  = 1;
   		CompoundCommand::current -> out = $2;
-  	}
-  	| /* can be empty */
+  	} |
+    GTGT WORD {
+      DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
+      CompoundCommand::current -> nf  = 0;
+  		CompoundCommand::current -> out = $2;
+    } |
+    GTAMP WORD {
+      DBG_VERBOSE("Yacc: Redirect stdout and stderr to \"%s\"\n", $2);
+      CompoundCommand::current -> nf  = 1;
+      CompoundCommand::current -> out = $2;
+      CompoundCommand::current -> err = $2;
+    } |
+    GTGTAMP WORD {
+      DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
+      CompoundCommand::current -> nf  = 0;
+      CompoundCommand::current -> out = $2;
+      CompoundCommand::current -> err = $2;
+    } |
+    LT WORD {
+      DBG_VERBOSE("Yacc: Redirect stdin from \"%s\"\n", $2);
+      CompoundCommand::current -> in  = $2;
+    }
   	;
 
+  // ----------------------------------------------------------------------- //
+  // Background flag                                                         //
+  // ----------------------------------------------------------------------- //
+  background:
+    AMP {
+      DBG_VERBOSE("Yacc: Enabling command backround flag\n");
+      CompoundCommand::current -> bg = 1;
+    } |
+    /* empty */
+    ;
 %%
 
 void yyerror(const char *s) {
