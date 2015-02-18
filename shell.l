@@ -12,31 +12,21 @@
 #include <string.h>
 #include "y.tab.h"
 
-static  void yyunput (int c,char *buf_ptr  );
+static void yyunput(int, char*);
 
-void myunputc(int c) {
-    unput(c);
-}
+void myunputc(int c) { unput(c); }
 
 %}
 
 %%
 
-\n 	{
-		return NEWLINE;
-	}
+\n 	        { return LF; }
 
-[ \t] 	{
-		/* Discard spaces and tabs */
-     	}	
+[ \t] 	    { /* discard */ }
 
-">" 	{
-		return GREAT;
-	}
+">"         { return GT; }
 
-[^ \t\n][^ \t\n]*  {
-		/* Assume that file names have only alpha chars */
-		yylval.string_val = strdup(yytext);
-		return WORD;
-	}
-
+[^ \t\n][^ \t\n]* {
+	yylval.string_val = strdup(yytext);
+	return WORD;
+}

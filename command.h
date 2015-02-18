@@ -1,41 +1,43 @@
+#include <vector>
 
-#ifndef command_h
-#define command_h
+#ifndef COMMAND_H_
+#define COMMAND_H_
 
-// Command Data Structure
-struct SimpleCommand {
-	// Available space for arguments currently preallocated
-	int _numberOfAvailableArguments;
+class SimpleCommand {
+public:
 
-	// Number of arguments
-	int _numberOfArguments;
-	char ** _arguments;
+	std::vector<char*>  	 *args;
 
-	SimpleCommand();
-	void insertArgument( char * argument );
+	SimpleCommand(void);
+	~SimpleCommand(void);
+
+	void pushArgument(char*);
+
+	static SimpleCommand *current;
 };
 
-struct Command {
-	int              _numberOfAvailableSimpleCommands;
-	int              _numberOfSimpleCommands;
-	SimpleCommand  **_simpleCommands;
+class CompoundCommand {
+public:
 
-	char            *_outFile;
-	char            *_inputFile;
-	char            *_errFile;
-	int              _background;
+	std::vector<SimpleCommand*>  *args;
 
-	void prompt();
-	void print();
-	void execute();
-	void clear();
+	int								bg;
 
-	Command();
-	
-	void insertSimpleCommand( SimpleCommand * simpleCommand );
+	char			 			 *in;
+	char			 			 *out;
+	char			 			 *err;
 
-	static Command _currentCommand;
-	static SimpleCommand *_currentSimpleCommand;
+	CompoundCommand(void);
+	~CompoundCommand(void);
+
+	void prompt(void);
+	void print(void);
+	void execute(void);
+	void clear(void);
+
+	void pushArgument(SimpleCommand*);
+
+	static CompoundCommand *current;
 };
 
 #endif

@@ -13,17 +13,17 @@
 
 %token	<string_val> WORD
 
-%token 	NOTOKEN GREAT NEWLINE
+%token 	NOTOKEN LF GT
 
 %union	{
-		char   *string_val;
-	}
+	char   *string_val;
+}
 
 %{
-//#define yylex yylex
 #include <stdio.h>
 #include "command.h"
-void yyerror(const char * s);
+
+void yyerror(const char*);
 int yylex();
 
 %}
@@ -37,18 +37,17 @@ commands: command | commands command;
 command: simple_command;
 
 simple_command:
-	command_and_args iomodifier_opt NEWLINE {
+	command_and_args iomodifier_opt LF {
 		printf("   Yacc: Execute command\n");
-		Command::_currentCommand.execute();
+		CompoundCommand::current -> execute();
 	} |
-  NEWLINE |
-  error NEWLINE { yyerrok; }
+  LF |
+  error LF { yyerrok; }
 	;
 
 command_and_args:
 	command_word arg_list {
-		Command::_currentCommand.
-			insertSimpleCommand( Command::_currentSimpleCommand );
+		CompoundCommand::current -> pushArgument(SimpleCommand::current);
 	}
 	;
 
@@ -60,22 +59,22 @@ arg_list:
 argument:
 	WORD {
     printf("   Yacc: insert argument \"%s\"\n", $1);
-	  Command::_currentSimpleCommand->insertArgument( $1 );
+	  SimpleCommand::current -> pushArgument($1);
 	}
 	;
 
 command_word:
 	WORD {
     printf("   Yacc: insert command \"%s\"\n", $1);
-    Command::_currentSimpleCommand = new SimpleCommand();
-    Command::_currentSimpleCommand->insertArgument( $1 );
+    SimpleCommand::current = new SimpleCommand();
+    SimpleCommand::current -> pushArgument($1);
 	}
 	;
 
 iomodifier_opt:
-	GREAT WORD {
+	GT WORD {
 		printf("   Yacc: insert output \"%s\"\n", $2);
-		Command::_currentCommand._outFile = $2;
+		CompoundCommand::current -> out = $2;
 	}
 	| /* can be empty */
 	;
@@ -84,7 +83,7 @@ iomodifier_opt:
 
 void
 yyerror(const char * s) {
-	fprintf(stderr,"%s", s);
+	fprintf(stderr, "%s", s);
 }
 
 #if 0

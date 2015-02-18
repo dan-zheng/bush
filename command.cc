@@ -17,160 +17,121 @@
 #include <string.h>
 #include <signal.h>
 
+#include <vector>
+
+#include "trace.h"
 #include "command.h"
 
-SimpleCommand::SimpleCommand()
-{
-	// Creat available space for 5 arguments
-	_numberOfAvailableArguments = 5;
-	_numberOfArguments = 0;
-	_arguments = (char **) malloc( _numberOfAvailableArguments * sizeof( char * ) );
+SimpleCommand   *SimpleCommand::current;
+CompoundCommand *CompoundCommand::current;
+
+SimpleCommand::SimpleCommand(void) {
+	args = new std::vector<char*>();
+}
+
+SimpleCommand::~SimpleCommand(void) {
+	delete args;
 }
 
 void
-SimpleCommand::insertArgument( char * argument )
-{
-	if ( _numberOfAvailableArguments == _numberOfArguments  + 1 ) {
-		// Double the available space
-		_numberOfAvailableArguments *= 2;
-		_arguments = (char **) realloc( _arguments,
-				  _numberOfAvailableArguments * sizeof( char * ) );
-	}
-
-	_arguments[ _numberOfArguments ] = argument;
-
-	// Add NULL argument at the end
-	_arguments[ _numberOfArguments + 1] = NULL;
-
-	_numberOfArguments++;
+SimpleCommand::pushArgument(char *arg) {
+	args -> push_back(arg);
 }
 
-Command::Command()
-{
-	// Create available space for one simple command
-	_numberOfAvailableSimpleCommands = 1;
-	_simpleCommands = (SimpleCommand **)
-		malloc( _numberOfAvailableSimpleCommands * sizeof( SimpleCommand * ) );
+CompoundCommand::CompoundCommand() {
+	args = new std::vector<SimpleCommand*>();
 
-	_numberOfSimpleCommands = 0;
-	_outFile = 0;
-	_inputFile = 0;
-	_errFile = 0;
-	_background = 0;
+	bg  = 0;
+	in  = NULL;
+	out = NULL;
+	err = NULL;
 }
 
 void
-Command::insertSimpleCommand( SimpleCommand * simpleCommand )
-{
-	if ( _numberOfAvailableSimpleCommands == _numberOfSimpleCommands ) {
-		_numberOfAvailableSimpleCommands *= 2;
-		_simpleCommands = (SimpleCommand **) realloc( _simpleCommands,
-			 _numberOfAvailableSimpleCommands * sizeof( SimpleCommand * ) );
-	}
-
-	_simpleCommands[ _numberOfSimpleCommands ] = simpleCommand;
-	_numberOfSimpleCommands++;
+CompoundCommand::pushArgument(SimpleCommand *cmd) {
+	args -> push_back(cmd);
 }
 
 void
-Command:: clear()
-{
-	for ( int i = 0; i < _numberOfSimpleCommands; i++ ) {
-		for ( int j = 0; j < _simpleCommands[ i ]->_numberOfArguments; j ++ ) {
-			free ( _simpleCommands[ i ]->_arguments[ j ] );
-		}
+CompoundCommand::clear() {
 
-		free ( _simpleCommands[ i ]->_arguments );
-		delete  _simpleCommands[ i ]; // This is a class, so we must delete it. Don't mix free/delete.
-	}
+	args -> erase(args -> begin(), args -> end());
 
-	if ( _outFile ) {
-		free( _outFile );
-	}
+	if (out) free(out);
+	if (in)  free(in);
+	if (err && err != out) free(err);
 
-	if ( _inputFile ) {
-		free( _inputFile );
-	}
-
-	if ( _errFile && _errFile != _outFile ) {
-		free( _errFile );
-	}
-
-	_numberOfSimpleCommands = 0;
-	_outFile = 0;
-	_inputFile = 0;
-	_errFile = 0;
-	_background = 0;
+	bg   = 0;
+	in   = NULL;
+	out  = NULL;
+	err  = NULL;
 }
 
 void
-Command::print()
-{
-	printf("\n\n");
-	printf("              COMMAND TABLE                \n");
-	printf("\n");
-	printf("  #   Simple Commands\n");
-	printf("  --- ----------------------------------------------------------\n");
+CompoundCommand::print() {
 
-	for ( int i = 0; i < _numberOfSimpleCommands; i++ ) {
-		printf("  %-3d ", i );
-		for ( int j = 0; j < _simpleCommands[i]->_numberOfArguments; j++ ) {
-			printf("\"%s\" \t", _simpleCommands[i]->_arguments[ j ] );
+	DBG_TRACE("\n\n");
+	DBG_TRACE("              COMMAND TABLE                \n");
+	DBG_TRACE("\n");
+	DBG_TRACE("  #   Simple Commands\n");
+	DBG_TRACE("  --- ----------------------------------------------------------\n");
+
+	int csize = args -> size();
+	for (int i = 0; i < csize; i++) {
+		DBG_TRACE("  %-3d ", i);
+
+		int size = args -> at(i) -> args -> size();
+		for (int j = 0; j < size; j++) {
+			DBG_TRACE("\"%s\" \t", args -> at(i) -> args -> at(j));
 		}
 	}
 
-	printf( "\n\n" );
-	printf( "  Output       Input        Error        Background\n" );
-	printf( "  ------------ ------------ ------------ ------------\n" );
-	printf( "  %-12s %-12s %-12s %-12s\n", _outFile?_outFile:"default",
-		_inputFile?_inputFile:"default", _errFile?_errFile:"default",
-		_background?"YES":"NO");
-	printf( "\n\n" );
-
+	DBG_TRACE( "\n\n" );
+	DBG_TRACE( "  Output       Input        Error        Background\n" );
+	DBG_TRACE( "  ------------ ------------ ------------ ------------\n" );
+	DBG_TRACE( "  %-12s %-12s %-12s %-12s\n",
+		out ? out   : "default",
+		in  ? in    : "default",
+		err ? err   : "default",
+		bg  ? "YES" : "NO");
+	DBG_TRACE( "\n\n" );
 }
 
 void
-Command::execute()
-{
+CompoundCommand::execute() {
 	// Don't do anything if there are no simple commands
-	if ( _numberOfSimpleCommands == 0 ) {
-		prompt();
-		return;
+	if (!args -> empty()) {
+
+		// Print contents of Command data structure
+		print();
+
+		// Add execution here
+		// For every simple command fork a new process
+		// Setup i/o redirection
+		// and call exec
+
+		// Clear to prepare for next command
+		clear();
+
 	}
-
-	// Print contents of Command data structure
-	print();
-
-	// Add execution here
-	// For every simple command fork a new process
-	// Setup i/o redirection
-	// and call exec
-
-	// Clear to prepare for next command
-	clear();
 
 	// Print new prompt
 	prompt();
 }
 
-// Shell implementation
-
 void
-Command::prompt()
-{
-	printf("myshell>");
+CompoundCommand::prompt() {
+	printf(MAGENTA("myshell> "));
 	fflush(stdout);
 }
 
-Command Command::_currentCommand;
-SimpleCommand * Command::_currentSimpleCommand;
+int
+yyparse(void);
 
-int yyparse(void);
-
-int main(int argc, char **argv)
-{
-	Command::_currentCommand.prompt();
+int
+main(int argc, char **argv) {
+	CompoundCommand::current = new CompoundCommand();
+	CompoundCommand::current -> prompt();
 	yyparse();
-
-    return 0;
+  return 0;
 }
