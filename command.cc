@@ -70,31 +70,31 @@ CompoundCommand::clear() {
 void
 CompoundCommand::print() {
 
-	DBG_TRACE("\n\n");
-	DBG_TRACE("              COMMAND TABLE                \n");
-	DBG_TRACE("\n");
-	DBG_TRACE("  #   Simple Commands\n");
-	DBG_TRACE("  --- ----------------------------------------------------------\n");
+	DBG_INFO("\n\n");
+	DBG_INFO("            COMMAND TABLE                \n");
+	DBG_INFO("\n");
+	DBG_INFO("#   Simple Commands\n");
+	DBG_INFO("--- ----------------------------------------------------------\n");
 
 	int csize = args -> size();
 	for (int i = 0; i < csize; i++) {
-		DBG_TRACE("  %-3d ", i);
+		DBG_INFO("  %-3d ", i);
 
 		int size = args -> at(i) -> args -> size();
 		for (int j = 0; j < size; j++) {
-			DBG_TRACE("\"%s\" \t", args -> at(i) -> args -> at(j));
+			DBG_INFO_N("\"%s\" \t", args -> at(i) -> args -> at(j));
 		}
 	}
 
-	DBG_TRACE( "\n\n" );
-	DBG_TRACE( "  Output       Input        Error        Background\n" );
-	DBG_TRACE( "  ------------ ------------ ------------ ------------\n" );
-	DBG_TRACE( "  %-12s %-12s %-12s %-12s\n",
+	DBG_INFO_N( "\n\n" );
+	DBG_INFO( "Output       Input        Error        Background\n" );
+	DBG_INFO( "------------ ------------ ------------ ------------\n" );
+	DBG_INFO( "%-12s %-12s %-12s %-12s\n",
 		out ? out   : "default",
 		in  ? in    : "default",
 		err ? err   : "default",
 		bg  ? "YES" : "NO");
-	DBG_TRACE( "\n\n" );
+	DBG_INFO( "\n\n" );
 }
 
 void
@@ -121,7 +121,7 @@ CompoundCommand::execute() {
 
 void
 CompoundCommand::prompt() {
-	printf(MAGENTA("myshell> "));
+	printf(LGREEN("myshell> "));
 	fflush(stdout);
 }
 
@@ -130,6 +130,12 @@ yyparse(void);
 
 int
 main(int argc, char **argv) {
+	DBG_ERR("Error debug level enabled.\n");
+	DBG_WARN("Warning debug level enabled.\n");
+	DBG_INFO("Info debug level enabled.\n");
+	DBG_VERBOSE("Verbose debug level enabled.\n");
+
+
 	CompoundCommand::current = new CompoundCommand();
 	CompoundCommand::current -> prompt();
 	yyparse();

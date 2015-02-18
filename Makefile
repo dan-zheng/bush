@@ -1,13 +1,15 @@
 
-#Use GNU compiler
-cc = gcc
-CC = g++
+# CLI commands
+CC      = g++
+LEX     = lex
+YACC    = yacc
 
-LEX=lex
-YACC=yacc
+# Platform-specific libraries
+LFL     = -lfl
 
-LFL = -lfl
-CFLAGS = -g
+# Debug logging level (0 - None, 4 - Max)
+DEBUG   = 4
+CFLAGS += -DDEBUG=$(DEBUG)
 
 # OS detection, since -lfl on OS X is -ll
 UNAME_S := $(shell uname -s)
@@ -15,9 +17,6 @@ ifeq ($(UNAME_S),Darwin)
 	LFL = -ll
 	CFLAGS += -DOS_X
 endif
-
-# Additional Flags
-CFLAGS += $(CLI)
 
 # Aliases
 all: no-clean clean-tmp

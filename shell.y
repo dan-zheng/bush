@@ -21,6 +21,7 @@
 
 %{
 #include <stdio.h>
+#include "trace.h"
 #include "command.h"
 
 void yyerror(const char*);
@@ -38,7 +39,7 @@ command: simple_command;
 
 simple_command:
 	command_and_args iomodifier_opt LF {
-		printf("   Yacc: Execute command\n");
+		DBG_VERBOSE("Yacc: Execute command\n");
 		CompoundCommand::current -> execute();
 	} |
   LF |
@@ -58,14 +59,14 @@ arg_list:
 
 argument:
 	WORD {
-    printf("   Yacc: insert argument \"%s\"\n", $1);
+    DBG_VERBOSE("Yacc: insert argument \"%s\"\n", $1);
 	  SimpleCommand::current -> pushArgument($1);
 	}
 	;
 
 command_word:
 	WORD {
-    printf("   Yacc: insert command \"%s\"\n", $1);
+    DBG_VERBOSE("Yacc: insert command \"%s\"\n", $1);
     SimpleCommand::current = new SimpleCommand();
     SimpleCommand::current -> pushArgument($1);
 	}
@@ -73,7 +74,7 @@ command_word:
 
 iomodifier_opt:
 	GT WORD {
-		printf("   Yacc: insert output \"%s\"\n", $2);
+    DBG_VERBOSE("Yacc: insert output \"%s\"\n", $2);
 		CompoundCommand::current -> out = $2;
 	}
 	| /* can be empty */
