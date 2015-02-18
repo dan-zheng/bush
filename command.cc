@@ -23,6 +23,8 @@
 #include "trace.h"
 #include "command.h"
 
+#define HIGHLIGHT COLOR_LCYAN
+
 SimpleCommand::SimpleCommand(void) {
 	args = new std::vector<char*>();
 }
@@ -69,37 +71,31 @@ CompoundCommand::clear() {
 void
 CompoundCommand::print() {
 
-	DBG_INFO("\n\n");
-	DBG_INFO("            COMMAND TABLE                \n");
-	DBG_INFO("\n");
+	DBG_INFO("\n\n                      COMMAND TABLE                           \n\n");
 	DBG_INFO("#   Simple Commands\n");
 	DBG_INFO("--- ----------------------------------------------------------\n");
 
 	int csize = args -> size();
 	for (int i = 0; i < csize; i++) {
-		DBG_INFO("  %-3d ", i);
+		DBG_INFO("%-3d ", i);
 
 		int size = args -> at(i) -> args -> size();
 		for (int j = 0; j < size; j++) {
 			DBG_INFO_N("\"%s\" \t", args -> at(i) -> args -> at(j));
 		}
+		DBG_INFO_N("\n");
 	}
 
-	DBG_INFO_N( "\n\n" );
+	DBG_INFO_N("\n\n");
 	DBG_INFO( "Output       Input        Error        Truncate     Background\n" );
 	DBG_INFO( "------------ ------------ ------------ ------------ ------------\n" );
-	DBG_INFO( "%s%-12s %s%-12s %s%-12s %s%-12s %s%-12s\n",
-		out ? COLOR_YELLOW   : COLOR_NONE,
-		out ? out   : "default",
-		in  ? COLOR_YELLOW   : COLOR_NONE,
-		in  ? in    : "default",
-		err ? COLOR_YELLOW   : COLOR_NONE,
-		err ? err   : "default",
-		nf  ? COLOR_YELLOW   : COLOR_NONE,
-		nf  ? "YES" : "NO",
-		bg  ? COLOR_YELLOW   : COLOR_NONE,
-		bg  ? "YES" : "NO");
-	DBG_INFO( "\n\n" );
+	DBG_INFO( "%s%-12s %s%-12s %s%-12s %s%-12s %s%-12s %s\n\n\n",
+		out ? HIGHLIGHT   : COLOR_NONE, out ? out   : "default",
+		in  ? HIGHLIGHT   : COLOR_NONE, in  ? in    : "default",
+		err ? HIGHLIGHT   : COLOR_NONE, err ? err   : "default",
+		nf  ? HIGHLIGHT   : COLOR_NONE, nf  ? "YES" : "NO",
+		bg  ? HIGHLIGHT   : COLOR_NONE, bg  ? "YES" : "NO",
+		COLOR_NONE);
 }
 
 void

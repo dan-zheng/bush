@@ -36,36 +36,47 @@
 
   commands: command | commands command;
 
-  command: simple_command;
-
-  simple_command:
-  	command_and_args redirects background LF {
-  		DBG_VERBOSE("Yacc: Execute command\n");
-  		CompoundCommand::current -> execute();
-  	} |
+  command: partials redirects background LF {
+      DBG_VERBOSE("Yacc: Execute command\n");
+      CompoundCommand::current -> execute();
+    }  |
     LF |
     error LF { yyerrok; }
-  	;
+  ;
 
   // ----------------------------------------------------------------------- //
-  // Basic command and argument list                                         //
+  // Partial command list                                                    //
+  //                                                                         //
+  //   cmd [arg]* [ | cmd [arg]* ]*                                          //
+  //                                                                         //
   // ----------------------------------------------------------------------- //
-  command_and_args:
-  	command_word arguments {
-  		CompoundCommand::current -> pushArgument(SimpleCommand::current);
-  	}
-  	;
+  partials: partial | partial PIPE partials;
 
-  command_word:
-  	WORD {
+
+  // ----------------------------------------------------------------------- //
+  // Partial command                                                         //
+  //                                                                         //
+  //   cmd [arg]*                                                            //
+  //                                                                         //
+  // ----------------------------------------------------------------------- //
+  partial:
+    cmd_word arguments {
+      CompoundCommand::current -> pushArgument(SimpleCommand::current);
+    }
+    ;
+  cmd_word:
+    WORD {
       DBG_VERBOSE("Yacc: insert command \"%s\"\n", $1);
       SimpleCommand::current = new SimpleCommand();
       SimpleCommand::current -> pushArgument($1);
-  	}
-  	;
+    }
+    ;
 
   // ----------------------------------------------------------------------- //
   // Argument list                                                           //
+  //                                                                         //
+  //   [arg]*                                                                //
+  //                                                                         //
   // ----------------------------------------------------------------------- //
   arguments: argument | argument arguments |;
   argument:
@@ -74,9 +85,18 @@
       SimpleCommand::current -> pushArgument($1);
     }
     ;
-  
+
   // ----------------------------------------------------------------------- //
   // IO Redirects                                                            //
+  //                                                                         //
+  //   [                                                                     //
+  //     [>  filename]                                                       //
+  //     [<  filename]                                                       //
+  //     [>& filename]                                                       //
+  //     [>> filename]                                                       //
+  //     [>>& filename]                                                      //
+  //   ]*                                                                    //
+  //                                                                         //
   // ----------------------------------------------------------------------- //
   redirects: redirect | redirect redirects |;
   redirect:
@@ -110,6 +130,9 @@
 
   // ----------------------------------------------------------------------- //
   // Background flag                                                         //
+  //                                                                         //
+  //   [&]                                                                   //
+  //                                                                         //
   // ----------------------------------------------------------------------- //
   background:
     AMP {
