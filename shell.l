@@ -19,6 +19,8 @@ void myunputc(int c) { unput(c); }
 
 %}
 
+wordchar    [^ |><\t\n]
+
 %%
 
 \n 	        { return LF; }
@@ -39,7 +41,7 @@ void myunputc(int c) { unput(c); }
 
 "|"         { return PIPE; }
 
-[^ \t\n][^ \t\n]* {
+{wordchar}{wordchar}* {
 	yylval.string_val = strdup(yytext);
 	return WORD;
 }
