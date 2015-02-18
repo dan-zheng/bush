@@ -35,8 +35,8 @@ y.tab.o: shell.y
 command.o: command.cc
 	$(CC) $(CFLAGS) -c command.cc
 
-shell: y.tab.o lex.yy.o command.o
-	$(CC) -o shell lex.yy.o y.tab.o command.o $(LFL)
+shell: y.tab.o lex.yy.o command.o main.cc
+	$(CC) $(CFLAGS) -o shell main.cc lex.yy.o y.tab.o command.o $(LFL)
 
 # Test
 mocha: shell

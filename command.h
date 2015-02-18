@@ -30,7 +30,6 @@ public:
 	CompoundCommand(void);
 	~CompoundCommand(void);
 
-	void prompt(void);
 	void print(void);
 	void execute(void);
 	void clear(void);

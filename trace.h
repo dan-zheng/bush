@@ -14,6 +14,9 @@ Brown       0;33     Yellow        1;33
 Light Gray  0;37     White         1;37
 */
 
+#define FIRST_ARG_(N, ...) N
+#define FIRST_ARG(args) FIRST_ARG_ args
+
 #ifndef NO_COLORS
 
   #define COLOR_BLACK   "\033[0;30m"
@@ -84,7 +87,7 @@ Light Gray  0;37     White         1;37
 #endif
 
 #if DEBUG >= DBG_LVL_ERROR
-  #define DBG_ERR(...) fprintf(stderr, COLOR_LRED "\tERROR:       " COLOR_NONE __VA_ARGS__);
+  #define DBG_ERR(...) fprintf(stderr, COLOR_LRED "  ERROR:       " COLOR_NONE __VA_ARGS__);
   #define DBG_ERR_N(...) fprintf(stderr, __VA_ARGS__);
 #else
   #define DBG_ERR(...)
@@ -92,7 +95,7 @@ Light Gray  0;37     White         1;37
 #endif
 
 #if DEBUG >= DBG_LVL_WARN
-  #define DBG_WARN(...) fprintf(stderr, COLOR_YELLOW "\tWARNING:     " COLOR_NONE __VA_ARGS__);
+  #define DBG_WARN(...) fprintf(stderr, COLOR_YELLOW "  WARNING:     " COLOR_NONE __VA_ARGS__);
   #define DBG_WARN_N(...) fprintf(stderr, __VA_ARGS__);
 #else
   #define DBG_WARN(...)
@@ -100,7 +103,7 @@ Light Gray  0;37     White         1;37
 #endif
 
 #if DEBUG >= DBG_LVL_INFO
-  #define DBG_INFO(...) fprintf(stderr, COLOR_LBLUE  "\tINFO:        "  COLOR_NONE __VA_ARGS__);
+  #define DBG_INFO(...) fprintf(stderr, COLOR_LBLUE  "  INFO:        "  COLOR_NONE __VA_ARGS__);
   #define DBG_INFO_N(...) fprintf(stderr, __VA_ARGS__);
 #else
   #define DBG_INFO(...)
@@ -108,15 +111,20 @@ Light Gray  0;37     White         1;37
 #endif
 
 #if DEBUG >= DBG_LVL_VERBOSE
-  #define DBG_VERBOSE(...) fprintf(stderr, COLOR_DGRAY  "\tVERBOSE:     "  COLOR_NONE __VA_ARGS__);
+  #define DBG_VERBOSE(...) fprintf(stderr, COLOR_DGRAY  "  VERBOSE:     "  COLOR_NONE __VA_ARGS__);
   #define DBG_VERBOSE_N(...) fprintf(stderr, __VA_ARGS__);
 #else
   #define DBG_VERBOSE(...)
   #define DBG_VERBOSE_N(...)
 #endif
 
+#define WARN(...)   fprintf(stderr, COLOR_YELLOW "\u2691     " __VA_ARGS__);\
+                    fprintf(stderr, " (%s:%d)\n", __FILE__, __LINE__);\
+                    fprintf(stderr, COLOR_NONE);
 
-#define WARN(...) fprintf(stderr, COLOR_YELLOW __VA_ARGS__ COLOR_NONE);
-#define PANIC(...) fprintf(stderr, __VA_ARGS__); exit(1);
+#define PANIC(...)  fprintf(stderr, COLOR_LRED "\u2717     " __VA_ARGS__);\
+                    fprintf(stderr, " (%s:%d)\n", __FILE__, __LINE__);\
+                    fprintf(stderr, COLOR_NONE);\
+                    exit(1);
 
 #endif

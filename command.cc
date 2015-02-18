@@ -19,11 +19,9 @@
 
 #include <vector>
 
+#include "main.h"
 #include "trace.h"
 #include "command.h"
-
-SimpleCommand   *SimpleCommand::current;
-CompoundCommand *CompoundCommand::current;
 
 SimpleCommand::SimpleCommand(void) {
 	args = new std::vector<char*>();
@@ -117,27 +115,4 @@ CompoundCommand::execute() {
 
 	// Print new prompt
 	prompt();
-}
-
-void
-CompoundCommand::prompt() {
-	printf(LGREEN("myshell> "));
-	fflush(stdout);
-}
-
-int
-yyparse(void);
-
-int
-main(int argc, char **argv) {
-	DBG_ERR("Error debug level enabled.\n");
-	DBG_WARN("Warning debug level enabled.\n");
-	DBG_INFO("Info debug level enabled.\n");
-	DBG_VERBOSE("Verbose debug level enabled.\n");
-
-
-	CompoundCommand::current = new CompoundCommand();
-	CompoundCommand::current -> prompt();
-	yyparse();
-  return 0;
 }
