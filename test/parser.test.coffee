@@ -83,4 +83,10 @@ describe 'Parser', ->
           infile: 'infile'
         done
 
-  
+    it 'should correctly parse redirects regardless whether there are whitespaces', (done) ->
+      runTest
+        cli: 'command<infile'
+        tab: [ ['command'] ]
+        flags:
+          infile: 'infile'
+        done
