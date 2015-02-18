@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "trace.h"
 #include "command.h"
 
@@ -9,7 +11,7 @@ yyparse(void);
 
 void
 prompt(void) {
-  printf(LGREEN("myshell> "));
+  if (isatty(0)) { printf(LGREEN("myshell> ")); }
   fflush(stdout);
 }
 

@@ -72,12 +72,12 @@ void
 CompoundCommand::print() {
 
 	DBG_INFO("\n\n                      COMMAND TABLE                           \n\n");
-	DBG_INFO("#   Simple Commands\n");
-	DBG_INFO("--- ----------------------------------------------------------\n");
+	DBG_INFO("#    Simple Commands\n");
+	DBG_INFO("───  ────────────────────────────────────────────────────────────────\n");
 
 	int csize = args -> size();
 	for (int i = 0; i < csize; i++) {
-		DBG_INFO("%-3d ", i);
+		DBG_INFO("%-3d  ", i);
 
 		int size = args -> at(i) -> args -> size();
 		for (int j = 0; j < size; j++) {
@@ -87,9 +87,9 @@ CompoundCommand::print() {
 	}
 
 	DBG_INFO_N("\n\n");
-	DBG_INFO( "Output       Input        Error        Truncate     Background\n" );
-	DBG_INFO( "------------ ------------ ------------ ------------ ------------\n" );
-	DBG_INFO( "%s%-12s %s%-12s %s%-12s %s%-12s %s%-12s %s\n\n\n",
+	DBG_INFO("Output        Input         Error         Truncate      Background\n" );
+	DBG_INFO("────────────  ────────────  ────────────  ────────────  ────────────\n" );
+	DBG_INFO("%s%-12s  %s%-12s  %s%-12s  %s%-12s  %s%-12s %s\n\n\n",
 		out ? HIGHLIGHT   : COLOR_NONE, out ? out   : "default",
 		in  ? HIGHLIGHT   : COLOR_NONE, in  ? in    : "default",
 		err ? HIGHLIGHT   : COLOR_NONE, err ? err   : "default",
