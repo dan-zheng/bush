@@ -17,6 +17,7 @@
   "devDependencies": {
     "bluebird": "^2.9.9",
     "chai": "^2.0.0",
-    "coffee-script": "^1.9.0"
+    "coffee-script": "^1.9.0",
+    "underscore": "^1.7.0"
   }
 }

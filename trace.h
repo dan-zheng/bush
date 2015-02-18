@@ -75,32 +75,32 @@
 #endif
 
 #if DEBUG >= DBG_LVL_ERROR
-  #define DBG_ERR(...) fprintf(stderr, COLOR_LRED "  ERROR:       " COLOR_NONE __VA_ARGS__);
-  #define DBG_ERR_N(...) fprintf(stderr, __VA_ARGS__);
+  #define DBG_ERR(...) printf(COLOR_LRED "  ERROR:       " COLOR_NONE __VA_ARGS__);
+  #define DBG_ERR_N(...) printf(__VA_ARGS__);
 #else
   #define DBG_ERR(...)
   #define DBG_ERR_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_WARN
-  #define DBG_WARN(...) fprintf(stderr, COLOR_YELLOW "  WARNING:     " COLOR_NONE __VA_ARGS__);
-  #define DBG_WARN_N(...) fprintf(stderr, __VA_ARGS__);
+  #define DBG_WARN(...) printf(COLOR_YELLOW "  WARNING:     " COLOR_NONE __VA_ARGS__);
+  #define DBG_WARN_N(...) printf(__VA_ARGS__);
 #else
   #define DBG_WARN(...)
   #define DBG_WARN_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_INFO
-  #define DBG_INFO(...) fprintf(stderr, COLOR_LBLUE  "  INFO:        "  COLOR_NONE __VA_ARGS__);
-  #define DBG_INFO_N(...) fprintf(stderr, __VA_ARGS__);
+  #define DBG_INFO(...) printf(COLOR_LBLUE  "  INFO:        "  COLOR_NONE __VA_ARGS__);
+  #define DBG_INFO_N(...) printf(__VA_ARGS__);
 #else
   #define DBG_INFO(...)
   #define DBG_INFO_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_VERBOSE
-  #define DBG_VERBOSE(...) fprintf(stderr, COLOR_DGRAY  "  VERBOSE:     "  COLOR_NONE __VA_ARGS__);
-  #define DBG_VERBOSE_N(...) fprintf(stderr, __VA_ARGS__);
+  #define DBG_VERBOSE(...) printf(COLOR_DGRAY  "  VERBOSE:     "  COLOR_NONE __VA_ARGS__);
+  #define DBG_VERBOSE_N(...) printf(__VA_ARGS__);
 #else
   #define DBG_VERBOSE(...)
   #define DBG_VERBOSE_N(...)
