@@ -16,18 +16,19 @@
 
 %token 	NOTOKEN LF GT LT AMP GTGT GTAMP GTGTAMP PIPE
 
-%union	{
-	char   *string_val;
-}
+%union	{ char   *string_val; }
 
 %{
   #include <stdio.h>
   #include "main.h"
   #include "trace.h"
+  #include "global.h"
   #include "command.h"
 
   void yyerror(const char*);
   int yylex();
+
+  int error = 0;
 %}
 
 %%
@@ -37,10 +38,18 @@
   commands: command | commands command;
 
   command: partials redirects background LF {
-      DBG_VERBOSE("Yacc: Execute command\n");
-      CompoundCommand::current -> execute();
+      if (error) {
+        DBG_WARN("Command execution blocked by error.\n");
+        error = 0;
+        prompt();
+      } else {
+        DBG_VERBOSE("Yacc: Execute command\n");
+        CompoundCommand::current -> execute();
+      }
     }  |
-    LF |
+    LF {
+      prompt();
+    } |
     error LF { yyerrok; }
   ;
 
@@ -51,7 +60,6 @@
   //                                                                         //
   // ----------------------------------------------------------------------- //
   partials: partial | partial PIPE partials;
-
 
   // ----------------------------------------------------------------------- //
   // Partial command                                                         //
@@ -101,28 +109,80 @@
   redirects: redirect | redirect redirects |;
   redirect:
   	GT WORD {
+
+      if (CompoundCommand::current -> out) {
+        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
+          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
+          error = 1;
+          free($2);
+        #else
+          free(CompoundCommand::current -> out);
+        #endif
+      }
+
       DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", $2);
       CompoundCommand::current -> nf  = 1;
   		CompoundCommand::current -> out = $2;
   	} |
     GTGT WORD {
+
+      if (CompoundCommand::current -> out) {
+        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
+          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
+          error = 1;
+          free($2);
+        #else
+          free(CompoundCommand::current -> out);
+        #endif
+      }
+
       DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
       CompoundCommand::current -> nf  = 0;
   		CompoundCommand::current -> out = $2;
     } |
     GTAMP WORD {
+
+      if (CompoundCommand::current -> out) {
+        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
+          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
+          error = 1;
+          free($2);
+        #else
+          free(CompoundCommand::current -> out);
+          free(CompoundCommand::current -> err);
+        #endif
+      }
+
       DBG_VERBOSE("Yacc: Redirect stdout and stderr to \"%s\"\n", $2);
       CompoundCommand::current -> nf  = 1;
       CompoundCommand::current -> out = $2;
       CompoundCommand::current -> err = $2;
     } |
     GTGTAMP WORD {
+
+      if (CompoundCommand::current -> out) {
+        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
+          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
+          error = 1;
+          free($2);
+        #else
+          free(CompoundCommand::current -> out);
+          free(CompoundCommand::current -> err);
+        #endif
+      }
+
       DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
       CompoundCommand::current -> nf  = 0;
       CompoundCommand::current -> out = $2;
       CompoundCommand::current -> err = $2;
     } |
     LT WORD {
+
+      if (CompoundCommand::current -> in) {
+        fprintf(stderr, RED("Error: Cannot redirect input from multiple files!\n"));
+        error = 1;
+      }
+
       DBG_VERBOSE("Yacc: Redirect stdin from \"%s\"\n", $2);
       CompoundCommand::current -> in  = $2;
     }
@@ -144,7 +204,7 @@
 %%
 
 void yyerror(const char *s) {
-  WARN("%s", s);
+  fprintf(stderr, YELLOW("ERROR: %s\n"), s);
   prompt();
 }
 

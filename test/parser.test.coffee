@@ -6,7 +6,7 @@ expect = chai.expect
 util   = require('./utils.coffee')
 target = './shell'
 
-describe 'command parser', ->
+describe 'Parser', ->
 
   runTest = (cfg, done) ->
     util.run(target, cfg.cli).then (result) ->
@@ -17,22 +17,70 @@ describe 'command parser', ->
     .catch (error) -> done(error)
     .done()
 
-  it 'should correctly recognize a basic command', (done) ->
-    runTest
-      cli: 'command'
-      tab: [ ['command'] ]
-      flags: ['default', 'default', 'default', 'NO', 'NO']
-      done
+  describe 'Basic Command', ->
 
-  it 'should correctly recognize a basic command with one argument', (done) ->
-    runTest
-      cli: 'command arg0'
-      tab: [ ['command', 'arg0'] ]
-      flags: ['default', 'default', 'default', 'NO', 'NO']
-      done
+    it 'should correctly parse a basic command', (done) ->
+      runTest
+        cli: 'command'
+        tab: [ ['command'] ]
+        done
 
-  it 'should correctly recognize a basic command with multiple arguments', (done) ->
-    runTest
-      cli: 'command arg0 arg1 arg2 arg3 arg4'
-      tab: [ ['command', 'arg0', 'arg1', 'arg2', 'arg3', 'arg4', 'arg5' ] ]
-      flags: ['default', 'default', 'default', 'NO', 'NO']
+    it 'should correctly parse a basic command with one argument', (done) ->
+      runTest
+        cli: 'command arg0'
+        tab: [ ['command', 'arg0'] ]
+        done
+
+    it 'should correctly parse a basic command with multiple arguments', (done) ->
+      runTest
+        cli: 'command arg0 arg1 arg2 arg3 arg4'
+        tab: [ ['command', 'arg0', 'arg1', 'arg2', 'arg3', 'arg4'] ]
+        done
+
+  describe 'IO Redirect', ->
+
+    it 'should correctly parse > file', (done) ->
+      runTest
+        cli: 'command > outfile'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'outfile'
+          truncate: 'YES'
+        done
+
+    it 'should correctly parse >> file', (done) ->
+      runTest
+        cli: 'command >> outfile'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'outfile'
+        done
+
+    it 'should correctly parse >& file', (done) ->
+      runTest
+        cli: 'command >& outfile'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'outfile'
+          errfile: 'outfile'
+          truncate: 'YES'
+        done
+
+    it 'should correctly parse >>& file', (done) ->
+      runTest
+        cli: 'command >>& outfile'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'outfile'
+          errfile: 'outfile'
+        done
+
+    it 'should correctly parse < file', (done) ->
+      runTest
+        cli: 'command < infile'
+        tab: [ ['command'] ]
+        flags:
+          infile: 'infile'
+        done
+
+  

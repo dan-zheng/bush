@@ -9,6 +9,13 @@ _       = require('underscore')
 
 module.exports = self = { }
 
+defaultFlags =
+  infile: 'default'
+  outfile: 'default'
+  errfile: 'default'
+  truncate: 'NO'
+  bg: 'NO'
+
 self.run = (cli, input) ->
   return new Promise (resolve, reject) ->
     exec "echo \"#{input}\" | #{cli}", (error, stdout, stderr) ->
@@ -26,5 +33,6 @@ self.checkCmdTable = (tab, cmds, flags) ->
     row = "INFO: #{i} " + _.chain(cmd).map((i) -> "\"#{i}\"").reduce(((mem, i) -> mem + ' ' + i)).value()
     expect(tab).to.contain(row)
   # Check flags
-  flags = 'INFO: ' + _.chain(flags).reduce((mem, i) -> mem + ' ' + i).value()
+  flags = _.extend { }, defaultFlags, flags
+  flags = "INFO: #{flags.outfile} #{flags.infile} #{flags.errfile} #{flags.truncate} #{flags.bg}"
   expect(tab).to.include(flags);
