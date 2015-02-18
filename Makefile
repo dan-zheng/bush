@@ -26,11 +26,11 @@ no-clean: shell examples mocha
 # Shell
 lex.yy.o: shell.l
 	$(LEX) shell.l
-	$(CC) $(CFLAGS) -c lex.yy.c
+	$(CC) -x c++ $(CFLAGS) -c lex.yy.c
 
 y.tab.o: shell.y
 	$(YACC) -d shell.y
-	$(CC) $(CFLAGS) -c y.tab.c
+	$(CC) -x c++ $(CFLAGS) -c y.tab.c
 
 command.o: command.cc
 	$(CC) $(CFLAGS) -c command.cc
