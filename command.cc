@@ -25,6 +25,9 @@
 
 #define HIGHLIGHT COLOR_YELLOW
 
+// ------------------------------------------------------------------------- //
+// class SimpleCommand { ... }                                               //
+// ------------------------------------------------------------------------- //
 SimpleCommand::SimpleCommand() {
 	args = new std::vector<char*>();
 }
@@ -42,10 +45,13 @@ SimpleCommand::print() {
 }
 
 void
-SimpleCommand::pushArgument(char *arg) {
+SimpleCommand::push(char *arg) {
 	args -> push_back(arg);
 }
 
+// ------------------------------------------------------------------------- //
+// class CompoundCommand { ... }                                             //
+// ------------------------------------------------------------------------- //
 CompoundCommand::CompoundCommand() {
 	args = new std::vector<SimpleCommand*>();
 
@@ -57,7 +63,7 @@ CompoundCommand::CompoundCommand() {
 }
 
 void
-CompoundCommand::pushArgument(SimpleCommand *cmd) {
+CompoundCommand::push(SimpleCommand *cmd) {
 	args -> push_back(cmd);
 }
 

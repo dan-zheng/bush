@@ -13,7 +13,7 @@ public:
 
 	void print();
 
-	void pushArgument(char*);
+	void push(char*);
 
 	static SimpleCommand *current;
 };
@@ -37,7 +37,7 @@ public:
 	void execute();
 	void clear();
 
-	void pushArgument(SimpleCommand*);
+	void push(SimpleCommand*);
 
 	static CompoundCommand *current;
 };
