@@ -58,7 +58,7 @@ clean: clean-tmp
 	rm -f shell ctrl-c regular cat_grep
 
 clean-tmp:
-	rm -f lex.yy.* y.tab.* y.tab.* *.o
+	rm -f lex.yy.* y.tab.* y.tab.* *.o *.tmp.*
 	rm -rf *.dSYM
 
 .PHONY: examples

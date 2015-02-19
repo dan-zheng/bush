@@ -1,6 +1,7 @@
 !*/*
 *.yy.*
 *.tab.*
+*.tmp.*
 *.o
 *.dSYM
 y.output
