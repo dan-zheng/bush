@@ -35,7 +35,10 @@ y.tab.o: shell.y
 command.o: command.cc
 	$(CC) $(CCFLAGS) -c command.cc
 
-shell: y.tab.o lex.yy.o command.o main.cc
+plumber.o: plumber.cc
+	$(CC) $(CCFLAGS) -c plumber.cc
+
+shell: y.tab.o lex.yy.o command.o main.cc plumber.o
 	$(CC) $(CCFLAGS) -o shell main.cc lex.yy.o y.tab.o command.o $(LFL)
 
 # Test
@@ -43,10 +46,12 @@ mocha: shell
 	-mocha --reporter nyan
 
 # Example executables
-examples:  examples/ctrl-c.cc examples/regular.cc
-	$(CC) $(CCFLAGS) -o cat_grep examples/cat_grep.cc
+examples:  examples/cat_grep.cc plumber.o examples/ctrl-c.cc examples/regular.cc
+	$(CC) $(CCFLAGS) -o cat_grep examples/cat_grep.cc plumber.o
 	$(CC) $(CCFLAGS) -o ctrl-c examples/ctrl-c.cc
 	$(CC) $(CCFLAGS) -o regular examples/regular.cc
+
+
 
 # Cleanup
 clean: clean-tmp

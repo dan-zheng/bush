@@ -12,6 +12,8 @@
 #include <sys/wait.h>
 #endif
 
+#include "../plumber.h"
+
 const char * usage = ""
 "Usage:\n"
 "    cat_grep file-name word outfile\n"
@@ -37,32 +39,15 @@ int main(int argc, char **argv, char **envp)
 	// change them during redirection and we will need to restore them
 	// at the end.
 
-	int defaultin = dup( 0 );
-	int defaultout = dup( 1 );
-	int defaulterr = dup( 2 );
+	Plumber::capture();
 
 	//////////////////  cat //////////////////////////
 
-	// Input:    defaultin
+	// Input:    Plumber::defin
 	// Output:   pipe
-	// Error:    defaulterr
+	// Error:    Plumber::deferr
 
-	// Create new pipe
-
-	int fdpipe[2];
-	if ( pipe(fdpipe) == -1) {
-		perror( "cat_grep: pipe");
-		exit( 2 );
-	}
-
-	// Redirect input
-	dup2( defaultin, 0 );
-
-	// Redirect output to pipe
-	dup2( fdpipe[ 1 ], 1 );
-
-	// Redirect err
-	dup2( defaulterr, 2 );
+	Plumber::redirect(PLB_NONE, PLB_PIPE, PLB_PIPE);
 
 	// Create new process for "cat"
 	int pid = fork();
@@ -73,13 +58,8 @@ int main(int argc, char **argv, char **envp)
 
 	if (pid == 0) {
 		//Child
-
 		// close file descriptors that are not needed
-		close(fdpipe[0]);
-		close(fdpipe[1]);
-		close( defaultin );
-		close( defaultout );
-		close( defaulterr );
+		Plumber::clear();
 
 		// You can use execvp() instead if the arguments are stored in an array
 		execlp(cat, cat, argv[1], (char *) 0);
@@ -93,10 +73,7 @@ int main(int argc, char **argv, char **envp)
 
 	// Input:    pipe
 	// Output:   outfile
-	// Error:    defaulterr
-
-	// Redirect input.
-	dup2( fdpipe[0], 0);
+	// Error:    Plumber::deferr
 
 	// Redirect output to utfile
 	int outfd = creat( argv[ 3 ], 0666 );
@@ -106,11 +83,9 @@ int main(int argc, char **argv, char **envp)
 		exit( 2 );
 	}
 
-	dup2( outfd, 1 );
-	close( outfd );
+	Plumber::redirect(PLB_PIPE, outfd, outfd);
 
-	// Redirect err
-	dup2( defaulterr, 2 );
+	close( outfd );
 
 	pid = fork();
 	if (pid == -1 ) {
@@ -122,11 +97,7 @@ int main(int argc, char **argv, char **envp)
 		//Child
 
 		// close file descriptors that are not needed
-		close(fdpipe[0]);
-		close(fdpipe[1]);
-		close( defaultin );
-		close( defaultout );
-		close( defaulterr );
+		Plumber::clear();
 
 		// You can use execvp() instead if the arguments are stored in an array
 		execlp(grep, cat, argv[2], (char *) 0);
@@ -138,17 +109,7 @@ int main(int argc, char **argv, char **envp)
 	}
 
 	// Restore input, output, and error
-
-	dup2( defaultin, 0 );
-	dup2( defaultout, 1 );
-	dup2( defaulterr, 2 );
-
-	// Close file descriptors that are not needed
-	close(fdpipe[0]);
-	close(fdpipe[1]);
-	close( defaultin );
-	close( defaultout );
-	close( defaulterr );
+	Plumber::restore();
 
 	// Wait for last process in the pipe line
 	waitpid( pid, 0, 0 );
