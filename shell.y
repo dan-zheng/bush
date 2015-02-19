@@ -86,7 +86,7 @@
   //   [arg]*                                                                //
   //                                                                         //
   // ----------------------------------------------------------------------- //
-  arguments: argument | argument arguments |;
+  arguments: argument arguments |;
   argument:
     WORD {
       DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
@@ -106,70 +106,53 @@
   //   ]*                                                                    //
   //                                                                         //
   // ----------------------------------------------------------------------- //
-  redirects: redirect | redirect redirects |;
+  redirects: redirect redirects |;
   redirect:
   	GT WORD {
+      char *out = CompoundCommand::current -> out;
+      char *err = CompoundCommand::current -> err;
 
-      if (CompoundCommand::current -> out) {
-        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
-          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
-          error = 1;
-          free($2);
-        #else
-          free(CompoundCommand::current -> out);
-        #endif
-      }
+      if (out) { free(out); }
 
       DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", $2);
-      CompoundCommand::current -> nf  = 1;
-  		CompoundCommand::current -> out = $2;
+      CompoundCommand::current -> out = $2;
+
+      if (out && out == err) {
+        DBG_VERBOSE("Yacc: Redirect stderr to \"%s\"\n", $2);
+        CompoundCommand::current -> err = $2;
+      }
   	} |
     GTGT WORD {
+      char *out = CompoundCommand::current -> out;
+      char *err = CompoundCommand::current -> err;
 
-      if (CompoundCommand::current -> out) {
-        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
-          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
-          error = 1;
-          free($2);
-        #else
-          free(CompoundCommand::current -> out);
-        #endif
-      }
+      if (out) { free(out); }
 
       DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
       CompoundCommand::current -> nf  = 0;
   		CompoundCommand::current -> out = $2;
+
+      if (out && out == err) {
+        DBG_VERBOSE("Yacc: Redirect stderr to \"%s\"\n", $2);
+        CompoundCommand::current -> err = $2;
+      }
     } |
     GTAMP WORD {
+      char *out = CompoundCommand::current -> out;
+      char *err = CompoundCommand::current -> err;
 
-      if (CompoundCommand::current -> out) {
-        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
-          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
-          error = 1;
-          free($2);
-        #else
-          free(CompoundCommand::current -> out);
-          free(CompoundCommand::current -> err);
-        #endif
-      }
+      if (out) { free(out); }
 
       DBG_VERBOSE("Yacc: Redirect stdout and stderr to \"%s\"\n", $2);
-      CompoundCommand::current -> nf  = 1;
       CompoundCommand::current -> out = $2;
       CompoundCommand::current -> err = $2;
     } |
     GTGTAMP WORD {
 
-      if (CompoundCommand::current -> out) {
-        #ifdef DISALLOW_OVERLAPPING_REDIRECTS
-          fprintf(stderr, RED("Error: Cannot redirect output to multiple files!\n"));
-          error = 1;
-          free($2);
-        #else
-          free(CompoundCommand::current -> out);
-          free(CompoundCommand::current -> err);
-        #endif
-      }
+      char *out = CompoundCommand::current -> out;
+      char *err = CompoundCommand::current -> err;
+
+      if (out) { free(out); }
 
       DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
       CompoundCommand::current -> nf  = 0;
@@ -179,7 +162,7 @@
     LT WORD {
 
       if (CompoundCommand::current -> in) {
-        fprintf(stderr, RED("Error: Cannot redirect input from multiple files!\n"));
+        fprintf(stderr, RED("Error: Ambiguous input redirect.\n"));
         error = 1;
       }
 

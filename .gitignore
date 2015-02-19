@@ -3,6 +3,7 @@
 *.tab.*
 *.o
 *.dSYM
+y.output
 .DS_Store
 
 node_modules

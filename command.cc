@@ -42,7 +42,7 @@ CompoundCommand::CompoundCommand() {
 	args = new std::vector<SimpleCommand*>();
 
 	bg  = 0;
-	nf  = 0;
+	nf  = 1;
 	in  = NULL;
 	out = NULL;
 	err = NULL;
@@ -63,6 +63,7 @@ CompoundCommand::clear() {
 	if (err && err != out) free(err);
 
 	bg   = 0;
+	nf   = 1;
 	in   = NULL;
 	out  = NULL;
 	err  = NULL;

@@ -45,7 +45,6 @@ describe 'Parser', ->
         tab: [ ['command'] ]
         flags:
           outfile: 'outfile'
-          truncate: 'YES'
         done
 
     it 'should correctly parse >> file', (done) ->
@@ -54,6 +53,7 @@ describe 'Parser', ->
         tab: [ ['command'] ]
         flags:
           outfile: 'outfile'
+          truncate: 'NO'
         done
 
     it 'should correctly parse >& file', (done) ->
@@ -63,7 +63,6 @@ describe 'Parser', ->
         flags:
           outfile: 'outfile'
           errfile: 'outfile'
-          truncate: 'YES'
         done
 
     it 'should correctly parse >>& file', (done) ->
@@ -73,6 +72,7 @@ describe 'Parser', ->
         flags:
           outfile: 'outfile'
           errfile: 'outfile'
+          truncate: 'NO'
         done
 
     it 'should correctly parse < file', (done) ->
@@ -89,4 +89,40 @@ describe 'Parser', ->
         tab: [ ['command'] ]
         flags:
           infile: 'infile'
+        done
+
+    it 'should correctly handle `command > file1 > file2`', (done) ->
+      runTest
+        cli: 'command > file1 > file2'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'file2'
+        done
+
+    it 'should correctly handle `command >> file1 > file2`', (done) ->
+      runTest
+        cli: 'command >> file1 > file2'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'file2'
+          truncate: 'NO'
+        done
+
+    it 'should correctly handle `command >& file1 > file2`', (done) ->
+      runTest
+        cli: 'command >& file1 > file2'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'file2'
+          errfile: 'file2'
+        done
+
+    it 'should correctly handle `command >>& file1 > file2`', (done) ->
+      runTest
+        cli: 'command >>& file1 > file2'
+        tab: [ ['command'] ]
+        flags:
+          outfile: 'file2'
+          errfile: 'file2'
+          truncate: 'NO'
         done

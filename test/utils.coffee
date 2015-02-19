@@ -13,7 +13,7 @@ defaultFlags =
   infile: 'default'
   outfile: 'default'
   errfile: 'default'
-  truncate: 'NO'
+  truncate: 'YES'
   bg: 'NO'
 
 self.run = (cli, input) ->
@@ -23,7 +23,7 @@ self.run = (cli, input) ->
       else resolve(stdout: self.stripAnsi(stdout), stderr: self.stripAnsi(stderr));
 
 self.stripAnsi = (str) ->
-  return str.replace(/\033\[[0-9;]+m/g, '')
+  return str.replace(/\x1B\[[0-9;]+m/g, '')
 
 self.checkCmdTable = (tab, cmds, flags) ->
   # Strip spaces
