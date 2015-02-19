@@ -13,7 +13,7 @@ defaultFlags =
   infile: 'default'
   outfile: 'default'
   errfile: 'default'
-  truncate: 'YES'
+  append: 'NO'
   bg: 'NO'
 
 self.run = (cli, input) ->
@@ -34,5 +34,5 @@ self.checkCmdTable = (tab, cmds, flags) ->
     expect(tab).to.contain(row)
   # Check flags
   flags = _.extend { }, defaultFlags, flags
-  flags = "INFO: #{flags.outfile} #{flags.infile} #{flags.errfile} #{flags.truncate} #{flags.bg}"
+  flags = "INFO: #{flags.outfile} #{flags.infile} #{flags.errfile} #{flags.bg} #{flags.append}"
   expect(tab).to.include(flags);

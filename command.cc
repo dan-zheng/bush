@@ -23,14 +23,22 @@
 #include "trace.h"
 #include "command.h"
 
-#define HIGHLIGHT COLOR_LCYAN
+#define HIGHLIGHT COLOR_YELLOW
 
-SimpleCommand::SimpleCommand(void) {
+SimpleCommand::SimpleCommand() {
 	args = new std::vector<char*>();
 }
 
-SimpleCommand::~SimpleCommand(void) {
+SimpleCommand::~SimpleCommand() {
 	delete args;
+}
+
+void
+SimpleCommand::print() {
+	int size = args -> size();
+	for (int j = 0; j < size; j++) {
+		DBG_INFO_N("\"%s\" ", args -> at(j));
+	}
 }
 
 void
@@ -41,11 +49,11 @@ SimpleCommand::pushArgument(char *arg) {
 CompoundCommand::CompoundCommand() {
 	args = new std::vector<SimpleCommand*>();
 
-	bg  = 0;
-	nf  = 1;
-	in  = NULL;
-	out = NULL;
-	err = NULL;
+	bg     = 0;
+	append = 0;
+	in     = NULL;
+	out    = NULL;
+	err    = NULL;
 }
 
 void
@@ -62,41 +70,43 @@ CompoundCommand::clear() {
 	if (in)  free(in);
 	if (err && err != out) free(err);
 
-	bg   = 0;
-	nf   = 1;
-	in   = NULL;
-	out  = NULL;
-	err  = NULL;
+	bg     = 0;
+	append = 0;
+	in     = NULL;
+	out    = NULL;
+	err    = NULL;
 }
 
 void
 CompoundCommand::print() {
 
-	DBG_INFO("\n\n                      COMMAND TABLE                           \n\n");
-	DBG_INFO("#    Simple Commands\n");
-	DBG_INFO("───  ────────────────────────────────────────────────────────────────\n");
+	DBG_INFO("\n");
+	DBG_INFO("\n");
+	DBG_INFO("            COMMAND TABLE                \n");
+	DBG_INFO("\n");
+	DBG_INFO("#   Simple Commands\n");
+	DBG_INFO("--- ------------------------------------------------------------\n");
 
 	int csize = args -> size();
 	for (int i = 0; i < csize; i++) {
-		DBG_INFO("%-3d  ", i);
-
-		int size = args -> at(i) -> args -> size();
-		for (int j = 0; j < size; j++) {
-			DBG_INFO_N("\"%s\" \t", args -> at(i) -> args -> at(j));
-		}
+		DBG_INFO("%-3d ", i);
+		args -> at(i) -> print();
 		DBG_INFO_N("\n");
 	}
 
-	DBG_INFO_N("\n\n");
-	DBG_INFO("Output        Input         Error         Truncate      Background\n" );
-	DBG_INFO("────────────  ────────────  ────────────  ────────────  ────────────\n" );
-	DBG_INFO("%s%-12s  %s%-12s  %s%-12s  %s%-12s  %s%-12s %s\n\n\n",
-		out ? HIGHLIGHT   : COLOR_NONE, out ? out   : "default",
-		in  ? HIGHLIGHT   : COLOR_NONE, in  ? in    : "default",
-		err ? HIGHLIGHT   : COLOR_NONE, err ? err   : "default",
-		nf  ? HIGHLIGHT   : COLOR_NONE, nf  ? "YES" : "NO",
-		bg  ? HIGHLIGHT   : COLOR_NONE, bg  ? "YES" : "NO",
+	DBG_INFO_N("\n");
+	DBG_INFO("\n");
+	DBG_INFO(" Output       Input        Error        Background   Append File\n" );
+	DBG_INFO("------------ ------------ ------------ ------------ ------------\n" );
+	DBG_INFO(" %s%-12s %s%-12s %s%-12s %s%-12s %s%-12s %s\n",
+		out      ? HIGHLIGHT   : COLOR_NONE, out    ? out   : "default",
+		in       ? HIGHLIGHT   : COLOR_NONE, in     ? in    : "default",
+		err      ? HIGHLIGHT   : COLOR_NONE, err    ? err   : "default",
+		bg       ? HIGHLIGHT   : COLOR_NONE, bg     ? "YES" : "NO",
+		append   ? HIGHLIGHT   : COLOR_NONE, append ? "YES" : "NO",
 		COLOR_NONE);
+	DBG_INFO("\n");
+	DBG_INFO("\n");
 }
 
 void
@@ -118,5 +128,5 @@ CompoundCommand::execute() {
 	}
 
 	// Print new prompt
-	prompt();
+	// prompt();
 }

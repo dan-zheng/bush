@@ -8,8 +8,10 @@ public:
 
 	std::vector<char*>  	 *args;
 
-	SimpleCommand(void);
-	~SimpleCommand(void);
+	SimpleCommand();
+	~SimpleCommand();
+
+	void print();
 
 	void pushArgument(char*);
 
@@ -22,18 +24,18 @@ public:
 	std::vector<SimpleCommand*>  *args;
 
 	int								bg;
-	int								nf;
+	int								append;
 
 	char			 			 *in;
 	char			 			 *out;
 	char			 			 *err;
 
-	CompoundCommand(void);
-	~CompoundCommand(void);
+	CompoundCommand();
+	~CompoundCommand();
 
-	void print(void);
-	void execute(void);
-	void clear(void);
+	void print();
+	void execute();
+	void clear();
 
 	void pushArgument(SimpleCommand*);
 

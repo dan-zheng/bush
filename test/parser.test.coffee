@@ -53,7 +53,7 @@ describe 'Parser', ->
         tab: [ ['command'] ]
         flags:
           outfile: 'outfile'
-          truncate: 'NO'
+          append: 'YES'
         done
 
     it 'should correctly parse >& file', (done) ->
@@ -72,7 +72,7 @@ describe 'Parser', ->
         flags:
           outfile: 'outfile'
           errfile: 'outfile'
-          truncate: 'NO'
+          append: 'YES'
         done
 
     it 'should correctly parse < file', (done) ->
@@ -105,7 +105,7 @@ describe 'Parser', ->
         tab: [ ['command'] ]
         flags:
           outfile: 'file2'
-          truncate: 'NO'
+          append: 'YES'
         done
 
     it 'should correctly handle `command >& file1 > file2`', (done) ->
@@ -124,5 +124,5 @@ describe 'Parser', ->
         flags:
           outfile: 'file2'
           errfile: 'file2'
-          truncate: 'NO'
+          append: 'YES'
         done

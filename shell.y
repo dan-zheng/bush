@@ -45,6 +45,7 @@
       } else {
         DBG_VERBOSE("Yacc: Execute command\n");
         CompoundCommand::current -> execute();
+        prompt();
       }
     }  |
     LF {
@@ -129,8 +130,8 @@
       if (out) { free(out); }
 
       DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
-      CompoundCommand::current -> nf  = 0;
-  		CompoundCommand::current -> out = $2;
+      CompoundCommand::current -> append =  1;
+  		CompoundCommand::current -> out    = $2;
 
       if (out && out == err) {
         DBG_VERBOSE("Yacc: Redirect stderr to \"%s\"\n", $2);
@@ -155,9 +156,9 @@
       if (out) { free(out); }
 
       DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
-      CompoundCommand::current -> nf  = 0;
-      CompoundCommand::current -> out = $2;
-      CompoundCommand::current -> err = $2;
+      CompoundCommand::current -> append =  1;
+      CompoundCommand::current -> out    = $2;
+      CompoundCommand::current -> err    = $2;
     } |
     LT WORD {
 
@@ -188,6 +189,7 @@
 
 void yyerror(const char *s) {
   fprintf(stderr, YELLOW("ERROR: %s\n"), s);
+  CompoundCommand::current -> clear();
   prompt();
 }
 
