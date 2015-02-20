@@ -40,6 +40,7 @@
   command: partials redirects background LF {
       if (error) {
         DBG_WARN("Command execution blocked by error.\n");
+        CompoundCommand::current -> clear();
         error = 0;
         prompt();
       } else {
@@ -49,7 +50,7 @@
       }
     }  |
     LF {
-      prompt();
+      if (!error) { prompt(); }
     } |
     error LF { yyerrok; }
   ;
@@ -113,62 +114,71 @@
       char *out = CompoundCommand::current -> out;
       char *err = CompoundCommand::current -> err;
 
-      if (out) { free(out); }
-
-      DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", $2);
-      CompoundCommand::current -> out = $2;
-
-      if (out && out == err) {
-        DBG_VERBOSE("Yacc: Redirect stderr to \"%s\"\n", $2);
-        CompoundCommand::current -> err = $2;
+      if (out) {
+        COMPLAIN("Ambiguous output redirect.");
+        error = 1;
+      }
+      else {
+        DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", $2);
+        CompoundCommand::current -> out = $2;
       }
   	} |
     GTGT WORD {
       char *out = CompoundCommand::current -> out;
       char *err = CompoundCommand::current -> err;
 
-      if (out) { free(out); }
-
-      DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
-      CompoundCommand::current -> append =  1;
-  		CompoundCommand::current -> out    = $2;
-
-      if (out && out == err) {
-        DBG_VERBOSE("Yacc: Redirect stderr to \"%s\"\n", $2);
-        CompoundCommand::current -> err = $2;
+      if (out) {
+        COMPLAIN("Ambiguous output redirect.");
+        error = 1;
+      }
+      else {
+        DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
+        CompoundCommand::current -> append =  1;
+        CompoundCommand::current -> out    = $2;
       }
     } |
     GTAMP WORD {
       char *out = CompoundCommand::current -> out;
       char *err = CompoundCommand::current -> err;
 
-      if (out) { free(out); }
+      if (out) {
+        COMPLAIN("Ambiguous output redirect.");
+        error = 1;
+      }
+      else {
+        DBG_VERBOSE("Yacc: Redirect stdout and stderr to \"%s\"\n", $2);
+        CompoundCommand::current -> out = $2;
+        CompoundCommand::current -> err = $2;
+      }
 
-      DBG_VERBOSE("Yacc: Redirect stdout and stderr to \"%s\"\n", $2);
-      CompoundCommand::current -> out = $2;
-      CompoundCommand::current -> err = $2;
     } |
     GTGTAMP WORD {
 
       char *out = CompoundCommand::current -> out;
       char *err = CompoundCommand::current -> err;
 
-      if (out) { free(out); }
+      if (out) {
+        COMPLAIN("Ambiguous output redirect.");
+        error = 1;
+      }
+      else {
+        DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
+        CompoundCommand::current -> append =  1;
+        CompoundCommand::current -> out    = $2;
+        CompoundCommand::current -> err    = $2;
+      }
 
-      DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
-      CompoundCommand::current -> append =  1;
-      CompoundCommand::current -> out    = $2;
-      CompoundCommand::current -> err    = $2;
     } |
     LT WORD {
 
       if (CompoundCommand::current -> in) {
-        fprintf(stderr, RED("Error: Ambiguous input redirect.\n"));
+        COMPLAIN("Ambiguous input redirect.");
         error = 1;
       }
-
-      DBG_VERBOSE("Yacc: Redirect stdin from \"%s\"\n", $2);
-      CompoundCommand::current -> in  = $2;
+      else {
+        DBG_VERBOSE("Yacc: Redirect stdin from \"%s\"\n", $2);
+        CompoundCommand::current -> in  = $2;
+      }
     }
   	;
 
@@ -188,7 +198,7 @@
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, "-" SH_NAME ": %s\n", s);
+  COMPLAIN(s);
   CompoundCommand::current -> clear();
   prompt();
 }

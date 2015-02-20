@@ -4,6 +4,7 @@
 #define TRACE_H
 
 #include <stdio.h>
+#include "global.h"
 #include "plumber.h"
 
 #ifndef NO_COLORS
@@ -115,5 +116,7 @@
                     dprintf(Plumber::std(2), " (%s:%d)\n", __FILE__, __LINE__);\
                     dprintf(Plumber::std(2), COLOR_NONE);\
                     exit(1);
+
+#define COMPLAIN(s) fprintf(stderr, "-" SH_NAME ": %s\n", s);
 
 #endif
