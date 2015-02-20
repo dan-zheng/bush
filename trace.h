@@ -4,6 +4,7 @@
 #define TRACE_H
 
 #include <stdio.h>
+#include "plumber.h"
 
 #ifndef NO_COLORS
 
@@ -75,44 +76,44 @@
 #endif
 
 #if DEBUG >= DBG_LVL_ERROR
-  #define DBG_ERR(...) printf(COLOR_LRED "  ERROR:       " COLOR_NONE __VA_ARGS__);
-  #define DBG_ERR_N(...) printf(__VA_ARGS__);
+  #define DBG_ERR(...) dprintf(Plumber::std(1), COLOR_LRED "  ERROR:       " COLOR_NONE __VA_ARGS__);
+  #define DBG_ERR_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_ERR(...)
   #define DBG_ERR_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_WARN
-  #define DBG_WARN(...) printf(COLOR_YELLOW "  WARNING:     " COLOR_NONE __VA_ARGS__);
-  #define DBG_WARN_N(...) printf(__VA_ARGS__);
+  #define DBG_WARN(...) dprintf(Plumber::std(1), COLOR_YELLOW "  WARNING:     " COLOR_NONE __VA_ARGS__);
+  #define DBG_WARN_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_WARN(...)
   #define DBG_WARN_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_INFO
-  #define DBG_INFO(...) printf(COLOR_LBLUE  "  INFO:        "  COLOR_NONE __VA_ARGS__);
-  #define DBG_INFO_N(...) printf(__VA_ARGS__);
+  #define DBG_INFO(...) dprintf(Plumber::std(1), COLOR_LBLUE  "  INFO:        "  COLOR_NONE __VA_ARGS__);
+  #define DBG_INFO_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_INFO(...)
   #define DBG_INFO_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_VERBOSE
-  #define DBG_VERBOSE(...) printf(COLOR_DGRAY  "  VERBOSE:     "  COLOR_NONE __VA_ARGS__);
-  #define DBG_VERBOSE_N(...) printf(__VA_ARGS__);
+  #define DBG_VERBOSE(...) dprintf(Plumber::std(1), COLOR_DGRAY  "  VERBOSE:     "  COLOR_NONE __VA_ARGS__);
+  #define DBG_VERBOSE_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_VERBOSE(...)
   #define DBG_VERBOSE_N(...)
 #endif
 
-#define WARN(...)   fprintf(stderr, COLOR_YELLOW "\u2691     " __VA_ARGS__);\
-                    fprintf(stderr, " (%s:%d)\n", __FILE__, __LINE__);\
-                    fprintf(stderr, COLOR_NONE);
+#define WARN(...)   dprintf(Plumber::std(2), COLOR_YELLOW "\u2691     " __VA_ARGS__);\
+                    dprintf(Plumber::std(2), " (%s:%d)\n", __FILE__, __LINE__);\
+                    dprintf(Plumber::std(2), COLOR_NONE);
 
-#define PANIC(...)  fprintf(stderr, COLOR_LRED "\u2717     " __VA_ARGS__);\
-                    fprintf(stderr, " (%s:%d)\n", __FILE__, __LINE__);\
-                    fprintf(stderr, COLOR_NONE);\
+#define PANIC(...)  dprintf(Plumber::std(2), COLOR_LRED "\u2717     " __VA_ARGS__);\
+                    dprintf(Plumber::std(2), " (%s:%d)\n", __FILE__, __LINE__);\
+                    dprintf(Plumber::std(2), COLOR_NONE);\
                     exit(1);
 
 #endif

@@ -25,6 +25,8 @@ public:
   static int  in (char*);
   static int  out(char*, int);
   static int  err(char*, int);
+
+  static int  std(int);
 };
 
 #endif

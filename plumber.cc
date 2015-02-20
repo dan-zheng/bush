@@ -37,8 +37,8 @@ Plumber::capture() {
   file[1] = dup(1);
   file[2] = dup(2);
 
-  if (pipe(ipipe) == -1 || pipe(opipe) == -1) {
-    perror("Plumber::makePipe()");
+  if (pipe(opipe) == -1 || pipe(ipipe) == -1) {
+    perror("Plumber::capture()");
     exit(2);
   }
 }
@@ -72,20 +72,24 @@ void
 Plumber::swap() {
   DBG_VERBOSE("Plubmer::swap()\n");
 
-  int tmp;
+  close(ipipe[1]);
 
-  tmp = ipipe[0];
   ipipe[0] = opipe[0];
-  opipe[0] = tmp;
-
-  tmp = ipipe[1];
   ipipe[1] = opipe[1];
-  opipe[1] = tmp;
+
+  if (pipe(opipe) == -1) {
+    perror("Plumber::swap()");
+    exit(2);
+  }
 }
 
 void
 Plumber::redirect(int in, int out, int err) {
   DBG_VERBOSE("Plubmer::redirect()\n");
+
+  close(0);
+  close(1);
+  close(2);
 
   switch (in) {
     case PLB_NONE: { dup2(def[0],   0); } break;
@@ -140,4 +144,9 @@ Plumber::err(char* path, int append) {
     return file[2] = file[1];
   }
   return 0;
+}
+
+int
+Plumber::std(int i) {
+  return def[i];
 }
