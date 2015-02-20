@@ -5,7 +5,7 @@ LEX     = lex
 YACC    = yacc
 
 # Platform-specific libraries
-LFL     = -lfl
+LFL     = -lfl -L./lib -ltty
 
 # Debug logging level (0 - None, 4 - Max)
 DEBUG   = 4
