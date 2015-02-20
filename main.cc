@@ -3,6 +3,10 @@
 #include "trace.h"
 #include "command.h"
 
+#ifndef OS_X
+#include "lib/tty.h"
+#endif
+
 SimpleCommand   *SimpleCommand::current;
 CompoundCommand *CompoundCommand::current;
 
