@@ -70,14 +70,14 @@
   // ----------------------------------------------------------------------- //
   partial:
     cmd_word arguments {
-      CompoundCommand::current -> pushArgument(SimpleCommand::current);
+      CompoundCommand::current -> push(SimpleCommand::current);
     }
     ;
   cmd_word:
     WORD {
       DBG_VERBOSE("Yacc: Insert command \"%s\"\n", $1);
       SimpleCommand::current = new SimpleCommand();
-      SimpleCommand::current -> pushArgument($1);
+      SimpleCommand::current -> push($1);
     }
     ;
 
@@ -91,7 +91,7 @@
   argument:
     WORD {
       DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
-      SimpleCommand::current -> pushArgument($1);
+      SimpleCommand::current -> push($1);
     }
     ;
 

@@ -18,7 +18,8 @@ prompt(void) {
 int
 main(int argc, char **argv) {
 
-  DBG_ERR_N("  DEBUG : ");
+  // Print enabled debug levels
+  DBG_ERR_N("  ENABLED DEBUG LEVELS : ");
   DBG_ERR_N(LRED("ERROR"));
   DBG_ERR_N(" ");
   DBG_WARN_N(YELLOW("WARNING"));
