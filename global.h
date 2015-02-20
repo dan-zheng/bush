@@ -4,11 +4,13 @@
 // Name of this shell
 #define SH_NAME "myshell"
 
-// Makes parser throw an error if attempting to overwrite
-// an existing redirect.
-//#define DISALLOW_OVERLAPPING_REDIRECTS
+// Disables features so that different parts of the lab can be
+// independently tested
+#define FLVL_PART1 0
+#define FLVL_PART2 1
+#define FLVL_PART3 2
+#define FLVL_EXTRA 3
 
-// Disables execution of commands so that parser-test can correctly run
-//#define PARSER_ONLY
+#define FEATURE_LEVEL FLVL_PART2
 
 #endif

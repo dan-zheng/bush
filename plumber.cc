@@ -22,11 +22,13 @@ int Plumber::opipe[2];
 
 void
 Plumber::init() {
-
+  DBG_VERBOSE("Plubmer::init()\n");
 }
 
 void
 Plumber::capture() {
+  DBG_INFO("Plubmer::capture()\n");
+
   def[0]  = dup(0);
   def[1]  = dup(1);
   def[2]  = dup(2);
@@ -43,6 +45,8 @@ Plumber::capture() {
 
 void
 Plumber::restore() {
+  DBG_INFO("Plubmer::restore()\n");
+
   dup2(def[0],  0);
   dup2(def[1], 1);
   dup2(def[2], 2);
@@ -51,6 +55,8 @@ Plumber::restore() {
 
 void
 Plumber::clear() {
+  DBG_INFO("Plubmer::clear()\n");
+
   close(def[0]);
   close(def[1]);
   close(def[2]);
@@ -64,6 +70,8 @@ Plumber::clear() {
 
 void
 Plumber::swap() {
+  DBG_VERBOSE("Plubmer::swap()\n");
+
   int tmp;
 
   tmp = ipipe[0];
@@ -77,6 +85,7 @@ Plumber::swap() {
 
 void
 Plumber::redirect(int in, int out, int err) {
+  DBG_VERBOSE("Plubmer::redirect()\n");
 
   switch (in) {
     case PLB_NONE: { dup2(def[0],   0); } break;

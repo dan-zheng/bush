@@ -134,6 +134,8 @@ CompoundCommand::clear() {
 	in     = NULL;
 	out    = NULL;
 	err    = NULL;
+
+	//Plumber::restore();
 }
 
 void
@@ -183,7 +185,7 @@ CompoundCommand::execute() {
 	// Print contents of Command data structure
 	print();
 
-	#ifndef PARSER_ONLY
+	#if FEATURE_LEVEL >= FLVL_PART2
 
 	// Capture the I/O state
 	Plumber::capture();
@@ -207,14 +209,12 @@ CompoundCommand::execute() {
 	// Unless &, wait for child to finish
 	if (!bg) { waitpid(pid, 0, 0); }
 
-	#else
-
-
+	// Restore I/O state
+	Plumber::restore();
 
 	#endif
 
-	// Restore I/O state
-	Plumber::restore();
+
 
 	// Clear to prepare for next command
 	clear();
