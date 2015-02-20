@@ -32,14 +32,16 @@ y.tab.o: shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
 
-command.o: command.cc
+cfiles: command.cc plumber.cc
 	$(CC) $(CCFLAGS) -c command.cc
-
-plumber.o: plumber.cc
 	$(CC) $(CCFLAGS) -c plumber.cc
 
-shell: y.tab.o lex.yy.o command.o main.cc plumber.o
-	$(CC) $(CCFLAGS) -o shell main.cc lex.yy.o y.tab.o command.o $(LFL)
+builtin.o: builtin.cc
+	$(CC) $(CCFLAGS) -c builtin.cc
+
+
+shell: cfiles y.tab.o lex.yy.o main.cc builtin.o
+	$(CC) $(CCFLAGS) -o shell main.cc lex.yy.o y.tab.o plumber.o command.o builtin.o $(LFL)
 
 # Test
 mocha: shell

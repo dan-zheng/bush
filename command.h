@@ -11,9 +11,12 @@ public:
 	SimpleCommand();
 	~SimpleCommand();
 
-	void print();
+	void  print();
+	int   execute();
 
-	void push(char*);
+	void  push(char*);
+	char* first();
+	char* last();
 
 	static SimpleCommand *current;
 };
@@ -33,11 +36,13 @@ public:
 	CompoundCommand();
 	~CompoundCommand();
 
-	void print();
-	void execute();
-	void clear();
+	void  print();
+	void  execute();
+	void  clear();
 
-	void push(SimpleCommand*);
+	void           push(SimpleCommand*);
+	SimpleCommand* first();
+	SimpleCommand* last();
 
 	static CompoundCommand *current;
 };

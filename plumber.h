@@ -17,6 +17,7 @@ public:
   static void restore();
   static void clear();
   static void redirect(int, int, int);
+  
 };
 
 #endif

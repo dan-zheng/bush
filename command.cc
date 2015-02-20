@@ -22,8 +22,13 @@
 #include "main.h"
 #include "trace.h"
 #include "command.h"
+#include "builtin.h"
+#include "plumber.h"
 
-#define HIGHLIGHT COLOR_YELLOW
+#define HIGHLIGHT  COLOR_YELLOW
+#define OUT_FLAGS  (S_IRUSR | S_IWUSR | S_IXUSR)
+#define OUT_TRUNC  (O_WRONLY | O_CREAT | O_TRUNC)
+#define OUT_APPEND (O_WRONLY | O_CREAT | O_APPEND)
 
 // ------------------------------------------------------------------------- //
 // class SimpleCommand { ... }                                               //
@@ -39,14 +44,53 @@ SimpleCommand::~SimpleCommand() {
 void
 SimpleCommand::print() {
 	int size = args -> size();
-	for (int j = 0; j < size; j++) {
+	for (int j = 0; j < size - 1; j++) {
 		DBG_INFO_N("\"%s\" ", args -> at(j));
+	}
+}
+
+int
+SimpleCommand::execute() {
+	DBG_VERBOSE("SimpleCommand::execute() : %s\n", first());
+	int pid = fork();
+
+	// Fail
+	if (pid == -1) {
+		perror(LRED("SimpleCommand::execute() : "));
+		exit(2);
+	}
+
+	// Success
+	if (pid == 0) {
+		// Close unnecessary descriptors
+		Plumber::clear();
+
+		// Execute the program
+		execvp(first(), &args->front());
+
+		// Panic here
+		perror(LRED("SimpleCommand::execute() : "));
+		exit(2);
+	} else {
+		return pid;
 	}
 }
 
 void
 SimpleCommand::push(char *arg) {
 	args -> push_back(arg);
+}
+
+char*
+SimpleCommand::first() {
+	if (args -> size() == 0) { return NULL; }
+	return args -> at(0);
+}
+
+char*
+SimpleCommand::last() {
+	if (args -> size() == 0) { return NULL; }
+	return args -> at(args -> size() - 1);
 }
 
 // ------------------------------------------------------------------------- //
@@ -64,7 +108,13 @@ CompoundCommand::CompoundCommand() {
 
 void
 CompoundCommand::push(SimpleCommand *cmd) {
+	cmd -> args -> push_back(NULL);
 	args -> push_back(cmd);
+}
+
+SimpleCommand*
+CompoundCommand::first() {
+	return args -> at(0);
 }
 
 void
@@ -99,7 +149,7 @@ CompoundCommand::print() {
 		args -> at(i) -> print();
 		DBG_INFO_N("\n");
 	}
-	
+
 	DBG_INFO("\n");
 	DBG_INFO(" Output       Input        Error        Background   Append File\n" );
 	DBG_INFO("------------ ------------ ------------ ------------ ------------\n" );
@@ -116,22 +166,32 @@ CompoundCommand::print() {
 
 void
 CompoundCommand::execute() {
-	// Don't do anything if there are no simple commands
-	if (!args -> empty()) {
 
-		// Print contents of Command data structure
-		print();
+	// Handle exit()
+	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(); }
 
-		// Add execution here
-		// For every simple command fork a new process
-		// Setup i/o redirection
-		// and call exec
-
-		// Clear to prepare for next command
-		clear();
-
+	// Empty command, skip.
+	if (args -> empty()) {
+		DBG_VERBOSE("CompoundCommand::execute() : Skipping empty command.");
+		return;
 	}
 
-	// Print new prompt
-	// prompt();
+	// Print contents of Command data structure
+	print();
+
+	// Capture the I/O
+	Plumber::capture();
+
+	
+
+	// Execute first command
+	int pid = first() -> execute();
+
+
+
+	// Unless &, wait for child to finish
+	if (!bg) { waitpid(pid, 0, 0); }
+
+	// Clear to prepare for next command
+	clear();
 }
