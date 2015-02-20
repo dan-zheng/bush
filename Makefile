@@ -21,7 +21,7 @@ endif
 # Aliases
 all: no-clean clean-tmp
 
-no-clean: shell examples mocha
+no-clean: shell examples
 
 # Shell
 lex.yy.o: shell.l

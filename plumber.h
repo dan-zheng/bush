@@ -9,15 +9,17 @@ private:
   static int       defin;
   static int       defout;
   static int       deferr;
-  static int       iopipe[2];
+  static int       ipipe[2];
+  static int       opipe[2];
 
 public:
 
   static void capture();
   static void restore();
   static void clear();
+  static void swap();
   static void redirect(int, int, int);
-  
+
 };
 
 #endif

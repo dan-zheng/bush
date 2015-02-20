@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+#include "global.h"
 #include "trace.h"
 #include "command.h"
 #include "builtin.h"
@@ -16,7 +17,7 @@ yyparse(void);
 
 void
 prompt(void) {
-  if (isatty(0)) { printf(LGREEN("myshell> ")); }
+  if (isatty(0)) { printf(LGREEN("%s> "), SH_NAME); }
   fflush(stdout);
 }
 

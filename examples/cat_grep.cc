@@ -48,7 +48,7 @@ int main(int argc, char **argv, char **envp)
 	// Error:    Plumber::deferr
 
 	Plumber::redirect(PLB_NONE, PLB_PIPE, PLB_PIPE);
-	
+
 	// Create new process for "cat"
 	int pid = fork();
 	if ( pid == -1 ) {
@@ -83,6 +83,7 @@ int main(int argc, char **argv, char **envp)
 		exit( 2 );
 	}
 
+	Plumber::swap();
 	Plumber::redirect(PLB_PIPE, outfd, outfd);
 
 	close( outfd );

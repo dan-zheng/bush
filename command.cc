@@ -14,11 +14,15 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <signal.h>
+#include <fcntl.h>
 
+#include <cerrno>
 #include <vector>
 
+#include "global.h"
 #include "main.h"
 #include "trace.h"
 #include "command.h"
@@ -26,9 +30,10 @@
 #include "plumber.h"
 
 #define HIGHLIGHT  COLOR_YELLOW
-#define OUT_FLAGS  (S_IRUSR | S_IWUSR | S_IXUSR)
-#define OUT_TRUNC  (O_WRONLY | O_CREAT | O_TRUNC)
-#define OUT_APPEND (O_WRONLY | O_CREAT | O_APPEND)
+#define F_READ   O_RDONLY
+#define F_FLAGS  S_IRUSR | S_IWUSR | S_IXUSR
+#define F_TRUNC  O_WRONLY | O_CREAT | O_TRUNC
+#define F_APPEND O_WRONLY | O_CREAT | O_APPEND
 
 // ------------------------------------------------------------------------- //
 // class SimpleCommand { ... }                                               //
@@ -51,12 +56,11 @@ SimpleCommand::print() {
 
 int
 SimpleCommand::execute() {
-	DBG_VERBOSE("SimpleCommand::execute() : %s\n", first());
 	int pid = fork();
 
 	// Fail
 	if (pid == -1) {
-		perror(LRED("SimpleCommand::execute() : "));
+		perror(LRED("SimpleCommand::execute() "));
 		exit(2);
 	}
 
@@ -69,7 +73,12 @@ SimpleCommand::execute() {
 		execvp(first(), &args->front());
 
 		// Panic here
-		perror(LRED("SimpleCommand::execute() : "));
+		if (errno != ENOENT) {
+			perror(LRED("SimpleCommand::execute() "));
+		}
+		else {
+			fprintf(stderr, "-%s: %s: command not found\n", SH_NAME, first());
+		}
 		exit(2);
 	} else {
 		return pid;
@@ -173,25 +182,68 @@ CompoundCommand::execute() {
 	// Empty command, skip.
 	if (args -> empty()) {
 		DBG_VERBOSE("CompoundCommand::execute() : Skipping empty command.");
+		clear();
 		return;
 	}
 
 	// Print contents of Command data structure
 	print();
 
-	// Capture the I/O
+	#ifndef PARSER_ONLY
+
+	// Capture the I/O state
 	Plumber::capture();
 
-	
+	// Open input file
+	int fdin  = PLB_NONE;
+	if (in) {
+		DBG_VERBOSE("CompoundCommand::execute() : Opening input file: %s\n", in);
+		fdin = open(in, F_READ, F_FLAGS);
+		if (fdin == -1) {
+			DBG_ERR("CompoundCommand::execute() : Failed to open input file.\n");
+			perror(in);
+			clear();
+			return;
+		}
+	}
+
+	// Open output file
+	int fdout = PLB_NONE;
+	if (out) {
+		DBG_VERBOSE("CompoundCommand::execute() : Opening output file: %s\n", out);
+		fdout = open(out, append ? (F_APPEND) : (F_TRUNC), F_FLAGS);
+		if (fdout == -1) {
+			DBG_ERR("CompoundCommand::execute() : Failed to open output file.\n");
+			perror(in);
+			clear();
+			return;
+		}
+	}
+
+	// Open error file
+	int fderr = PLB_NONE;
+	if (err && fdout) { fderr = fdout; }
+
+	// Redirect for the first command
+	Plumber::redirect(fdin, fdout, fderr);
 
 	// Execute first command
 	int pid = first() -> execute();
 
-
-
 	// Unless &, wait for child to finish
 	if (!bg) { waitpid(pid, 0, 0); }
 
+	#else
+
+
+
+	#endif
+
+	// Restore I/O state
+	Plumber::restore();
+
 	// Clear to prepare for next command
 	clear();
+
+
 }
