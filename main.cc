@@ -4,6 +4,7 @@
 #include "trace.h"
 #include "command.h"
 #include "builtin.h"
+#include "plumber.h"
 
 #ifndef OS_X
 #include "lib/tty.h"
@@ -37,7 +38,7 @@ main(int argc, char **argv) {
     DBG_ERR_N("\n\n");
   }
 
-  BuiltIn::init();
+  Plumber::init();
   CompoundCommand::current = new CompoundCommand();
   prompt();
   yyparse();

@@ -3,16 +3,18 @@
 
 #define PLB_NONE  -1
 #define PLB_PIPE  -2
+#define PLB_FILE  -3
 
 class Plumber {
 private:
-  static int       defin;
-  static int       defout;
-  static int       deferr;
+  static int       def[3];
+  static int       file[3];
   static int       ipipe[2];
   static int       opipe[2];
 
 public:
+
+  static void init();
 
   static void capture();
   static void restore();
@@ -20,6 +22,9 @@ public:
   static void swap();
   static void redirect(int, int, int);
 
+  static int  in (char*);
+  static int  out(char*, int);
+  static int  err(char*, int);
 };
 
 #endif

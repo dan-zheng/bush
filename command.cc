@@ -14,10 +14,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/stat.h>
 #include <string.h>
 #include <signal.h>
-#include <fcntl.h>
 
 #include <cerrno>
 #include <vector>
@@ -30,10 +28,6 @@
 #include "plumber.h"
 
 #define HIGHLIGHT  COLOR_YELLOW
-#define F_READ   O_RDONLY
-#define F_FLAGS  S_IRUSR | S_IWUSR | S_IXUSR
-#define F_TRUNC  O_WRONLY | O_CREAT | O_TRUNC
-#define F_APPEND O_WRONLY | O_CREAT | O_APPEND
 
 // ------------------------------------------------------------------------- //
 // class SimpleCommand { ... }                                               //
@@ -194,38 +188,18 @@ CompoundCommand::execute() {
 	// Capture the I/O state
 	Plumber::capture();
 
-	// Open input file
-	int fdin  = PLB_NONE;
-	if (in) {
-		DBG_VERBOSE("CompoundCommand::execute() : Opening input file: %s\n", in);
-		fdin = open(in, F_READ, F_FLAGS);
-		if (fdin == -1) {
-			DBG_ERR("CompoundCommand::execute() : Failed to open input file.\n");
-			perror(in);
-			clear();
-			return;
-		}
+	// Open input/output files
+	if (
+		Plumber::in(in) == -1 ||
+		Plumber::out(out, append) == -1 ||
+		Plumber::err(err, append) == -1)
+	{
+		clear();
+		return;
 	}
-
-	// Open output file
-	int fdout = PLB_NONE;
-	if (out) {
-		DBG_VERBOSE("CompoundCommand::execute() : Opening output file: %s\n", out);
-		fdout = open(out, append ? (F_APPEND) : (F_TRUNC), F_FLAGS);
-		if (fdout == -1) {
-			DBG_ERR("CompoundCommand::execute() : Failed to open output file.\n");
-			perror(in);
-			clear();
-			return;
-		}
-	}
-
-	// Open error file
-	int fderr = PLB_NONE;
-	if (err && fdout) { fderr = fdout; }
 
 	// Redirect for the first command
-	Plumber::redirect(fdin, fdout, fderr);
+	Plumber::redirect(PLB_FILE, PLB_FILE, PLB_FILE);
 
 	// Execute first command
 	int pid = first() -> execute();

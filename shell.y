@@ -188,7 +188,7 @@
 %%
 
 void yyerror(const char *s) {
-  fprintf(stderr, YELLOW("ERROR: %s\n"), s);
+  fprintf(stderr, "-" SH_NAME ": %s\n", s);
   CompoundCommand::current -> clear();
   prompt();
 }
