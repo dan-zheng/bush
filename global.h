@@ -11,6 +11,8 @@
 #define FLVL_PART3 2
 #define FLVL_EXTRA 3
 
-#define FEATURE_LEVEL FLVL_PART2
+#ifndef FEATURE_LEVEL
+#define FEATURE_LEVEL 4
+#endif
 
 #endif

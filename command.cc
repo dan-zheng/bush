@@ -164,14 +164,14 @@ CompoundCommand::print() {
 	}
 
 	DBG_INFO("\n");
-	DBG_INFO(" Output       Input        Error        Background   Append File\n" );
+	DBG_INFO(" Output       Input        Error        Background   File Mode  \n" );
 	DBG_INFO("------------ ------------ ------------ ------------ ------------\n" );
 	DBG_INFO(" %s%-12s %s%-12s %s%-12s %s%-12s %s%-12s %s\n",
-		out      ? HIGHLIGHT   : COLOR_NONE, out    ? out   : "default",
-		in       ? HIGHLIGHT   : COLOR_NONE, in     ? in    : "default",
-		err      ? HIGHLIGHT   : COLOR_NONE, err    ? err   : "default",
-		bg       ? HIGHLIGHT   : COLOR_NONE, bg     ? "YES" : "NO",
-		append   ? HIGHLIGHT   : COLOR_NONE, append ? "YES" : "NO",
+		out      ? HIGHLIGHT   : COLOR_NONE, out    ? out      : "DEFAULT",
+		in       ? HIGHLIGHT   : COLOR_NONE, in     ? in       : "DEFAULT",
+		err      ? HIGHLIGHT   : COLOR_NONE, err    ? err      : "DEFAULT",
+		bg       ? HIGHLIGHT   : COLOR_NONE, bg     ? "YES"    : "NO",
+		append   ? HIGHLIGHT   : COLOR_NONE, append ? "APPEND" : "OVERWRITE",
 		COLOR_NONE);
 	DBG_INFO("\n");
 	DBG_INFO("\n");

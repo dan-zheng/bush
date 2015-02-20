@@ -1,15 +1,16 @@
 
 # CLI commands
-CC      = g++
-LEX     = lex
-YACC    = yacc
+CC       = g++
+LEX      = lex
+YACC     = yacc
 
 # Platform-specific libraries
-LFL     = -lfl -L./lib -ltty
+LFL      = -lfl -L./lib -ltty
 
 # Debug logging level (0 - None, 4 - Max)
-DEBUG   = 4
-CCFLAGS = $(CFLAGS) -DDEBUG=$(DEBUG)
+DEBUG    = 4
+FEATURES = 4
+CCFLAGS  = $(CFLAGS) -DDEBUG=$(DEBUG) -DFEATURE_LEVEL=$(FEATURES)
 
 # OS detection, since -lfl on OS X is -ll
 UNAME_S := $(shell uname -s)
