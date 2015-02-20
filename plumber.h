@@ -19,7 +19,7 @@ public:
   static void capture();
   static void restore();
   static void clear();
-  static void swap();
+  static void push();
   static void redirect(int, int, int);
 
   static int  in (char*);

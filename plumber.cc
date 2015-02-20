@@ -69,7 +69,7 @@ Plumber::clear() {
 }
 
 void
-Plumber::swap() {
+Plumber::push() {
   DBG_VERBOSE("Plubmer::swap()\n");
 
   close(ipipe[1]);

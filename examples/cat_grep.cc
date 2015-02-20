@@ -83,7 +83,7 @@ int main(int argc, char **argv, char **envp)
 		exit( 2 );
 	}
 
-	Plumber::swap();
+	Plumber::push();
 	Plumber::redirect(PLB_PIPE, outfd, outfd);
 
 	close( outfd );

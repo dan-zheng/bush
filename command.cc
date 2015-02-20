@@ -50,6 +50,8 @@ SimpleCommand::print() {
 
 int
 SimpleCommand::execute() {
+	DBG_INFO("SimpleCommand::execute() : %s\n", first());
+
 	int pid = fork();
 
 	// Fail
@@ -74,7 +76,8 @@ SimpleCommand::execute() {
 			fprintf(stderr, "-%s: %s: command not found\n", SH_NAME, first());
 		}
 		exit(2);
-	} else {
+	}
+	else {
 		return pid;
 	}
 }
@@ -200,14 +203,34 @@ CompoundCommand::execute() {
 		return;
 	}
 
-	// Redirect for the first command
-	Plumber::redirect(PLB_FILE, PLB_FILE, PLB_FILE);
+	// Number of simple commands
+	int argc = args -> size();
 
-	// Execute first command
-	int pid = first() -> execute();
+	// Execute command s
+	int pid  = -1;
+	if (argc == 1) {
+		// One and only command.. redirect both ends to files
+		Plumber::redirect(PLB_FILE, PLB_FILE, PLB_FILE);
+		pid = first() -> execute();
+	}
+	else {
+		// Multiple, let's work on it
+		for (int i = 0; i < argc; i++) {
+			DBG_VERBOSE("Command loop: %d / %d\n", i + 1, argc);
+
+			Plumber::redirect(
+				i == 0        ? PLB_FILE : PLB_PIPE,
+				i == argc - 1 ? PLB_FILE : PLB_PIPE,
+				PLB_FILE
+			);
+
+			pid = args -> at(i) -> execute();
+			Plumber::push();
+		}
+	}
 
 	// Unless &, wait for child to finish
-	if (!bg) { waitpid(pid, 0, 0); }
+	if (pid != -1 && !bg) { waitpid(pid, 0, 0); }
 
 	// Restore I/O state
 	Plumber::restore();
