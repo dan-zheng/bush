@@ -3,6 +3,8 @@
 #ifndef TRACE_H
 #define TRACE_H
 
+#include <sys/types.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "global.h"
 #include "plumber.h"
@@ -77,7 +79,8 @@
 #endif
 
 #if DEBUG >= DBG_LVL_ERROR
-  #define DBG_ERR(...) dprintf(Plumber::std(1), COLOR_LRED "  ERROR:       " COLOR_NONE __VA_ARGS__);
+  #define DBG_ERR(...)  dprintf(Plumber::std(1), COLOR_DGRAY "[%d] ", getpid());\
+                        dprintf(Plumber::std(1), COLOR_LRED " ERROR:       " COLOR_NONE __VA_ARGS__);
   #define DBG_ERR_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_ERR(...)
@@ -85,7 +88,8 @@
 #endif
 
 #if DEBUG >= DBG_LVL_WARN
-  #define DBG_WARN(...) dprintf(Plumber::std(1), COLOR_YELLOW "  WARNING:     " COLOR_NONE __VA_ARGS__);
+  #define DBG_WARN(...) dprintf(Plumber::std(1), COLOR_DGRAY "[%d] ", getpid());\
+                        dprintf(Plumber::std(1), COLOR_YELLOW " WARNING:     " COLOR_NONE __VA_ARGS__);
   #define DBG_WARN_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_WARN(...)
@@ -93,7 +97,8 @@
 #endif
 
 #if DEBUG >= DBG_LVL_INFO
-  #define DBG_INFO(...) dprintf(Plumber::std(1), COLOR_LBLUE  "  INFO:        "  COLOR_NONE __VA_ARGS__);
+  #define DBG_INFO(...) dprintf(Plumber::std(1), COLOR_DGRAY "[%d] ", getpid());\
+                        dprintf(Plumber::std(1), COLOR_LBLUE " INFO:        "  COLOR_NONE __VA_ARGS__);
   #define DBG_INFO_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_INFO(...)
@@ -101,7 +106,8 @@
 #endif
 
 #if DEBUG >= DBG_LVL_VERBOSE
-  #define DBG_VERBOSE(...) dprintf(Plumber::std(1), COLOR_DGRAY  "  VERBOSE:     "  COLOR_NONE __VA_ARGS__);
+  #define DBG_VERBOSE(...) dprintf(Plumber::std(1), COLOR_DGRAY "[%d] ", getpid());\
+                           dprintf(Plumber::std(1), COLOR_DGRAY " VERBOSE:     "  COLOR_NONE __VA_ARGS__);
   #define DBG_VERBOSE_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
 #else
   #define DBG_VERBOSE(...)
