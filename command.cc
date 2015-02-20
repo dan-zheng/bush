@@ -99,8 +99,7 @@ CompoundCommand::print() {
 		args -> at(i) -> print();
 		DBG_INFO_N("\n");
 	}
-
-	DBG_INFO_N("\n");
+	
 	DBG_INFO("\n");
 	DBG_INFO(" Output       Input        Error        Background   Append File\n" );
 	DBG_INFO("------------ ------------ ------------ ------------ ------------\n" );
