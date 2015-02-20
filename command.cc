@@ -52,6 +52,11 @@ int
 SimpleCommand::execute() {
 	DBG_INFO("SimpleCommand::execute() : %s\n", first());
 
+	if (!strcmp(first(), "hi")) {
+		printf("Hello World!!\n");
+		return -1;
+	}
+
 	int pid = fork();
 
 	// Fail
@@ -224,7 +229,9 @@ CompoundCommand::execute() {
 				PLB_FILE
 			);
 
-			pid = args -> at(i) -> execute();
+			int _pid = args -> at(i) -> execute();
+			if (_pid != -1) { pid = _pid; }
+
 			Plumber::push();
 		}
 	}
