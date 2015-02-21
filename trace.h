@@ -123,8 +123,8 @@
                     dprintf(Plumber::std(2), COLOR_NONE);\
                     exit(1);
 
-#define COMPLAIN(...) dprintf(Plumber::std(2), "-" SH_NAME ": ");\
-                      dprintf(Plumber::std(2), __VA_ARGS__);\
-                      dprintf(Plumber::std(2), "\n");
+#define COMPLAIN(...) fprintf(stderr, "-" SH_NAME ": ");\
+                      fprintf(stderr, __VA_ARGS__);\
+                      fprintf(stderr, "\n");
 
 #endif
