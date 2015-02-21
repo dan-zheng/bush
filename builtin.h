@@ -2,6 +2,7 @@
 #define BUILTIN_H_
 
 #include <map>
+#include <string.h>
 
 struct StringComp : public std::binary_function<const char*, const char*, bool> {
   bool operator()(char const *a, char const *b) const {
