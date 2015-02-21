@@ -4,10 +4,11 @@
 #include <map>
 #include <string.h>
 
-struct StringComp : public std::binary_function<const char*, const char*, bool> {
-  bool operator()(char const *a, char const *b) const {
-    return strcmp(a, b) < 0;
-  }
+struct StringComp :
+  public std::binary_function<const char*, const char*, bool> {
+    bool operator()(char const *a, char const *b) const {
+      return strcmp(a, b) < 0;
+    }
 };
 
 typedef void (*BuiltInFunc)(char**);
@@ -27,5 +28,9 @@ public:
 };
 
 void __cd(char**);
+
+void __setenv(char**);
+void __unsetenv(char**);
+void __printenv(char**);
 
 #endif
