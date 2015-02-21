@@ -198,7 +198,7 @@
 %%
 
 void yyerror(const char *s) {
-  COMPLAIN(s);
+  COMPLAIN("%s", s);
   CompoundCommand::current -> clear();
   prompt();
 }

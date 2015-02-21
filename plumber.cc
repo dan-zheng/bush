@@ -29,7 +29,7 @@ Plumber::init() {
 
 void
 Plumber::capture() {
-  DBG_INFO("Plubmer::capture()\n");
+  DBG_VERBOSE("Plubmer::capture()\n");
 
   def[0]  = dup(0);
   def[1]  = dup(1);
@@ -47,7 +47,7 @@ Plumber::capture() {
 
 void
 Plumber::restore() {
-  DBG_INFO("Plubmer::restore()\n");
+  DBG_VERBOSE("Plubmer::restore()\n");
 
   dup2(def[0],  0);
   dup2(def[1], 1);
@@ -57,7 +57,7 @@ Plumber::restore() {
 
 void
 Plumber::clear() {
-  DBG_INFO("Plubmer::clear()\n");
+  DBG_VERBOSE("Plubmer::clear()\n");
 
   close(def[0]);
   close(def[1]);

@@ -3,11 +3,18 @@
 
 #include <map>
 
+struct StringComp : public std::binary_function<const char*, const char*, bool> {
+  bool operator()(char const *a, char const *b) const {
+    return std::strcmp(a, b) < 0;
+  }
+};
+
 typedef void (*BuiltInFunc)(char**);
+typedef std::map<const char*, BuiltInFunc, StringComp> FuncMap;
 
 class BuiltIn {
 private:
-  static std::map<const char*, BuiltInFunc> map;
+  static FuncMap map;
 public:
 
   static void init();
@@ -15,9 +22,9 @@ public:
   static void reg(const char*, BuiltInFunc);
   static BuiltInFunc get(const char*);
 
-  // Builtin functions here
-  static void _exit(char**);
-  static void _cd(char**);
+  static void _exit();
 };
+
+void __cd(char**);
 
 #endif

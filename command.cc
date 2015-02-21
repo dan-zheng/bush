@@ -56,7 +56,6 @@ SimpleCommand::execute() {
 
 	BuiltInFunc fn = BuiltIn::get(first());
 	if (fn) {
-		DBG_INFO("SimpleCommand::execute() : built-in command found.\n");
 		(*fn)(&args->front());
 		return -1;
 	}
@@ -160,6 +159,8 @@ CompoundCommand::clear() {
 void
 CompoundCommand::print() {
 
+	#if FEATURE_LEVEL == FL_PART1
+
 	DBG_INFO("\n");
 	DBG_INFO("\n");
 	DBG_INFO("            COMMAND TABLE                \n");
@@ -186,13 +187,15 @@ CompoundCommand::print() {
 		COLOR_NONE);
 	DBG_INFO("\n");
 	DBG_INFO("\n");
+
+	#endif
 }
 
 void
 CompoundCommand::execute() {
 
 	// Handle exit()
-	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(NULL); }
+	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(); }
 
 	// Empty command, skip.
 	if (args -> empty()) {
