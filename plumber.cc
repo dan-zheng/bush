@@ -15,6 +15,7 @@
 #define F_TRUNC  O_WRONLY | O_CREAT | O_TRUNC
 #define F_APPEND O_WRONLY | O_CREAT | O_APPEND
 
+int Plumber::rootPID;
 int Plumber::def[3];
 int Plumber::file[3];
 int Plumber::ipipe[2];
@@ -23,6 +24,7 @@ int Plumber::opipe[2];
 void
 Plumber::init() {
   DBG_VERBOSE("Plubmer::init()\n");
+  rootPID = getpid();
 }
 
 void

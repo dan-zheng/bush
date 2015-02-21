@@ -14,6 +14,9 @@ private:
 
 public:
 
+  static int  rootPID;
+
+
   static void init();
 
   static void capture();

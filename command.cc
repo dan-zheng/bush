@@ -52,6 +52,17 @@ int
 SimpleCommand::execute() {
 	DBG_INFO("SimpleCommand::execute() : %s\n", first());
 
+	#if FEATURE_LEVEL >= FL_PART3
+
+	BuiltInFunc fn = BuiltIn::get(first());
+	if (fn) {
+		DBG_INFO("SimpleCommand::execute() : built-in command found.\n");
+		(*fn)(&args->front());
+		return -1;
+	}
+
+	#endif
+
 	if (!strcmp(first(), "hi")) {
 		printf("Hello World!!\n");
 		return -1;
@@ -181,7 +192,7 @@ void
 CompoundCommand::execute() {
 
 	// Handle exit()
-	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(); }
+	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(NULL); }
 
 	// Empty command, skip.
 	if (args -> empty()) {

@@ -1,5 +1,8 @@
 #include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
 
+#include "main.h"
 #include "global.h"
 #include "trace.h"
 #include "command.h"
@@ -17,6 +20,18 @@ int
 yyparse(void);
 
 void
+signal(int n) {
+  switch (n) {
+    case SIGINT:
+    case SIGCHLD: {
+      int status;
+      int pid = wait(&status);
+      if (pid != -1) { kill(getpid(), n); }
+    } break;
+  }
+}
+
+void
 prompt(void) {
   if (isatty(0)) { printf(LGREEN("%s> "), SH_NAME); }
   fflush(stdout);
@@ -24,6 +39,9 @@ prompt(void) {
 
 int
 main(int argc, char **argv) {
+
+  sigset(SIGINT,  signal);
+  sigset(SIGCHLD, signal);
 
   if (isatty(0)) {
     // Print enabled debug levels
@@ -39,6 +57,8 @@ main(int argc, char **argv) {
   }
 
   Plumber::init();
+  BuiltIn::init();
+
   CompoundCommand::current = new CompoundCommand();
   prompt();
   yyparse();
