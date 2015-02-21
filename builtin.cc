@@ -34,7 +34,9 @@ void
 __cd(char* args[]) {
   DBG_INFO("BuiltIn::cd() : %s\n", args[1]);
   if (args[1]) {
-    if (chdir(args[1]) < 0) { COMPLAIN("cd: %s: No such file or directory.", args[1]); }
+    if (chdir(args[1]) < 0) {
+      COMPLAIN("cd: %s: No such file or directory.", args[1]);
+    }
   } else {
     chdir(getenv("HOME"));
   }
