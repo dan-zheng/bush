@@ -40,8 +40,10 @@ prompt(void) {
 int
 main(int argc, char **argv) {
 
+  #if FEATURE_LEVEL >= FL_PART3
   sigset(SIGINT,  signal);
   sigset(SIGCHLD, signal);
+  #endif
 
   if (isatty(0)) {
     // Print enabled debug levels

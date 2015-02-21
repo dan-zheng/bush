@@ -19,13 +19,11 @@ void myunputc(int c) { unput(c); }
 
 %}
 
-wordchar    [^ |><\t\n]
+wordchar    ([^ |><\t\n]|\\[^ |><\t\n])
 
 %%
 
 \n 	        { return LF; }
-
-[ \t] 	    { /* discard */ }
 
 ">>&"       { return GTGTAMP; }
 
@@ -40,6 +38,16 @@ wordchar    [^ |><\t\n]
 "&"         { return AMP; }
 
 "|"         { return PIPE; }
+
+\".*\"      {
+              yylval.string_val = strdup(yytext + 1);
+              if (yylval.string_val[yyleng - 2] == '"') {
+                yylval.string_val[yyleng - 2] = 0;
+              }
+              return WORD;
+            }
+
+[ \t] 	    { /* discard */ }
 
 {wordchar}{wordchar}* {
 	yylval.string_val = strdup(yytext);
