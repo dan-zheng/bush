@@ -32,8 +32,9 @@ shell: y.tab.o lex.yy.o main.o util.o builtin.o command.o plumber.o env.o
 	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 
 env.o: 		 env.cc env.h global.h trace.h
+	$(CC) $(CCFLAGS) -c env.cc
 main.o:    main.cc main.h global.h trace.h plumber.h command.h builtin.h main.h
-	$(CC) $(CCFILES) -c main.cc
+	$(CC) $(CCFLAGS) -c main.cc
 util.o:    util.cc util.h global.h trace.h
 	$(CC) $(CCFLAGS) -c util.cc
 lex.yy.o:  shell.l
@@ -43,9 +44,9 @@ y.tab.o:   shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
 builtin.o: builtin.cc builtin.h global.h trace.h env.o
-	$(CC) $(CCFILES) -c builtin.cc
+	$(CC) $(CCFLAGS) -c builtin.cc
 command.o: command.cc command.h global.h trace.h plumber.h main.h builtin.h
-	$(CC) $(CCFILES) -c command.cc
+	$(CC) $(CCFLAGS) -c command.cc
 plumber.o: plumber.cc plumber.h global.h trace.h plumber.h
 	$(CC) $(CCFLAGS) -c plumber.cc
 
