@@ -24,7 +24,7 @@ void
 Env::print(char* args[]) {
   DBG_VERBOSE("Env::print() : (no arguments)\n");
   char** p = environ;
-  while (*p) { printf("%s\n", *p++); };
+  while (*p) { dprintf(1, "%s\n", *p++); };
 }
 
 int

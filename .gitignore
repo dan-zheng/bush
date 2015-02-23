@@ -13,3 +13,11 @@ cat_grep
 ctrl-c
 regular
 shell
+
+test-shell/*-in
+test-shell/*-out
+test-shell/bgfile
+test-shell/out
+test-shell/err*
+test-shell/file-list
+test-shell/hello world
