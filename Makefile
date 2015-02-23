@@ -9,7 +9,7 @@ YACC     = yacc
 LFL      = -lfl
 
 # Debug logging level (0 - None, 4 - Max)
-DEBUG    = 3
+DEBUG    = 4
 FEATURES = 4
 CCFLAGS  = $(CFLAGS) -DDEBUG=$(DEBUG) -DFEATURE_LEVEL=$(FEATURES)
 
