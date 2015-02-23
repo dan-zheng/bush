@@ -94,7 +94,7 @@
   argument:
     WORD {
       Util::unescape($1);
-      if (Env::expand(&$1)) { error = 1; }
+      if (Env::expand(&$1) || Env::tilde(&$1)) { error = 1; }
       DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
       SimpleCommand::current -> push($1);
     }

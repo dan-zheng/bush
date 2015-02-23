@@ -22,7 +22,7 @@
  - [x] Allow Quotes
  - [x] Escape Characters
  - [x] Environment Variable Expansion
- - [ ] Tilde Expansion
+ - [x] Tilde Expansion
  - [x] Prompt only in TTY
  - [ ] Link LibTTY
  - [ ] Subshell

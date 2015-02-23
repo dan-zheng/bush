@@ -7,6 +7,7 @@ public:
   static void unset(char**);
   static void print(char**);
   static int  expand(char**);
+  static int  tilde(char**);
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <string>
+#include <pwd.h>
 #include "env.h"
 #include "global.h"
 #include "trace.h"
@@ -61,6 +62,34 @@ Env::expand(char** str) {
   }
 
   result -> append(po);
+
+  free(*str);
+  *str = strdup(result -> c_str());
+  delete result;
+  return 0;
+}
+
+int
+Env::tilde(char** str) {
+  if (!*str) return 0;
+  if (**str != '~') return 0;
+
+  register struct passwd *pw;
+
+  char        *ps     = *str,
+              *pe     = strstr(*str, "/");
+  std::string *result = new std::string();
+
+  if (!pe || pe - ps == 1) {
+    pw = getpwuid(geteuid());
+  } else {
+    char *uname = strndup(ps + 1, pe - ps - 1);
+    pw = getpwnam(uname);
+    free(uname);
+  }
+
+  result -> append(pw -> pw_dir);
+  if (pe) { result -> append(pe); }
 
   free(*str);
   *str = strdup(result -> c_str());
