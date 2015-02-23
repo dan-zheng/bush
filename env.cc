@@ -85,8 +85,15 @@ Env::tilde(char** str) {
   } else {
     char *uname = strndup(ps + 1, pe - ps - 1);
     pw = getpwnam(uname);
+    if (!pw) {
+      COMPLAIN("Unknown user: %s", uname);
+      free(uname);
+      return 1;
+    }
     free(uname);
   }
+
+
 
   result -> append(pw -> pw_dir);
   if (pe) { result -> append(pe); }
