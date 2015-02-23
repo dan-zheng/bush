@@ -80,6 +80,8 @@ Env::tilde(char** str) {
               *pe     = strstr(*str, "/");
   std::string *result = new std::string();
 
+  if (!pe) { pe = ps + strlen(*str); }
+
   if (!pe || pe - ps == 1) {
     pw = getpwuid(geteuid());
   } else {
