@@ -9,8 +9,8 @@ YACC     = yacc
 LFL      = -lfl
 
 # Debug logging level (0 - None, 4 - Max)
-DEBUG    = 4
-FEATURES = 4
+DEBUG    = 3
+FEATURES = 0
 CCFLAGS  = $(CFLAGS) -DDEBUG=$(DEBUG) -DFEATURE_LEVEL=$(FEATURES)
 
 # OS detection, since -lfl on OS X is -ll

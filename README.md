@@ -20,7 +20,7 @@
  - [x] `unsetenv`
  - [x] `cd [ dir ]`
  - [x] Allow Quotes
- - [ ] Escape Characters *WIP*
+ - [x] Escape Characters
  - [ ] Environment Variable Expansion
  - [ ] Tilde Expansion
  - [x] Prompt only in TTY
