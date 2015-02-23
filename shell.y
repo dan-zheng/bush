@@ -24,6 +24,7 @@
   #include "trace.h"
   #include "global.h"
   #include "command.h"
+  #include "util.h"
 
   void yyerror(const char*);
   int yylex();
@@ -91,6 +92,7 @@
   arguments: argument arguments |;
   argument:
     WORD {
+      Util::unescape($1);
       DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
       SimpleCommand::current -> push($1);
     }
