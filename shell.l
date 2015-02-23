@@ -19,7 +19,7 @@ void myunputc(int c) { unput(c); }
 
 %}
 
-wordchar    ([^ |><\t\n]|\\[^ |><\t\n])
+wordchar    ([^ |><\t\n]|\\[^\n\t])
 
 %%
 
