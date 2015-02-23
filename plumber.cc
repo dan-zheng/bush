@@ -23,6 +23,9 @@ int Plumber::_opipe[2];
 void
 Plumber::init() {
   DBG_VERBOSE("Plubmer::init()\n");
+  _def[0]  = dup(0);
+  _def[1]  = dup(1);
+  _def[2]  = dup(2);
 }
 
 void
@@ -134,9 +137,9 @@ Plumber::file(char* in, char* out, char* err, int append) {
   // Err
   if (err) {
     DBG_VERBOSE("Plumber::file() : stderr -> %s\n", err);
-    return _file[2] = _file[1];
+    _file[2] = _file[1];
   }
-
+  
   return f;
 }
 
