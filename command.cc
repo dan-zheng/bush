@@ -88,7 +88,7 @@ SimpleCommand::execute() {
 			perror(LRED("SimpleCommand::execute() "));
 		}
 		else {
-			fprintf(stderr, "-%s: %s: command not found\n", SH_NAME, first());
+			COMPLAIN("%s: command not found", first());
 		}
 		exit(2);
 	}
@@ -214,6 +214,7 @@ CompoundCommand::execute() {
 
 	// Open input/output files
 	if (Plumber::file(in, out, err, append)) {
+		DBG_ERR("Failed to open one of the files.\n");
 		clear();
 		return;
 	}
