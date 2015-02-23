@@ -28,9 +28,6 @@ public:
 };
 
 void __cd(char**);
-
-void __setenv(char**);
-void __unsetenv(char**);
-void __printenv(char**);
+void __debug(char**);
 
 #endif

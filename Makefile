@@ -1,3 +1,6 @@
+# --------------------------------------------------------------------------- #
+# Variables, Additional Flags & OS Detection  														    #
+# --------------------------------------------------------------------------- #
 
 # CLI commands
 CC       = g++
@@ -20,45 +23,48 @@ ifeq ($(UNAME_S),Darwin)
 	CCFLAGS += -DOS_X
 endif
 
+# --------------------------------------------------------------------------- #
+# shell: aliases & additional files                       								    #
+# --------------------------------------------------------------------------- #
 # Aliases
-all: no-clean clean-tmp
+all: shell
+shell: y.tab.o lex.yy.o main.o util.o builtin.o command.o plumber.o env.o
+	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 
-no-clean: shell examples
-
-# Shell
-lex.yy.o: shell.l
+env.o: 		 env.cc env.h global.h trace.h
+main.o:    main.cc main.h global.h trace.h plumber.h command.h builtin.h main.h
+	$(CC) $(CCFILES) -c main.cc
+util.o:    util.cc util.h global.h trace.h
+	$(CC) $(CCFLAGS) -c util.cc
+lex.yy.o:  shell.l
 	$(LEX) shell.l
 	$(CC) -x c++ $(CCFLAGS) -c lex.yy.c
-
-y.tab.o: shell.y
+y.tab.o:   shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
-
-cfiles: command.cc plumber.cc builtin.cc util.cc
-	$(CC) $(CCFLAGS) -c command.cc
+builtin.o: builtin.cc builtin.h global.h trace.h env.o
+	$(CC) $(CCFILES) -c builtin.cc
+command.o: command.cc command.h global.h trace.h plumber.h main.h builtin.h
+	$(CC) $(CCFILES) -c command.cc
+plumber.o: plumber.cc plumber.h global.h trace.h plumber.h
 	$(CC) $(CCFLAGS) -c plumber.cc
-	$(CC) $(CCFLAGS) -c builtin.cc
-	$(CC) $(CCFLAGS) -c util.cc
 
-shell: cfiles y.tab.o lex.yy.o main.cc
-	$(CC) $(CCFLAGS) -o shell main.cc lex.yy.o y.tab.o plumber.o command.o builtin.o util.o $(LFL)
-
-# Test
-mocha: shell
-	-mocha --reporter nyan
-
-# Example executables
-examples:  examples/cat_grep.cc plumber.o examples/ctrl-c.cc examples/regular.cc
+# --------------------------------------------------------------------------- #
+# examples: example executables.                          								    #
+# --------------------------------------------------------------------------- #
+.PHONY: examples
+examples: cat_grep ctrl-c regular
+cat_grep: examples/cat_grep.cc plumber.o
 	$(CC) $(CCFLAGS) -o cat_grep examples/cat_grep.cc plumber.o
+ctrl-c:   examples/ctrl-c.cc
 	$(CC) $(CCFLAGS) -o ctrl-c examples/ctrl-c.cc
+regular:  examples/regular.cc
 	$(CC) $(CCFLAGS) -o regular examples/regular.cc
 
-# Cleanup
-clean: clean-tmp
+# --------------------------------------------------------------------------- #
+# clean: get rid of all that messy mess                    								    #
+# --------------------------------------------------------------------------- #
+clean:
 	rm -f shell ctrl-c regular cat_grep
-
-clean-tmp:
 	rm -f lex.yy.* *.tab.c *.tab.h *.o *.tmp.*
 	rm -rf *.dSYM
-
-.PHONY: examples

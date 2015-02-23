@@ -21,7 +21,7 @@
  - [x] `cd [ dir ]`
  - [x] Allow Quotes
  - [x] Escape Characters
- - [ ] Environment Variable Expansion
+ - [x] Environment Variable Expansion
  - [ ] Tilde Expansion
  - [x] Prompt only in TTY
  - [ ] Link LibTTY

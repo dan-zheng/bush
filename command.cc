@@ -213,11 +213,7 @@ CompoundCommand::execute() {
 	Plumber::capture();
 
 	// Open input/output files
-	if (
-		Plumber::in(in) == -1 ||
-		Plumber::out(out, append) == -1 ||
-		Plumber::err(err, append) == -1)
-	{
+	if (Plumber::file(in, out, err, append)) {
 		clear();
 		return;
 	}
@@ -229,7 +225,7 @@ CompoundCommand::execute() {
 	int pid  = -1;
 	if (argc == 1) {
 		// One and only command.. redirect both ends to files
-		Plumber::redirect(PLB_FILE, PLB_FILE, PLB_FILE);
+		Plumber::redirect(PLB_NONE, PLB_NONE, PLB_NONE);
 		pid = first() -> execute();
 	}
 	else {
@@ -238,9 +234,9 @@ CompoundCommand::execute() {
 			DBG_VERBOSE("Command loop: %d / %d\n", i + 1, argc);
 
 			Plumber::redirect(
-				i == 0        ? PLB_FILE : PLB_PIPE,
-				i == argc - 1 ? PLB_FILE : PLB_PIPE,
-				PLB_FILE
+				i == 0        ? PLB_NONE : PLB_PIPE,
+				i == argc - 1 ? PLB_NONE : PLB_PIPE,
+				PLB_NONE
 			);
 
 			int _pid = args -> at(i) -> execute();

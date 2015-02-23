@@ -1,35 +1,32 @@
+// ------------------------------------------------------------------------- //
+// Plumber: heard you have pipes that need fixing..?                         //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+// ------------------------------------------------------------------------- //
 #ifndef PLUMBER_H_
 #define PLUMBER_H_
 
 #define PLB_NONE  -1
 #define PLB_PIPE  -2
-#define PLB_FILE  -3
 
+// Plumber: takes care of I/O, pipes and redirection.
 class Plumber {
 private:
-  static int       def[3];
-  static int       file[3];
-  static int       ipipe[2];
-  static int       opipe[2];
-
+  static int       _def[3];              // Default I/O handles
+  static int       _file[3];             // File I/O handles
+  static int       _ipipe[2];            // Input pipe
+  static int       _opipe[2];            // Output pipe
 public:
+  static void init();                   // Initializes the Plumber
 
-  static int  rootPID;
+  static void capture();                // Captures current I/O handles
+  static void restore();                // Restores captured I/O handles
+  static void clear();                  // Clears handles managed by Plumber
+  static void push();                   // Push a new pipe into the Plumber
+  static void redirect(int, int, int);  // Redirect I/O as specified
 
+  static int  file(char*, char*, char*, int);               // Specify an input file
 
-  static void init();
-
-  static void capture();
-  static void restore();
-  static void clear();
-  static void push();
-  static void redirect(int, int, int);
-
-  static int  in (char*);
-  static int  out(char*, int);
-  static int  err(char*, int);
-
-  static int  std(int);
+  static int  std(int);                 // Get a default I/O handle
 };
 
 #endif

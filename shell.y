@@ -25,6 +25,7 @@
   #include "global.h"
   #include "command.h"
   #include "util.h"
+  #include "env.h"
 
   void yyerror(const char*);
   int yylex();
@@ -93,6 +94,7 @@
   argument:
     WORD {
       Util::unescape($1);
+      if (Env::expand(&$1)) { error = 1; }
       DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
       SimpleCommand::current -> push($1);
     }

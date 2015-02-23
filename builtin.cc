@@ -1,21 +1,21 @@
 #include <stdlib.h>
-#include <unistd.h>
 #include <map>
 
+#include "env.h"
 #include "global.h"
 #include "trace.h"
 #include "builtin.h"
 
-extern char **environ;
 FuncMap BuiltIn::map;
 
 void
 BuiltIn::init() {
   DBG_VERBOSE("BuiltIn::init()\n");
   BuiltIn::reg("cd", __cd);
-  BuiltIn::reg("setenv", __setenv);
-  BuiltIn::reg("unsetenv", __unsetenv);
-  BuiltIn::reg("printenv", __printenv);
+  BuiltIn::reg("setenv", Env::set);
+  BuiltIn::reg("unsetenv", Env::unset);
+  BuiltIn::reg("printenv", Env::print);
+  BuiltIn::reg("debug", __debug);
 }
 
 void
@@ -48,22 +48,7 @@ __cd(char* args[]) {
 }
 
 void
-__setenv(char* args[]) {
-  DBG_VERBOSE("__setenv() : %s=%s\n", args[1], args[2] ? args[2] : "(empty)");
-  setenv(args[1], args[2] ? args[2] : "", 1);
-}
-
-void
-__unsetenv(char* args[]) {
-  DBG_VERBOSE("__unsetenv() : %s\n", args[1]);
-  unsetenv(args[1]);
-}
-
-void
-__printenv(char* args[]) {
-  DBG_VERBOSE("__printenv() : (no arguments)\n");
-  char** p = environ;
-  while (*p) {
-    printf("%s\n", *p++);
-  };
+__debug(char* args[]) {
+  Env::expand(&args[1]);
+  printf("%s\n", args[1]);
 }
