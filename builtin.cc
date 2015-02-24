@@ -56,6 +56,12 @@ __debug(char* args[]) {
   //Path::popdir("");
   //Path::glob2rgx(&args[1]);
   //DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
-  char* wd = Path::cwd();
-  DBG_INFO("Path::cwd(): %s\n", wd);
+  Queue *list = Path::glob(args[1]);
+  while (!list->empty()) {
+    char* match = list->front();
+    list->pop();
+
+    printf("%s\n", match);
+    free(match);
+  }
 }

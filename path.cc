@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <errno.h>
+#include <regex.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 #include <string>
+#include <queue>
 
 #include "path.h"
+#include "util.h"
 
 
 char*
@@ -25,7 +29,9 @@ Path::join(char *path, char *dir) {
   char* onedir;
 
   while ((onedir = Path::popd(&dir))) {
-    Path::pushd(&result, onedir);
+    char *t = Path::pushd(result, onedir);
+    free(result);
+    result = t;
     free(onedir);
   }
 
@@ -58,32 +64,34 @@ Path::popd(char **path) {
   return dir;
 }
 
-void
-Path::pushd(char **path, char *dir) {
+char*
+Path::pushd(char *path, char *dir) {
 
   // Do not handle null arguments
-  if (!path || !*path || !dir) return;
+  if (!path || !dir) return NULL;
+
+  char *result = strdup(path);
 
   // There are three cases for dir pushes:
   if (!strcmp(dir, ".")) {
     // Current directory, there is nothing to push.
-    return;
+
   }
   else if (!strcmp(dir, "..")) {
     // Parent directory, remove the last directory name
-    char *ps = *path + strlen(*path);
-    while (ps > *path && *ps != '/') { ps--; }
+    char *ps = path + strlen(path);
+    while (ps > path && *ps != '/') { ps--; }
     *ps = 0;
   }
   else {
     // Child directory, push it into the path
     // Compute lengths of both components
-    int  path_length = strlen(*path);
+    int  path_length = strlen(path);
     int  dir_length  = strlen(dir);
 
     // Remove tailing slash from path if needed
-    if (*(*path + path_length - 1) == '/') {
-      *(*path + path_length - 1) = 0;
+    if (*(path + path_length - 1) == '/') {
+      *(path + path_length - 1) = 0;
       path_length -= 1;
     }
 
@@ -95,41 +103,146 @@ Path::pushd(char **path, char *dir) {
 
     // Re-allocate the path string and concat components
     char *ns = (char*) malloc(sizeof(char) * (path_length + dir_length + 1));
-    strcpy(ns, *path);
+    strcpy(ns, path);
     *(ns + path_length) = '/';
     strcpy(ns + path_length + 1, dir);
 
-    // Free old path and assign new path
-    free(*path);
-    *path = ns;
+    free(result);
+    result = ns;
   }
-
-  DBG_VERBOSE("Path::pushdir(): path: \"%s\"\n", *path);
+  DBG_VERBOSE("Path::pushdir(): dir: \"%s\"\n", dir);
+  DBG_VERBOSE("Path::pushdir(): path: \"%s\"\n", result);
+  return result;
 }
 
 
-void
-Path::glob2rgx(char **glob) {
-  if (!glob || !*glob) return;
-  std::string *result = new std::string(*glob);
+regex_t*
+Path::glob2rgx(char *glob) {
+  if (!glob) return NULL;
+  std::string *result = new std::string(glob);
 
-  int pos = 0;
-  while ((pos = result->find('.', pos)) != std::string::npos) {
-    result -> replace(pos, 1, "\\.");
-    pos += 2;
-  }
-  pos = 0;
-  while ((pos = result->find('*', pos)) != std::string::npos) {
-    result -> replace(pos, 1, ".*");
-    pos += 2;
-  }
-  pos = 0;
-  while ((pos = result->find('?', pos)) != std::string::npos) {
-    result -> replace(pos, 1, ".");
-    pos += 1;
+  Util::replace(result, ".", "\\.");
+  Util::replace(result, "*", ".*");
+  Util::replace(result, "?", ".");
+  result -> insert(0, "^");
+  result -> push_back('$');
+
+  regex_t *regex = (regex_t*)malloc(sizeof(regex_t));
+  int      fail  = regcomp(regex, result -> c_str(), REG_EXTENDED|REG_NOSUB);
+  if (fail) {
+    COMPLAIN("%s: %s", result -> c_str(), strerror(errno));
+    delete result;
+    return NULL;
   }
 
-  free(*glob);
-  *glob = strdup(result -> c_str());
   delete result;
+  return regex;
+}
+
+Queue*
+Path::glob(char* pattern) {
+  Queue *result    = new Queue();
+  Queue *iteration = new Queue();
+
+  // Push in the current working dir
+  result -> push(Path::cwd());
+
+
+  char *glob    = strdup(pattern);
+  char *partial;
+  while ((partial = Path::popd(&glob))) {
+
+    // Only perform regex glob if partial contains wildcards
+    if (strstr(partial, "*") || strstr(partial, "?")) {
+
+      // Compile pattern fragment into regex
+      regex_t *regex = Path::glob2rgx(partial);
+      free(partial);
+
+      // For each previously matched path
+      while (!result -> empty()) {
+        char *candidate = result -> front();
+        result -> pop();
+
+        DIR      *dir;
+        DirEntry *ent;
+        if ((dir = opendir(candidate))) {
+          // Iterate through all entries
+          while ((ent = readdir(dir))) {
+
+            // Skip '.' and '..'
+            if (!strcmp(ent->d_name, ".") ||
+                !strcmp(ent->d_name, "..")) {
+              continue;
+            }
+
+            // Skip files if we still have un-popped partials
+            if (strlen(glob) != 0 && ent->d_type != DT_DIR) {
+              continue;
+            }
+
+            // Push matches into result
+            regmatch_t m;
+            if (!regexec(regex, ent->d_name, 1, &m, 0)) {
+              char* full = Path::pushd(candidate, ent->d_name);
+              iteration -> push(full);
+              DBG_INFO("Path::glob(): regex: %s\n", full);
+            }
+
+          }
+        }
+        else {
+          COMPLAIN("%s: %s", candidate, strerror(errno));
+          // Clean up
+          free(candidate);
+          free(regex);
+          while (!result -> empty()) {
+            free(result->front());
+            result->pop();
+          }
+          while (!iteration -> empty()) {
+            free(iteration->front());
+            iteration->pop();
+          }
+          delete result;
+          delete iteration;
+          return NULL;
+        }
+
+        free(candidate);
+      }
+
+      // Clean up and go to next iteration
+      free(regex);
+
+    }
+    // No wildcards, perform directo pushd and copy
+    else {
+
+      while (!result -> empty()) {
+        char *candidate = result -> front();
+        result -> pop();
+
+        char *full = Path::pushd(candidate, partial);
+        free(candidate);
+
+        // Check for existence
+        if (access(full, F_OK) != -1) {
+          iteration -> push(full);
+          DBG_INFO("Path::glob(): pushd: %s\n", full);
+        } else {
+          free(full);
+        }
+      }
+
+      // Clean up and go to next iteration
+      free(partial);
+    }
+
+    delete result;
+    result    = iteration;
+    iteration = new Queue();
+  }
+
+  return result;
 }
