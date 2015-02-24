@@ -174,8 +174,14 @@ Path::glob(char* pattern) {
   Queue *result    = new Queue();
   Queue *iteration;
 
-  // Push in the current working dir
-  result -> push(Path::cwd());
+  // If pattern is a relative path, push in cwd
+  if (*pattern != '/') {
+    result -> push(Path::cwd());
+  }
+  // For absolute path, push in the root directory
+  else {
+    result -> push(strdup("/"));
+  }
 
   char *glob    = strdup(pattern);
   char *partial;
