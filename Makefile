@@ -28,13 +28,15 @@ endif
 # --------------------------------------------------------------------------- #
 # Aliases
 all: shell
-shell: y.tab.o lex.yy.o main.o util.o builtin.o command.o plumber.o env.o
+shell: y.tab.o lex.yy.o main.o util.o builtin.o command.o plumber.o env.o path.o
 	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 
 env.o: 		 env.cc env.h global.h trace.h
 	$(CC) $(CCFLAGS) -c env.cc
 main.o:    main.cc main.h global.h trace.h plumber.h command.h builtin.h main.h
 	$(CC) $(CCFLAGS) -c main.cc
+path.o:    path.cc path.h global.h trace.h
+	$(CC) $(CCFLAGS) -c path.cc
 util.o:    util.cc util.h global.h trace.h
 	$(CC) $(CCFLAGS) -c util.cc
 lex.yy.o:  shell.l
@@ -43,7 +45,7 @@ lex.yy.o:  shell.l
 y.tab.o:   shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
-builtin.o: builtin.cc builtin.h global.h trace.h env.o
+builtin.o: builtin.cc builtin.h global.h trace.h env.o path.o
 	$(CC) $(CCFLAGS) -c builtin.cc
 command.o: command.cc command.h global.h trace.h plumber.h main.h builtin.h
 	$(CC) $(CCFLAGS) -c command.cc

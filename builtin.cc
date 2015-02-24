@@ -2,6 +2,7 @@
 #include <map>
 
 #include "env.h"
+#include "path.h"
 #include "global.h"
 #include "trace.h"
 #include "builtin.h"
@@ -49,6 +50,10 @@ __cd(char* args[]) {
 
 void
 __debug(char* args[]) {
-  Env::expand(&args[1]);
-  printf("%s\n", args[1]);
+  //char* result = Path::join(args[1], args[2]);
+  //DBG_INFO("Path::join(): path: %s\n", result);
+  //free(result);
+  //Path::popdir("");
+  Path::glob2rgx(&args[1]);
+  DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
 }

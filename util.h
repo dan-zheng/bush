@@ -4,7 +4,6 @@
 class Util {
 public:
   static void  unescape(char*);
-  static char* envexpand(char*);
 };
 
 #endif
