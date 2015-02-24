@@ -128,12 +128,7 @@ Plumber::push() {
 void
 Plumber::redirect(int in, int out, int err) {
   DBG_VERBOSE("Plubmer::redirect()\n");
-
-  // Close existing standard output
-  close(0);
-  close(1);
-  close(2);
-
+  
   // Redirect stdin
   switch (in) {
     case PLB_NONE: { dup2(_file[0],  0); } break;
