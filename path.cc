@@ -121,19 +121,43 @@ Path::pushd(char *path, char *dir) {
   return result;
 }
 
-
 regex_t*
 Path::glob2rgx(char *glob) {
   if (!glob) return NULL;
   std::string *result = new std::string(glob);
 
   Util::replace(result, ".", "\\.");
-  Util::replace(result, "*", ".*");
-  Util::replace(result, "?", ".");
+  //Util::replace(result, "*", ".*");
+  int pos  = 0;
+  while ((pos = result ->find("*", pos)) != std::string::npos) {
+    if (pos != 0) {
+      result -> replace(pos, 1, ".*");
+      pos += 2;
+    }
+    else {
+      result -> replace(pos, 1, "[^.].*");
+      pos += 6;
+    }
+  }
+  //Util::replace(result, "?", ".");
+  pos = 0;
+  while ((pos = result ->find("?", pos)) != std::string::npos) {
+    if (pos != 0) {
+      result -> replace(pos, 1, ".");
+      pos += 1;
+    }
+    else {
+      result -> replace(pos, 1, "[^.]");
+      pos += 4;
+    }
+  }
+
   result -> insert(0, "^");
   result -> push_back('$');
 
   regex_t *regex = (regex_t*)malloc(sizeof(regex_t));
+
+  DBG_VERBOSE("Path::glob2rgx(): %s: \"%s\"\n", LGREEN("result"), result -> c_str());
   int      fail  = regcomp(regex, result -> c_str(), REG_EXTENDED|REG_NOSUB);
   if (fail) {
     COMPLAIN("%s: %s", result -> c_str(), strerror(errno));
