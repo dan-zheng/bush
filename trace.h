@@ -1,4 +1,12 @@
-
+// ------------------------------------------------------------------------- //
+//                                                                           //
+// CS252 Lab03 - Shell                                                       //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+//                                                                           //
+// trace.h                                                                   //
+// This file contains macros for debugging and console output coloring.      //
+//                                                                           //
+// ------------------------------------------------------------------------- //
 
 #ifndef TRACE_H
 #define TRACE_H

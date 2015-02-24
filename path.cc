@@ -22,7 +22,6 @@ Path::cwd() {
   return NULL;
 }
 
-
 char*
 Path::join(char *path, char *dir) {
 

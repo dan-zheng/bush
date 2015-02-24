@@ -1,3 +1,13 @@
+// ------------------------------------------------------------------------- //
+//                                                                           //
+// CS252 Lab03 - Shell                                                       //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+//                                                                           //
+// main.h                                                                    //
+// This file contains logic for globally available functions such as         //
+// signal handler and prompt().                                              //
+//                                                                           //
+// ------------------------------------------------------------------------- //
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -13,12 +23,13 @@
 #include "lib/tty.h"
 #endif
 
+// Forward declarations
 SimpleCommand   *SimpleCommand::current;
 CompoundCommand *CompoundCommand::current;
 
-int
-yyparse(void);
-
+// ------------------------------------------------------------------------- //
+// Handles the signal specified by its first argument (n).                   //
+// ------------------------------------------------------------------------- //
 void
 signal(int n) {
   switch (n) {
@@ -31,20 +42,29 @@ signal(int n) {
   }
 }
 
+// ------------------------------------------------------------------------- //
+// Prints an input prompt (only when in TTY mode).                           //
+// ------------------------------------------------------------------------- //
 void
 prompt(void) {
   if (isatty(0)) { printf(LGREEN("%s> "), SH_NAME); }
   fflush(stdout);
 }
 
+// ------------------------------------------------------------------------- //
+// main() function for the shell.                                            //
+// ------------------------------------------------------------------------- //
 int
 main(int argc, char **argv) {
 
+  // Handle signals if feature level is above FL_PART3
   #if FEATURE_LEVEL >= FL_PART3
-  //sigset(SIGINT,  signal);
-  //sigset(SIGCHLD, signal);
+  sigset(SIGINT,  signal);
+  sigset(SIGCHLD, signal);
   #endif
 
+  // If in TTY, print enabled debug flags for reference
+  // This block is no-op if DEBUG is set to DBG_LVL_NONE
   if (isatty(0)) {
     // Print enabled debug levels
     DBG_ERR_N(DGRAY("DEBUG FLAGS : "));
@@ -58,10 +78,14 @@ main(int argc, char **argv) {
     DBG_ERR_N("\n\n");
   }
 
+  // Initialize Plumber and BuiltIn
   Plumber::init();
   BuiltIn::init();
 
+  // Initialize the global CompoundCommand instance
   CompoundCommand::current = new CompoundCommand();
+
+  // Do the YACC magic...
   prompt();
   yyparse();
   return 0;
