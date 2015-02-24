@@ -1,13 +1,13 @@
-
-/*
- * CS252: Shell project
- *
- * Template file.
- * You will need to add more code here to execute the command table.
- *
- * NOTE: You are responsible for fixing any bugs this code may have!
- *
- */
+// ------------------------------------------------------------------------- //
+//                                                                           //
+// CS252 Lab03 - Shell                                                       //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+//                                                                           //
+// command.h                                                                 //
+// This file contains logic dealing with shell command representation and    //
+// execution.                                                                //
+//                                                                           //
+// ------------------------------------------------------------------------- //
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,19 +27,27 @@
 #include "builtin.h"
 #include "plumber.h"
 
+// Highlight color when printing non-default command table values
 #define HIGHLIGHT  COLOR_YELLOW
 
 // ------------------------------------------------------------------------- //
-// class SimpleCommand { ... }                                               //
+// SimpleCommand constructor.                                                //
 // ------------------------------------------------------------------------- //
 SimpleCommand::SimpleCommand() {
 	args = new std::vector<char*>();
 }
 
+// ------------------------------------------------------------------------- //
+// SimpleCommand destructor.                                                 //
+// ------------------------------------------------------------------------- //
 SimpleCommand::~SimpleCommand() {
 	delete args;
 }
 
+// ------------------------------------------------------------------------- //
+// Prints contents of the SimpleCommand to stdout.                           //
+// XXX Intended to be called from CompoundCommand::print()                   //
+// ------------------------------------------------------------------------- //
 void
 SimpleCommand::print() {
 	int size = args -> size();
@@ -48,12 +56,18 @@ SimpleCommand::print() {
 	}
 }
 
+// ------------------------------------------------------------------------- //
+// Executes the SimpleCommand.                                               //
+// XXX Intended to be called from CompoundCommand::execute()                 //
+// ------------------------------------------------------------------------- //
 int
 SimpleCommand::execute() {
 	DBG_INFO("SimpleCommand::execute() : %s\n", first());
 
 	#if FEATURE_LEVEL >= FL_PART3
 
+	// If there is a builtin command with that name, run the command handler
+	// with arguments. Do not run executable with the same name.
 	BuiltInFunc fn = BuiltIn::get(first());
 	if (fn) {
 		(*fn)(&args->front());
@@ -62,20 +76,16 @@ SimpleCommand::execute() {
 
 	#endif
 
-	if (!strcmp(first(), "hi")) {
-		printf("Hello World!!\n");
-		return -1;
-	}
-
+	// Fork the process at this point
 	int pid = fork();
 
-	// Fail
+	// Scream, run and panic if we can't fork
 	if (pid == -1) {
-		perror(LRED("SimpleCommand::execute() "));
-		exit(2);
+		COMPLAIN("SimpleCommand::execute(): %s", strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 
-	// Success
+	// Fork OK, go ahead
 	if (pid == 0) {
 		// Close unnecessary descriptors
 		Plumber::clear();
@@ -83,31 +93,38 @@ SimpleCommand::execute() {
 		// Execute the program
 		execvp(first(), &args->front());
 
-		// Panic here
+		// We shouldn't be here, panic!
 		if (errno != ENOENT) {
-			perror(LRED("SimpleCommand::execute() "));
+			COMPLAIN("SimpleCommand::execute(): %s", strerror(errno));
 		}
 		else {
 			COMPLAIN("%s: command not found", first());
 		}
-		exit(2);
+		exit(EXIT_FAILURE);
 	}
-	else {
-		return pid;
-	}
+	else { return pid; }
 }
 
+// ------------------------------------------------------------------------- //
+// Pushes an argument string into the args array.                            //
+// ------------------------------------------------------------------------- //
 void
 SimpleCommand::push(char *arg) {
 	args -> push_back(arg);
 }
 
+// ------------------------------------------------------------------------- //
+// Gets the first argument, or NULL if there are none.                       //
+// ------------------------------------------------------------------------- //
 char*
 SimpleCommand::first() {
 	if (args -> size() == 0) { return NULL; }
 	return args -> at(0);
 }
 
+// ------------------------------------------------------------------------- //
+// Gets the last argument, or NULL if there are none.                        //
+// ------------------------------------------------------------------------- //
 char*
 SimpleCommand::last() {
 	if (args -> size() == 0) { return NULL; }
@@ -115,7 +132,7 @@ SimpleCommand::last() {
 }
 
 // ------------------------------------------------------------------------- //
-// class CompoundCommand { ... }                                             //
+// CompoundCommand constructor.                                              //
 // ------------------------------------------------------------------------- //
 CompoundCommand::CompoundCommand() {
 	args = new std::vector<SimpleCommand*>();
@@ -127,20 +144,20 @@ CompoundCommand::CompoundCommand() {
 	err    = NULL;
 }
 
+// ------------------------------------------------------------------------- //
+// CompoundCommand destructor.                                               //
+// ------------------------------------------------------------------------- //
 void
 CompoundCommand::push(SimpleCommand *cmd) {
 	cmd -> args -> push_back(NULL);
 	args -> push_back(cmd);
 }
 
-SimpleCommand*
-CompoundCommand::first() {
-	return args -> at(0);
-}
-
+// ------------------------------------------------------------------------- //
+// Deletes contents of the CompoundCommand.                                  //
+// ------------------------------------------------------------------------- //
 void
 CompoundCommand::clear() {
-
 	args -> erase(args -> begin(), args -> end());
 
 	if (out) free(out);
@@ -152,10 +169,11 @@ CompoundCommand::clear() {
 	in     = NULL;
 	out    = NULL;
 	err    = NULL;
-
-	//Plumber::restore();
 }
 
+// ------------------------------------------------------------------------- //
+// Prints contents of the CompoundCommand to stdout.                         //
+// ------------------------------------------------------------------------- //
 void
 CompoundCommand::print() {
 
@@ -191,13 +209,16 @@ CompoundCommand::print() {
 	#endif
 }
 
+// ------------------------------------------------------------------------- //
+// Executes the CompoundCommand.                                             //
+// ------------------------------------------------------------------------- //
 void
 CompoundCommand::execute() {
 
-	// Handle exit()
+	// Handle `exit` command here.
 	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(); }
 
-	// Empty command, skip.
+	// CompoundCommand is empty, no point in executing it
 	if (args -> empty()) {
 		DBG_VERBOSE("CompoundCommand::execute() : Skipping empty command.");
 		clear();
@@ -205,6 +226,7 @@ CompoundCommand::execute() {
 	}
 
 	// Print contents of Command data structure
+	// Prints nothing when DEBUG LEVEL is lower than DBG_LVL_INFO
 	print();
 
 	#if FEATURE_LEVEL >= FLVL_PART2
@@ -234,15 +256,18 @@ CompoundCommand::execute() {
 		for (int i = 0; i < argc; i++) {
 			DBG_VERBOSE("Command loop: %d / %d\n", i + 1, argc);
 
+			// Let Plumber lay down pipes
 			Plumber::redirect(
 				i == 0        ? PLB_NONE : PLB_PIPE,
 				i == argc - 1 ? PLB_NONE : PLB_PIPE,
 				PLB_NONE
 			);
 
+			// Execute and pass on PID
 			int _pid = args -> at(i) -> execute();
 			if (_pid != -1) { pid = _pid; }
 
+			// Push new pipe into Plumber
 			Plumber::push();
 		}
 	}
@@ -255,10 +280,14 @@ CompoundCommand::execute() {
 
 	#endif
 
-
-
 	// Clear to prepare for next command
 	clear();
+}
 
-
+// ------------------------------------------------------------------------- //
+// Gets the first SimpleCommand that makes up the CompoundCommand.           //
+// ------------------------------------------------------------------------- //
+SimpleCommand*
+CompoundCommand::first() {
+	return args -> at(0);
 }
