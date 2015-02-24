@@ -33,7 +33,7 @@ public:
   static char*        pushd(char*, char*);
 
   static regex_t*     glob2rgx(char*);
-  static Queue*       glob(char*);
+  static char**       glob(char*);
 };
 
 #endif

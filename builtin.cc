@@ -61,13 +61,11 @@ __debug(char* args[]) {
   //Path::glob2rgx(&args[1]);
   //DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
 
-  Queue *list = Path::glob(args[1]);
-  while (!list->empty()) {
-    char* match = list->front();
-    list->pop();
-
-    printf("%s\n", match);
-    //free(match);
+  char **list = Path::glob(args[1]);
+  while (*list) {
+    printf("%s\n", *list);
+    free(*list++);
   }
+  free(list);
 
 }

@@ -145,10 +145,10 @@ Path::glob2rgx(char *glob) {
   return regex;
 }
 
-Queue*
+char**
 Path::glob(char* pattern) {
   Queue *result    = new Queue();
-  Queue *iteration = new Queue();
+  Queue *iteration;
 
   // Push in the current working dir
   result -> push(Path::cwd());
@@ -157,7 +157,9 @@ Path::glob(char* pattern) {
   char *partial;
   while ((partial = Path::popd(&glob))) {
 
-    DBG_VERBOSE("Path::glob(): %s: \"%s\"\n", YELLOW("partial"), partial);
+    iteration = new Queue();
+
+    DBG_VERBOSE("Path::glob(): %s: \"%s\"\n", "partial", partial);
 
     // Only perform regex glob if partial contains wildcards
     if (strstr(partial, "*") || strstr(partial, "?")) {
@@ -173,64 +175,74 @@ Path::glob(char* pattern) {
         char *candidate = result -> front();
         result -> pop();
 
+        // Open directory for reading
         DIR      *dir;
         DirEntry *ent;
-        if ((dir = opendir(candidate))) {
-          // Iterate through all entries
-          while ((ent = readdir(dir))) {
-
-            // Skip '.' and '..'
-            if (!strcmp(ent->d_name, ".") ||
-                !strcmp(ent->d_name, "..")) {
-              continue;
-            }
-
-            // Push matches into result
-            regmatch_t m;
-            if (!regexec(regex, ent->d_name, 1, &m, 0)) {
-              char* full = Path::pushd(candidate, ent->d_name);
-
-              // Check if we need to skip this match
-              DirStat f_stat;
-              if (!stat(full, &f_stat)) {
-                if (strlen(glob) != 0 && !S_ISDIR(f_stat.st_mode)) {
-                  DBG_VERBOSE("Path::glob(): %s: %d \"%s\"\n", RED("skip"), ent->d_type, ent->d_name);
-                  free(full);
-                  continue;
-                }
-
-                iteration -> push(full);
-                DBG_INFO("Path::glob(): regex: %s\n", full);
-              }
-            }
-
-          }
-        }
-        else {
+        if (!(dir = opendir(candidate))) {
           DBG_ERR("%s: %s", candidate, strerror(errno));
           free(candidate);
+          continue;
         }
 
+        // Iterate through all sub-entries
+        while ((ent = readdir(dir))) {
+
+          // Skip '.' and '..'
+          if (!strcmp(ent->d_name, ".") ||
+              !strcmp(ent->d_name, "..")) {
+            continue;
+          }
+
+          // Check if regex matches
+          regmatch_t m;
+          if (regexec(regex, ent->d_name, 1, &m, 0)) { continue; }
+
+          // Compute the full path of the file in question
+          char* full = Path::pushd(candidate, ent->d_name);
+
+          // Get entry stats to determine its type
+          DirStat f_stat;
+          if (stat(full, &f_stat)) {
+            DBG_ERR("Path::glob(): %s: %s\n", YELLOW("stat"), strerror(errno));
+            free(full);
+            continue;
+          }
+
+          // If this is not a DT_DIR, and we still have glob partials to go,
+          // this match needs to be skipped
+          if (strlen(glob) != 0 && !S_ISDIR(f_stat.st_mode)) {
+            DBG_VERBOSE("Path::glob(): %s: %d \"%s\"\n", RED("skip"), ent->d_type, ent->d_name);
+            free(full);
+            continue;
+          }
+
+          // Push it into the iteration queue
+          iteration -> push(full);
+          DBG_INFO("Path::glob(): regex: %s\n", full);
+        }
+
+        // We have no more use for *candidate, free it
         free(candidate);
       }
 
       // Clean up and go to next iteration
       free(regex);
-
     }
-    // No wildcards, perform directo pushd and copy
+    // No wildcards, perform direct pushd and copy
     else {
 
       while (!result -> empty()) {
         char *candidate = result -> front();
         result -> pop();
 
+        // No wildcards means pushd the partial into candidate
+        // and we're good to go.
         char *full = Path::pushd(candidate, partial);
-        DBG_INFO("Path::glob(): %s: %s\n", LBLUE("new root"), full);
         free(candidate);
 
-        // Check for existence
-        if (access(full, F_OK) != -1) {
+        // Check whether the file exists
+        DirStat f_stat;
+        if (!stat(full, &f_stat)) {
           iteration -> push(full);
           DBG_INFO("Path::glob(): pushd: %s\n", full);
         } else {
@@ -244,8 +256,19 @@ Path::glob(char* pattern) {
 
     delete result;
     result    = iteration;
-    iteration = new Queue();
   }
 
-  return result;
+  // Convert to null-terminated array
+  char **array = (char**)malloc(sizeof(char*) * (result->size() + 1));
+  char **pw    = array;
+  while (!result -> empty()) {
+    *pw++ = result -> front();
+    result -> pop();
+  }
+  *pw = 0;
+
+  // Clean up the stuff and return
+  free(glob);
+  delete result;
+  return array;
 }
