@@ -19,6 +19,7 @@
 #endif
 
 typedef struct dirent DirEntry;
+typedef struct stat   DirStat;
 typedef std::queue<char*> Queue;
 
 class Path {

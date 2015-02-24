@@ -14,7 +14,7 @@ LFL      = -lfl
 # Debug logging level (0 - None, 4 - Max)
 DEBUG    = 4
 FEATURES = 4
-CCFLAGS  = $(CFLAGS) -DDEBUG=$(DEBUG) -DFEATURE_LEVEL=$(FEATURES)
+CCFLAGS  = -g $(CFLAGS) -DDEBUG=$(DEBUG) -DFEATURE_LEVEL=$(FEATURES)
 
 # OS detection, since -lfl on OS X is -ll
 UNAME_S := $(shell uname -s)
@@ -27,7 +27,8 @@ endif
 # shell: aliases & additional files                       								    #
 # --------------------------------------------------------------------------- #
 # Aliases
-all: shell
+re:    clean shell
+all:   shell
 shell: y.tab.o lex.yy.o main.o util.o builtin.o command.o plumber.o env.o path.o
 	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 

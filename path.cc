@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <string>
 #include <queue>
 
@@ -43,24 +44,28 @@ Path::popd(char **path) {
 
   // Do not handle NULL paths
   if (!path || !*path) return NULL;
+  if (strlen(*path) == 0) return NULL;
 
   // Find the first path delimiter (or end of string)
-  char *pe  = strstr(*path, "/");
-  if (!pe) { pe = *path + strlen(*path); }
+  char *pe  = strstr(*path, "/"),
+       *np,
+       *dir;
 
-  // Do not handle strings with 0 length
-  if (pe == *path) return NULL;
-
-  // Duplicate the first directory name, and remove it from path
-
-  char *dir  = strndup(*path, pe - *path);
-  char *np   = strdup(pe + 1);
+  // We do have a separator, so pop first dir
+  if (pe) {
+    // Duplicate the first directory name, and remove it from path
+    dir = strndup(*path, pe - *path);
+    np  = strdup(pe + 1);
+  }
+  // We do not have a separator, pop the entire thing
+  else {
+    dir = strdup(*path);
+    np  = (char*)malloc(sizeof(char));
+    *np = 0;
+  }
 
   free(*path);
   *path = np;
-
-  DBG_VERBOSE("Path::popdir(): dir: \"%s\"\n", dir);
-  DBG_VERBOSE("Path::popdir(): path: \"%s\"\n", *path);
   return dir;
 }
 
@@ -75,13 +80,16 @@ Path::pushd(char *path, char *dir) {
   // There are three cases for dir pushes:
   if (!strcmp(dir, ".")) {
     // Current directory, there is nothing to push.
-
+    return strdup(path);
   }
   else if (!strcmp(dir, "..")) {
     // Parent directory, remove the last directory name
-    char *ps = path + strlen(path);
-    while (ps > path && *ps != '/') { ps--; }
+    char *np = strdup(path);
+    char *ps = np + strlen(path);
+    while (ps > np && *ps != '/') { ps--; }
     *ps = 0;
+    DBG_VERBOSE("Path::pushd(): %s\n", np);
+    return np;
   }
   else {
     // Child directory, push it into the path
@@ -102,7 +110,7 @@ Path::pushd(char *path, char *dir) {
     }
 
     // Re-allocate the path string and concat components
-    char *ns = (char*) malloc(sizeof(char) * (path_length + dir_length + 1));
+    char *ns = (char*) malloc(sizeof(char) * (path_length + dir_length + 2));
     strcpy(ns, path);
     *(ns + path_length) = '/';
     strcpy(ns + path_length + 1, dir);
@@ -110,8 +118,6 @@ Path::pushd(char *path, char *dir) {
     free(result);
     result = ns;
   }
-  DBG_VERBOSE("Path::pushdir(): dir: \"%s\"\n", dir);
-  DBG_VERBOSE("Path::pushdir(): path: \"%s\"\n", result);
   return result;
 }
 
@@ -147,13 +153,16 @@ Path::glob(char* pattern) {
   // Push in the current working dir
   result -> push(Path::cwd());
 
-
   char *glob    = strdup(pattern);
   char *partial;
   while ((partial = Path::popd(&glob))) {
 
+    DBG_VERBOSE("Path::glob(): %s: \"%s\"\n", YELLOW("partial"), partial);
+
     // Only perform regex glob if partial contains wildcards
     if (strstr(partial, "*") || strstr(partial, "?")) {
+
+      DBG_VERBOSE("Path::glob(): Regex handler.\n");
 
       // Compile pattern fragment into regex
       regex_t *regex = Path::glob2rgx(partial);
@@ -176,37 +185,30 @@ Path::glob(char* pattern) {
               continue;
             }
 
-            // Skip files if we still have un-popped partials
-            if (strlen(glob) != 0 && ent->d_type != DT_DIR) {
-              continue;
-            }
-
             // Push matches into result
             regmatch_t m;
             if (!regexec(regex, ent->d_name, 1, &m, 0)) {
               char* full = Path::pushd(candidate, ent->d_name);
-              iteration -> push(full);
-              DBG_INFO("Path::glob(): regex: %s\n", full);
+
+              // Check if we need to skip this match
+              DirStat f_stat;
+              if (!stat(full, &f_stat)) {
+                if (strlen(glob) != 0 && !S_ISDIR(f_stat.st_mode)) {
+                  DBG_VERBOSE("Path::glob(): %s: %d \"%s\"\n", RED("skip"), ent->d_type, ent->d_name);
+                  free(full);
+                  continue;
+                }
+
+                iteration -> push(full);
+                DBG_INFO("Path::glob(): regex: %s\n", full);
+              }
             }
 
           }
         }
         else {
-          COMPLAIN("%s: %s", candidate, strerror(errno));
-          // Clean up
+          DBG_ERR("%s: %s", candidate, strerror(errno));
           free(candidate);
-          free(regex);
-          while (!result -> empty()) {
-            free(result->front());
-            result->pop();
-          }
-          while (!iteration -> empty()) {
-            free(iteration->front());
-            iteration->pop();
-          }
-          delete result;
-          delete iteration;
-          return NULL;
         }
 
         free(candidate);
@@ -224,6 +226,7 @@ Path::glob(char* pattern) {
         result -> pop();
 
         char *full = Path::pushd(candidate, partial);
+        DBG_INFO("Path::glob(): %s: %s\n", LBLUE("new root"), full);
         free(candidate);
 
         // Check for existence

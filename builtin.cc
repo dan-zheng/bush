@@ -53,15 +53,21 @@ __debug(char* args[]) {
   //char* result = Path::join(args[1], args[2]);
   //DBG_INFO("Path::join(): path: %s\n", result);
   //free(result);
-  //Path::popdir("");
+  //char *dir;
+  //while ((dir = Path::popd(&args[1]))) {
+    //DBG_INFO("dir = %s\n", dir);
+  //  free(dir);
+  //}
   //Path::glob2rgx(&args[1]);
   //DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
+
   Queue *list = Path::glob(args[1]);
   while (!list->empty()) {
     char* match = list->front();
     list->pop();
 
     printf("%s\n", match);
-    free(match);
+    //free(match);
   }
+
 }
