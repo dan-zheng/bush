@@ -54,6 +54,8 @@ __debug(char* args[]) {
   //DBG_INFO("Path::join(): path: %s\n", result);
   //free(result);
   //Path::popdir("");
-  Path::glob2rgx(&args[1]);
-  DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
+  //Path::glob2rgx(&args[1]);
+  //DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
+  char* wd = Path::cwd();
+  DBG_INFO("Path::cwd(): %s\n", wd);
 }

@@ -1,8 +1,21 @@
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
 
 #include "path.h"
+
+
+char*
+Path::cwd() {
+  char tmp[2048];
+  if (getcwd(tmp, sizeof(tmp))) {
+    return strdup(tmp);
+  }
+  return NULL;
+}
 
 
 char*
