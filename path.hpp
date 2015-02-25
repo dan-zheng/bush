@@ -37,15 +37,18 @@ public:
                                // string. Creates its own copy of path string.
   ~Path();                     // Destructor. Cleans up the mess.
 
-  void  push(const char*);     // Pushes a path string into the path.
-  void  push(Path*);           // Pushes another path object on the path.
-  void  pushd(const char*);    // Pushes a single segment into the path.
+  Path* push(const char*);     // Pushes a path string into the path.
+  Path* push(Path*);           // Pushes another path object on the path.
+  Path* pushd(const char*);    // Pushes a single segment into the path.
   char* popd();                // Pops the first segment of the path.
 
-  void  reduce();              // Resolves '.' and '..' segments where possible.
+  Path* reduce();              // Resolves '.' and '..' segments where possible.
+  Path* print();               // Prints the string representation of the path.
 
   char* str();                 // Returns a string representation of the path.
+  char* resolve(Path*);        // Resolves a path relative to another.
   int   isAbsolute();          // Returns the Path::absolute flag.
+  int   count();               // Returns the number of segments in path
 
   Path* clone();               // Creates a deep copy of the path object.
 

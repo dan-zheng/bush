@@ -85,11 +85,12 @@ Path::init(const char* str) {
 // Copies the contents of the `path`, therefore the caller is responsible    //
 // for freeing the memory.                                                   //
 // ------------------------------------------------------------------------- //
-void
+Path*
 Path::push(const char *path) {
   Path *p = new Path(path);
   push(p);
   delete p;
+  return this;
 }
 
 // ------------------------------------------------------------------------- //
@@ -98,10 +99,11 @@ Path::push(const char *path) {
 // Copies segments of the `path`, therefore the caller is responsible        //
 // for freeing the memory.                                                   //
 // ------------------------------------------------------------------------- //
-void
+Path*
 Path::push(Path *path) {
   SegmentList::iterator it = path -> segments -> begin();
   for (; it != path -> segments -> end(); ++it) { pushd(*it); }
+  return this;
 }
 
 // ------------------------------------------------------------------------- //
@@ -111,13 +113,12 @@ Path::push(Path *path) {
 // Copies the `segment`, therefore the caller is responsible for freeing the //
 // memory.                                                                   //
 // ------------------------------------------------------------------------- //
-void
+Path*
 Path::pushd(const char* segment) {
-  if (!segment) { return; }
+  if (!segment) { return this; }
 
   // Get rid of heading and tailing slashes
   char *seg  = Path::trim(segment, '/');
-  DBG_VERBOSE("Path::pushd(): segment: %s\n", seg);
 
   // If this is a '.', no need to push it at all!
   if (!strcmp(seg, ".")) { /* skip this one */ }
@@ -126,14 +127,15 @@ Path::pushd(const char* segment) {
     char *last = segments -> back();
     segments -> pop_back();
     free(last);
+    free(seg);
   }
   // So we either really need to push the segment, or we have
   // nothing left to pop.
   else {
-    segments -> push_back(strdup(seg));
+    segments -> push_back(seg);
   }
 
-  free(seg);
+  return this;
 }
 
 // ------------------------------------------------------------------------- //
@@ -152,7 +154,7 @@ Path::popd() {
 // ------------------------------------------------------------------------- //
 // Resolves unresolved '.' and '..' segments where possible.                 //
 // ------------------------------------------------------------------------- //
-void
+Path*
 Path::reduce() {
   SegmentList *backup   = segments;
                segments = new SegmentList();
@@ -163,6 +165,18 @@ Path::reduce() {
     free(segment);
   }
   delete backup;
+  return this;
+}
+
+// ------------------------------------------------------------------------- //
+// DEBUG ONLY: Prints the string representation of the path.                 //
+// ------------------------------------------------------------------------- //
+Path*
+Path::print() {
+  char *p = str();
+  DBG_INFO("Path::print(): %s\n", p);
+  free(p);
+  return this;
 }
 
 // ------------------------------------------------------------------------- //
@@ -203,11 +217,31 @@ Path::str() {
 }
 
 // ------------------------------------------------------------------------- //
+// Resolves a path relative to another path.                                 //
+// Does not modify either of paths.                                          //
+// ------------------------------------------------------------------------- //
+char*
+Path::resolve(Path *base) {
+  Path *resolved = base -> clone() -> push(this);
+  char *strpath = resolved -> str();
+  delete resolved;
+  return strpath;
+}
+
+// ------------------------------------------------------------------------- //
 // Returns 1 if the path is an absolute path; 0 otherwise.                   //
 // ------------------------------------------------------------------------- //
 int
 Path::isAbsolute() {
   return absolute;
+}
+
+// ------------------------------------------------------------------------- //
+// Returns the number of segments in the path.                               //
+// ------------------------------------------------------------------------- //
+int
+Path::count() {
+  return segments -> size();
 }
 
 // ------------------------------------------------------------------------- //
@@ -220,7 +254,7 @@ Path::clone() {
   np -> absolute = absolute;
   SegmentList::iterator it = segments -> begin();
   for (; it != segments -> end(); ++it) {
-    np -> segments -> push_back(*it);
+    np -> segments -> push_back(strdup(*it));
   }
   return np;
 }

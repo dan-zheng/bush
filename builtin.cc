@@ -85,20 +85,9 @@ __cd(char* args[]) {
 #if DEBUG > DBG_LVL_NONE
 void
 __debug(char* args[]) {
-  /*
-  Path *p = new Path(args[1]);
-  char *s = p -> str();
-  printf("%s\n", s);
-  free(s);
-  delete p;
-  */
-  Path *p = new Path(args[1]);
-  p -> push(args[2]);
-  p -> reduce();
-  char *s = p -> str();
-  printf("%s\n", s);
-  free(s);
-  delete p;
+  Globber *g = new Globber(args[1]);
+  g -> run();
+  delete g;
 
 }
 #endif
