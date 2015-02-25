@@ -39,7 +39,7 @@ wordchar    ([^ |><\t\n]|\\[^\n\t])
 
 "|"         { return PIPE; }
 
-\".*\"      {
+\"[^\"]*\"      {
               yylval.string_val = strdup(yytext + 1);
               if (yylval.string_val[yyleng - 2] == '"') {
                 yylval.string_val[yyleng - 2] = 0;
