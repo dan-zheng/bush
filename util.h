@@ -24,6 +24,8 @@ public:
   static void  unescape(char*);
   // Replaces all occurences of given string in a std::string
   static void  replace(std::string*, const char*, const char*);
+  // Removes all occurences of the specified character from end of string
+  static void trimend(char*, char);
 };
 
 #endif

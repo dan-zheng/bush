@@ -41,3 +41,12 @@ Util::replace(std::string *str, const char *find, const char *replace) {
     pos += rlen;
   }
 }
+
+// ------------------------------------------------------------------------- //
+// Removes all occurences of the specified character from end of string.     //
+// ------------------------------------------------------------------------- //
+void
+Util::trimend(char* str, char c) {
+  char *pw = str + strlen(str);
+  while (*pw == c) { *pw-- = 0; }
+}

@@ -13,10 +13,10 @@
 #include <map>
 
 #include "env.h"
-#include "path.h"
 #include "global.h"
 #include "trace.h"
 #include "builtin.h"
+#include "globber.h"
 
 // Forward declaration
 FuncMap BuiltIn::map;
@@ -85,23 +85,8 @@ __cd(char* args[]) {
 #if DEBUG > DBG_LVL_NONE
 void
 __debug(char* args[]) {
-  //char* result = Path::join(args[1], args[2]);
-  //DBG_INFO("Path::join(): path: %s\n", result);
-  //free(result);
-  //char *dir;
-  //while ((dir = Path::popd(&args[1]))) {
-    //DBG_INFO("dir = %s\n", dir);
-  //  free(dir);
-  //}
-  //Path::glob2rgx(&args[1]);
-  //DBG_INFO("Path::glob2rgx(): %s\n", args[1]);
-
-  char **list = Path::glob(args[1]);
-  while (*list) {
-    printf("%s\n", *list);
-    free(*list++);
-  }
-  //free(list);
-
+  Globber *g = new Globber(args[1]);
+  g -> next();
+  delete g;
 }
 #endif

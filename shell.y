@@ -20,11 +20,13 @@
 
 %{
   #include <stdio.h>
+  #include <string.h>
   #include "main.h"
   #include "trace.h"
   #include "global.h"
   #include "command.h"
   #include "util.h"
+  #include "globber.h"
   #include "env.h"
 
   void yyerror(const char*);
