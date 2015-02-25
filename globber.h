@@ -32,7 +32,6 @@ public:
   static char*    join(const char*, const char*);
   static char*    popd(char*);
   static char*    pushd(const char*, const char*);
-
 };
 
 #endif

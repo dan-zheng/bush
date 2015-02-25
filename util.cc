@@ -50,3 +50,16 @@ Util::trimend(char* str, char c) {
   char *pw = str + strlen(str);
   while (*pw == c) { *pw-- = 0; }
 }
+
+// ------------------------------------------------------------------------- //
+// Removes all occurences of the specified character from start and end      //
+// of string.                                                                //
+// ------------------------------------------------------------------------- //
+char*
+Util::trim(const char* str, char c) {
+  const char *ps = str,
+             *pe = str + strlen(str) - 1;
+  while (*ps == c) { ps++; }
+  while (*pe == c) { pe--; }
+  return strndup(ps, pe - ps + 1);
+}
