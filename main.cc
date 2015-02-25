@@ -66,6 +66,11 @@ main(int argc, char **argv) {
   // If in TTY, print enabled debug flags for reference
   // This block is no-op if DEBUG is set to DBG_LVL_NONE
   if (isatty(0)) {
+    printf(LGRAY(SH_BANNER));
+
+    printf(LGRAY("BUSH - Blatantly Useless Shell\n"));
+    printf(LGRAY("Copyright (C) Denis Luchkin-Zhou (build %s)\n"), __TIMESTAMP__);
+
     // Print enabled debug levels
     DBG_ERR_N(DGRAY("DEBUG FLAGS : "));
     DBG_ERR_N(LRED("ERROR"));

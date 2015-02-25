@@ -13,7 +13,6 @@
 #include <map>
 
 #include "env.h"
-#include "util.h"
 #include "path.h"
 #include "global.h"
 #include "trace.h"
