@@ -70,5 +70,5 @@ regular:  examples/regular.cc
 # --------------------------------------------------------------------------- #
 clean:
 	rm -f shell ctrl-c regular cat_grep
-	rm -f lex.yy.* *.tab.c *.tab.hpp *.o *.tmp.*
+	rm -f *.yy.* *.tab.* *.tab.* *.o *.tmp.*
 	rm -rf *.dSYM
