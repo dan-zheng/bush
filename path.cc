@@ -25,10 +25,9 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <string>
 #include "trace.h"
 #include "path.h"
-#include "util.h"
-
 
 // ------------------------------------------------------------------------- //
 // Default constructor. Creates a relative Path object with no segments.     //
@@ -125,7 +124,7 @@ Path::pushd(const char* segment) {
   if (!segment) { return; }
 
   // Get rid of heading and tailing slashes
-  char *seg  = Util::trim(segment, '/');
+  char *seg  = Path::trim(segment, '/');
   DBG_VERBOSE("Path::pushd(): segment: %s\n", seg);
 
   // If this is a '.', no need to push it at all!
@@ -231,4 +230,58 @@ Path::clone() {
     np -> segments -> push_back(*it);
   }
   return np;
+}
+
+// ------------------------------------------------------------------------- //
+// Removes backslashes from escape sequences.                                //
+// Does not support interpreting excape sequences such as \n or \t.          //
+// Directly modifies the string passed in as a parameter.                    //
+// ------------------------------------------------------------------------- //
+void
+Path::unescape(char* str) {
+  char *pw = str, *pr = str;
+  while (*pr) {
+    if (*pr == '\\') { pr++; }
+    *pw++ = *pr++;
+  }
+  *pw = 0;
+}
+
+// ------------------------------------------------------------------------- //
+// Replaces all occurences of `find` in `str` with `replace`.                //
+// ------------------------------------------------------------------------- //
+void
+Path::replace(std::string *str, const char *find, const char *replace) {
+  int pos  = 0,
+      flen = strlen(find),
+      rlen = strlen(replace);
+  while ((pos = str->find(find, pos)) != std::string::npos) {
+    str -> replace(pos, flen, replace);
+    pos += rlen;
+  }
+}
+
+// ------------------------------------------------------------------------- //
+// Removes all occurences of the `c` from the end of `str`.                  //
+// Directly modifies the string passed in as a parameter.                    //
+// ------------------------------------------------------------------------- //
+void
+Path::trimend(char* str, char c) {
+  char *pw = str + strlen(str);
+  while (*pw == c) { *pw-- = 0; }
+}
+
+// ------------------------------------------------------------------------- //
+// Removes all occurences of the specified character from start and end      //
+// of string.                                                                //
+// Creates a copy of the string passed in as the parameter, therefore the    //
+// caller is responsible for freeing the return value.                       //
+// ------------------------------------------------------------------------- //
+char*
+Path::trim(const char* str, char c) {
+  const char *ps = str,
+             *pe = str + strlen(str) - 1;
+  while (*ps == c) { ps++; }
+  while (*pe == c) { pe--; }
+  return strndup(ps, pe - ps + 1);
 }

@@ -47,6 +47,24 @@ public:
   int   isAbsolute();          // Returns the Path::absolute flag.
 
   Path* clone();               // Creates a deep copy of the path object.
+
+  // ----------------------------------------------------------------------- //
+  // STATIC METHODS: mostly utility methods used by Path.                    //
+  // ----------------------------------------------------------------------- //
+  static
+  void  unescape(char*);       // Removes backslashes from escape sequences.
+                               // Does not interpret excape sequences such as
+                               // \n or \t
+  static
+  void  replace(std::string*,  // Replaces all occurences of given substring
+                const char* ,  // in a std::string.
+                const char* );
+  static
+  void  trimend(char*, char);  // Removes all occurences of the specified
+                               // character from the end of a string.
+  static
+  char* trim(const char*,      // Removes all occurences of the specified
+             char);            // character from both ends of a string.
 };
 
 #endif

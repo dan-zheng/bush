@@ -10,7 +10,7 @@
 #include <string>
 #include <queue>
 
-#include "util.h"
+#include "path.h"
 #include "globber.h"
 
 
@@ -246,7 +246,7 @@ Globber::torgx(const char *glob) {
   if (!glob) return NULL;
   std::string *result = new std::string(glob);
 
-  Util::replace(result, ".", "\\.");
+  Path::replace(result, ".", "\\.");
   int pos  = 0;
   while ((pos = result ->find("*", pos)) != std::string::npos) {
     if (pos != 0) {

@@ -29,15 +29,13 @@ endif
 # Aliases
 re:    clean shell
 all:   shell
-shell: y.tab.o lex.yy.o main.o util.o builtin.o command.o plumber.o env.o globber.o path.o
+shell: y.tab.o lex.yy.o main.o builtin.o command.o plumber.o env.o globber.o path.o
 	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 
 env.o: 		 env.cc env.h global.h trace.h
 	$(CC) $(CCFLAGS) -c env.cc
 main.o:    main.cc main.h global.h trace.h plumber.h command.h builtin.h main.h
 	$(CC) $(CCFLAGS) -c main.cc
-util.o:    util.cc util.h global.h trace.h
-	$(CC) $(CCFLAGS) -c util.cc
 path.o:    path.cc path.h global.h trace.h
 	$(CC) $(CCFLAGS) -c path.cc
 lex.yy.o:  shell.l

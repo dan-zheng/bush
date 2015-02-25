@@ -25,7 +25,7 @@
   #include "trace.h"
   #include "global.h"
   #include "command.h"
-  #include "util.h"
+  #include "path.h"
   #include "globber.h"
   #include "env.h"
 
@@ -95,7 +95,7 @@
   arguments: argument arguments |;
   argument:
     WORD {
-      Util::unescape($1);
+      Path::unescape($1);
       if (Env::expand(&$1) || Env::tilde(&$1)) { error = 1; }
       DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
       SimpleCommand::current -> push($1);
