@@ -143,6 +143,7 @@ Path::pushd(const char* segment) {
 // ------------------------------------------------------------------------- //
 char*
 Path::popd() {
+  if (segments -> empty()) { return NULL; }
   char *segment = segments -> front();
   segments -> pop_front();
   return segment;
