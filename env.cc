@@ -15,7 +15,6 @@
 #include <pwd.h>
 
 #include "env.hpp"
-#include "global.hpp"
 #include "trace.hpp"
 
 // Environment variable container

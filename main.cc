@@ -13,7 +13,6 @@
 #include <sys/wait.h>
 
 #include "main.hpp"
-#include "global.hpp"
 #include "trace.hpp"
 #include "command.hpp"
 #include "builtin.hpp"

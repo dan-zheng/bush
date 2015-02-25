@@ -20,7 +20,6 @@
 #include <cerrno>
 #include <vector>
 
-#include "global.hpp"
 #include "main.hpp"
 #include "trace.hpp"
 #include "command.hpp"

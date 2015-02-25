@@ -15,7 +15,6 @@
 #include <cerrno>
 #include <sys/stat.h>
 
-#include "global.hpp"
 #include "trace.hpp"
 #include "plumber.hpp"
 
@@ -128,7 +127,7 @@ Plumber::push() {
 void
 Plumber::redirect(int in, int out, int err) {
   DBG_VERBOSE("Plubmer::redirect()\n");
-  
+
   // Redirect stdin
   switch (in) {
     case PLB_NONE: { dup2(_file[0],  0); } break;

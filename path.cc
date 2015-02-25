@@ -71,18 +71,12 @@ Path::init(const char* str) {
   // Split paths into segments
   while (*pe++) {
     if (*pe == '/' && pe - ps > 0) {
-      char *segment = strndup(ps, pe - ps);
-      segments -> push_back(segment);
+      segments -> push_back(strndup(ps, pe - ps));
       ps = pe + 1;
-      DBG_VERBOSE("Path::init(): segment: \"%s\"\n", segment);
     }
   }
   // Copy over the final segment
-  if (pe - ps > 0) {
-    char *segment = strdup(ps);
-    segments -> push_back(segment);
-    DBG_VERBOSE("Path::Path(): segment: \"%s\"\n", segment);
-  }
+  if (pe - ps > 0) { segments -> push_back(strdup(ps)); }
 }
 
 // ------------------------------------------------------------------------- //

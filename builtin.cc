@@ -14,7 +14,6 @@
 
 #include "env.hpp"
 #include "path.hpp"
-#include "global.hpp"
 #include "trace.hpp"
 #include "builtin.hpp"
 #include "globber.hpp"

@@ -14,8 +14,34 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-#include "global.hpp"
 #include "plumber.hpp"
+
+// ------------------------------------------------------------------------- //
+// Name of this shell as displayed in prompt.                                //
+// ------------------------------------------------------------------------- //
+#define SH_NAME "bush"
+#define SH_BANNER "  ______     __  __     ______     __  __    \n"\
+                  " /\\  == \\   /\\ \\/\\ \\   /\\  ___\\   /\\ \\_\\ \\   \n"\
+                  " \\ \\  __<   \\ \\ \\_\\ \\  \\ \\___  \\  \\ \\  __ \\  \n"\
+                  "  \\ \\_____\\  \\ \\_____\\  \\/\\_____\\  \\ \\_\\ \\_\\ \n"\
+                  "   \\/_____/   \\/_____/   \\/_____/   \\/_/\\/_/ \n"\
+                  "\n"
+
+// ------------------------------------------------------------------------- //
+// Feature levels: allows turning off experimental features so that a more   //
+// version of the shell can be submitted for grading without those features  //
+// interfering with the output.                                              //
+// ------------------------------------------------------------------------- //
+#define FLVL_PART1 0
+#define FLVL_PART2 1
+#define FLVL_PART3 2
+#define FLVL_EXTRA 3
+
+// Default feature level to maximum
+#ifndef FEATURE_LEVEL
+  #define FEATURE_LEVEL 4
+#endif
+
 
 #ifndef NO_COLORS
 

@@ -23,7 +23,6 @@
   #include <string.h>
   #include "main.hpp"
   #include "trace.hpp"
-  #include "global.hpp"
   #include "command.hpp"
   #include "path.hpp"
   #include "globber.hpp"
