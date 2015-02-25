@@ -67,12 +67,10 @@ Path::init(const char* str) {
   // Watch out for null argument!
   if (!str) { return; }
   // Paths starting with '/' are absolute
-  if (*ps == '/') {
-    absolute = 1; ps += 1; pe = ps;
-  }
+  if (*ps == '/') { absolute = 1; ps += 1; pe = ps; }
   // Split paths into segments
   while (*pe++) {
-    if (*pe == '/' && pe - ps > 1) {
+    if (*pe == '/' && pe - ps > 0) {
       char *segment = strndup(ps, pe - ps);
       segments -> push_back(segment);
       ps = pe + 1;
@@ -80,7 +78,7 @@ Path::init(const char* str) {
     }
   }
   // Copy over the final segment
-  if (pe - ps > 1) {
+  if (pe - ps > 0) {
     char *segment = strdup(ps);
     segments -> push_back(segment);
     DBG_VERBOSE("Path::Path(): segment: \"%s\"\n", segment);
