@@ -16,7 +16,7 @@
 #include <string.h>
 #include <signal.h>
 
-#include "command.h"
+#include "command.hpp"
 
 SimpleCommand::SimpleCommand()
 {

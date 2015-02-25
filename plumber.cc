@@ -15,9 +15,9 @@
 #include <cerrno>
 #include <sys/stat.h>
 
-#include "global.h"
-#include "trace.h"
-#include "plumber.h"
+#include "global.hpp"
+#include "trace.hpp"
+#include "plumber.hpp"
 
 // Forward declarations
 int Plumber::_def[3];

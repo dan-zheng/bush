@@ -14,9 +14,9 @@
 #include <string>
 #include <pwd.h>
 
-#include "env.h"
-#include "global.h"
-#include "trace.h"
+#include "env.hpp"
+#include "global.hpp"
+#include "trace.hpp"
 
 // Environment variable container
 extern char **environ;

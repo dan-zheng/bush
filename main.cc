@@ -12,12 +12,12 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#include "main.h"
-#include "global.h"
-#include "trace.h"
-#include "command.h"
-#include "builtin.h"
-#include "plumber.h"
+#include "main.hpp"
+#include "global.hpp"
+#include "trace.hpp"
+#include "command.hpp"
+#include "builtin.hpp"
+#include "plumber.hpp"
 
 #ifndef OS_X
 #include "lib/tty.h"

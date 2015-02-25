@@ -32,11 +32,11 @@ all:   shell
 shell: y.tab.o lex.yy.o main.o builtin.o command.o plumber.o env.o globber.o path.o
 	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 
-env.o: 		 env.cc env.h global.h trace.h
+env.o: 		 env.cc env.hpp global.hpp trace.hpp
 	$(CC) $(CCFLAGS) -c env.cc
-main.o:    main.cc main.h global.h trace.h plumber.h command.h builtin.h main.h
+main.o:    main.cc main.hpp global.hpp trace.hpp plumber.hpp command.hpp builtin.hpp main.hpp
 	$(CC) $(CCFLAGS) -c main.cc
-path.o:    path.cc path.h global.h trace.h
+path.o:    path.cc path.hpp global.hpp trace.hpp
 	$(CC) $(CCFLAGS) -c path.cc
 lex.yy.o:  shell.l
 	$(LEX) shell.l
@@ -44,13 +44,13 @@ lex.yy.o:  shell.l
 y.tab.o:   shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
-globber.o: globber.cc globber.h global.h trace.h
+globber.o: globber.cc globber.hpp global.hpp trace.hpp
 	$(CC) $(CCFLAGS) -c globber.cc
-builtin.o: builtin.cc builtin.h global.h trace.h env.o globber.o
+builtin.o: builtin.cc builtin.hpp global.hpp trace.hpp env.o globber.o
 	$(CC) $(CCFLAGS) -c builtin.cc
-command.o: command.cc command.h global.h trace.h plumber.h main.h builtin.h
+command.o: command.cc command.hpp global.hpp trace.hpp plumber.hpp main.hpp builtin.hpp
 	$(CC) $(CCFLAGS) -c command.cc
-plumber.o: plumber.cc plumber.h global.h trace.h plumber.h
+plumber.o: plumber.cc plumber.hpp global.hpp trace.hpp plumber.hpp
 	$(CC) $(CCFLAGS) -c plumber.cc
 
 # --------------------------------------------------------------------------- #
@@ -70,5 +70,5 @@ regular:  examples/regular.cc
 # --------------------------------------------------------------------------- #
 clean:
 	rm -f shell ctrl-c regular cat_grep
-	rm -f lex.yy.* *.tab.c *.tab.h *.o *.tmp.*
+	rm -f lex.yy.* *.tab.c *.tab.hpp *.o *.tmp.*
 	rm -rf *.dSYM

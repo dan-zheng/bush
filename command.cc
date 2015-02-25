@@ -20,12 +20,12 @@
 #include <cerrno>
 #include <vector>
 
-#include "global.h"
-#include "main.h"
-#include "trace.h"
-#include "command.h"
-#include "builtin.h"
-#include "plumber.h"
+#include "global.hpp"
+#include "main.hpp"
+#include "trace.hpp"
+#include "command.hpp"
+#include "builtin.hpp"
+#include "plumber.hpp"
 
 // Highlight color when printing non-default command table values
 #define HIGHLIGHT  COLOR_YELLOW

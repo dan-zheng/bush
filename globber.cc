@@ -10,8 +10,8 @@
 #include <string>
 #include <queue>
 
-#include "path.h"
-#include "globber.h"
+#include "path.hpp"
+#include "globber.hpp"
 
 
 Globber::Globber(char *pattern) {

@@ -21,13 +21,13 @@
 %{
   #include <stdio.h>
   #include <string.h>
-  #include "main.h"
-  #include "trace.h"
-  #include "global.h"
-  #include "command.h"
-  #include "path.h"
-  #include "globber.h"
-  #include "env.h"
+  #include "main.hpp"
+  #include "trace.hpp"
+  #include "global.hpp"
+  #include "command.hpp"
+  #include "path.hpp"
+  #include "globber.hpp"
+  #include "env.hpp"
 
   void yyerror(const char*);
   int yylex();

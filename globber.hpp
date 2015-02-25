@@ -4,8 +4,8 @@
 #include <regex.h>
 #include <string.h>
 #include <queue>
-#include "global.h"
-#include "trace.h"
+#include "global.hpp"
+#include "trace.hpp"
 
 typedef struct dirent DirEntry;
 typedef struct stat   DirStat;

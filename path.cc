@@ -26,8 +26,8 @@
 #include <limits.h>
 #include <assert.h>
 #include <string>
-#include "trace.h"
-#include "path.h"
+#include "trace.hpp"
+#include "path.hpp"
 
 // ------------------------------------------------------------------------- //
 // Default constructor. Creates a relative Path object with no segments.     //

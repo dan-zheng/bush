@@ -12,12 +12,12 @@
 #include <stdlib.h>
 #include <map>
 
-#include "env.h"
-#include "path.h"
-#include "global.h"
-#include "trace.h"
-#include "builtin.h"
-#include "globber.h"
+#include "env.hpp"
+#include "path.hpp"
+#include "global.hpp"
+#include "trace.hpp"
+#include "builtin.hpp"
+#include "globber.hpp"
 
 // Forward declaration
 FuncMap BuiltIn::map;

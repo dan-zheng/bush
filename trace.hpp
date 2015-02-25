@@ -14,8 +14,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-#include "global.h"
-#include "plumber.h"
+#include "global.hpp"
+#include "plumber.hpp"
 
 #ifndef NO_COLORS
 
