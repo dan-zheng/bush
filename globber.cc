@@ -3,9 +3,18 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <errno.h>
+#include <list>
 #include "trace.hpp"
 #include "command.hpp"
 #include "globber.hpp"
+
+bool
+sort_comparer(const char *a, const char *b) {
+  int i = strcmp(a, b);
+  if (i < 0)      { return true; }
+  else if (i > 0) { return false; }
+  else            { return strlen(a) > strlen(b); }
+}
 
 Globber::Globber(const char* pattern) {
   matches = new MatchList();
@@ -41,11 +50,23 @@ Globber::run() {
 
 void
 Globber::output(ArgList *args) {
+  // Temporary list to hold stringified matches
+  std::list<char*> *tmp = new std::list<char*>();
+
+  // Copy matches to the temporary list
   MatchList::iterator it = matches -> begin();
   for (; it != matches -> end(); ++it) {
     (*it) -> setAbsolute(glob -> isAbsolute());
-    args -> push_back((*it) -> str());
+    tmp -> push_back((*it) -> str());
   }
+
+  // Sort the temporary list
+  tmp -> sort(sort_comparer);
+  while (!tmp -> empty()) {
+    args -> push_back(tmp -> front());
+    tmp -> pop_front();
+  }
+  delete tmp;
 }
 
 void
@@ -129,8 +150,8 @@ Globber::glob_regex(Path *match, Regex *regex, MatchList *iteration) {
   while ((ent = readdir(dir))) {
 
     // Skip '.' and '..' entries
-    if (!strcmp(ent->d_name, "." )) { continue; }
-    if (!strcmp(ent->d_name, "..")) { continue; }
+    //if (!strcmp(ent->d_name, "." )) { continue; }
+    //if (!strcmp(ent->d_name, "..")) { continue; }
 
     // Skip if regex does not match
     regmatch_t m;
