@@ -190,6 +190,11 @@ Path::print() {
 // ------------------------------------------------------------------------- //
 char*
 Path::str() {
+  // If this is an empty relative path, just return the '.'
+  if (!absolute && segments -> empty()) {
+    return strdup(".");
+  }
+
   char  buffer[PATH_MAX];
   char *pw = buffer;
 
