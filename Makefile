@@ -27,8 +27,13 @@ endif
 # shell: aliases & additional files                       								    #
 # --------------------------------------------------------------------------- #
 # Aliases
-re:    clean shell
-all:   shell
+all:     shell
+test:    release
+	echo "Not implemented yet."
+force:   clean shell
+release: DEBUG = 0
+release: force
+
 shell: y.tab.o lex.yy.o main.o builtin.o command.o plumber.o env.o globber.o path.o
 	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
 

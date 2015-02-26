@@ -158,6 +158,7 @@ Parser::out_file(char *file, int err, int append) {
     DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", file);
     command -> append = append;
     command -> out = file;
+    if (err) { command -> err = file; }
   }
 }
 
