@@ -48,6 +48,7 @@ public:
   char* str();                 // Returns a string representation of the path.
   char* resolve(Path*);        // Resolves a path relative to another.
   int   isAbsolute();          // Returns the Path::absolute flag.
+  void  setAbsolute(int);      // Sets the Path::absolute flag.
   int   count();               // Returns the number of segments in path
 
   Path* clone();               // Creates a deep copy of the path object.

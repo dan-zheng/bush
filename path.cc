@@ -122,13 +122,17 @@ Path::pushd(const char* segment) {
 
   // If this is a '.', no need to push it at all!
   if (!strcmp(seg, ".")) { /* skip this one */ }
+
   // If this is a '..', pop a directory from back
-  else if (!strcmp(seg, "..") && !segments -> empty()) {
+  else if (!strcmp(seg, "..") &&                 // We must have the '..', and
+           !segments -> empty() &&               // a segment to pop, and
+            strcmp(segments -> back(), "..")) {  // that segment can't be '..'
     char *last = segments -> back();
     segments -> pop_back();
     free(last);
     free(seg);
   }
+
   // So we either really need to push the segment, or we have
   // nothing left to pop.
   else {
@@ -219,6 +223,8 @@ Path::str() {
 // ------------------------------------------------------------------------- //
 // Resolves a path relative to another path.                                 //
 // Does not modify either of paths.                                          //
+// Data returned by this method is not managed by the Path object, therefore //
+// it is up to the caller to free the return value.                          //
 // ------------------------------------------------------------------------- //
 char*
 Path::resolve(Path *base) {
@@ -234,6 +240,15 @@ Path::resolve(Path *base) {
 int
 Path::isAbsolute() {
   return absolute;
+}
+
+// ------------------------------------------------------------------------- //
+// If called with 0 as arguments, makes the path relative.                   //
+// Otherwise, makes the path absolute.                                       //
+// ------------------------------------------------------------------------- //
+void
+Path::setAbsolute(int value) {
+  absolute = value;
 }
 
 // ------------------------------------------------------------------------- //
