@@ -14,54 +14,51 @@
 #ifndef COMMAND_H_
 #define COMMAND_H_
 
+typedef std::vector<char*>          ArgList;
+
 // ------------------------------------------------------------------------- //
 // An atomic executable shell command with its arguments.                    //
 // ------------------------------------------------------------------------- //
 class SimpleCommand {
 public:
-	std::vector<char*>  	 *args;
+  ArgList     *args;
 
-	SimpleCommand();
-	~SimpleCommand();
+  SimpleCommand();
+  ~SimpleCommand();
 
-	void  print();		    // Intended to be called from CompoundCommand::print()
-	int   execute();      // Intended to be called from CompoundCommand::execute()
+  void  print();        // Intended to be called from CompoundCommand::print()
+  int   execute();      // Intended to be called from CompoundCommand::execute()
 
-	void  push(char*);		// Pushes an argument into *args
-	char* first();				// Gets the first argument
-	char* last();					// Gets the last argument
-
-	// Globally accessible SimpleCommand instance
-	static SimpleCommand *current;
+  void  push(char*);    // Pushes an argument into *args
+  char* first();        // Gets the first argument
+  char* last();         // Gets the last argument
 };
+
+typedef std::vector<SimpleCommand*> PartialList;
 
 class CompoundCommand {
 public:
 
-	// SimpleCommands that make up this CompoundCommand
-	std::vector<SimpleCommand*>  *args;
+  PartialList  *args;    // SimpleCommands that make up this CompoundCommand
 
-	int			bg;					   // Flag to indicate whether the process should
-												 // run in background
-	int			append;				 // Flag to indicate whether the output files
-												 // should be overwritten
+  int      bg;           // Flag to indicate whether the process should
+                         // run in background
+  int      append;       // Flag to indicate whether the output files
+                         // should be overwritten
 
-	char	 *in;						 // Path to the input file
-	char	 *out;					 // Path to the output file
-	char	 *err;		       // Path to the error file
+  char   *in;            // Path to the input file
+  char   *out;           // Path to the output file
+  char   *err;           // Path to the error file
 
-	CompoundCommand();
-	~CompoundCommand();
+  CompoundCommand();
+  ~CompoundCommand();
 
-	void  print();         // Prints contents of the command to stdout
-	void  execute(); 			 // Executes the command
-	void  clear();	       // Deletes all contents of the command
+  void  print();         // Prints contents of the command to stdout
+  void  execute();       // Executes the command
+  void  clear();         // Deletes all contents of the command
 
-	void           push(SimpleCommand*);  // Pushes a SimpleCommand into *args
-	SimpleCommand* first();               // Gets the first SimpleCommand
-
-	// Globally accessible CompoundCommand instance
-	static CompoundCommand *current;
+  void           push(SimpleCommand*);  // Pushes a SimpleCommand into *args
+  SimpleCommand* first();               // Gets the first SimpleCommand
 };
 
 #endif

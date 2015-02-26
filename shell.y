@@ -1,62 +1,42 @@
-
-/*
- * CS-252 Spring 2015
- * shell.y: parser for shell
- *
- * This parser compiles the following grammar:
- *
- *	cmd [arg]* [> filename]
- *
- * You must extend it to understand the complete shell grammar.
- * cmd [arg]* [ | cmd [arg]* ]* [ [> filename] [< filename] [ >& filename] [>> filename] [>>& filename] ]* [&]
- *
- */
+// ------------------------------------------------------------------------- //
+//                                                                           //
+// CS252 Lab03 - Shell                                                       //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+//                                                                           //
+// shell.y                                                                   //
+// This file contains grammar rules for the shell commands.                  //
+//                                                                           //
+// ------------------------------------------------------------------------- //
 
 %token	<string_val> WORD
-
-%token 	NOTOKEN LF GT LT AMP GTGT GTAMP GTGTAMP PIPE
+%token  LF
+%token  GT
+%token  LT
+%token  AMP
+%token  GTGT
+%token  PIPE
+%token  GTAMP
+%token  GTGTAMP
+%token 	NOTOKEN
 
 %union	{ char   *string_val; }
 
 %{
-  #include <stdio.h>
-  #include <string.h>
   #include "main.hpp"
-  #include "trace.hpp"
-  #include "command.hpp"
-  #include "path.hpp"
-  #include "globber.hpp"
-  #include "env.hpp"
-
-  void yyerror(const char*);
-  int yylex();
-
-  int error = 0;
 %}
 
 %%
 
-  goal: commands;
+  goal:
+    commands;
 
-  commands: command | commands command;
+  commands:
+    command | commands command;
 
-  command: partials redirects background LF {
-      if (error) {
-        DBG_WARN("Command execution blocked by error.\n");
-        CompoundCommand::current -> clear();
-        error = 0;
-        prompt();
-      } else {
-        DBG_VERBOSE("Yacc: Execute command\n");
-        CompoundCommand::current -> execute();
-        prompt();
-      }
-    }  |
-    LF {
-      if (!error) { prompt(); }
-    } |
-    error LF { yyerrok; }
-  ;
+  command:
+    partials redirects background LF { parser -> execute();           } |
+    error LF                         { yyerrok;                       } |
+    LF                               { parser -> newline();           } ;
 
   // ----------------------------------------------------------------------- //
   // Partial command list                                                    //
@@ -64,7 +44,8 @@
   //   cmd [arg]* [ | cmd [arg]* ]*                                          //
   //                                                                         //
   // ----------------------------------------------------------------------- //
-  partials: partial | partial PIPE partials;
+  partials:
+    partial | partial PIPE partials;
 
   // ----------------------------------------------------------------------- //
   // Partial command                                                         //
@@ -73,17 +54,10 @@
   //                                                                         //
   // ----------------------------------------------------------------------- //
   partial:
-    cmd_word arguments {
-      CompoundCommand::current -> push(SimpleCommand::current);
-    }
-    ;
+    cmd_word arguments               { parser -> partial_end();       } ;
+
   cmd_word:
-    WORD {
-      DBG_VERBOSE("Yacc: Insert command \"%s\"\n", $1);
-      SimpleCommand::current = new SimpleCommand();
-      SimpleCommand::current -> push($1);
-    }
-    ;
+    WORD                             { parser -> partial_make($1);    } ;
 
   // ----------------------------------------------------------------------- //
   // Argument list                                                           //
@@ -93,13 +67,7 @@
   // ----------------------------------------------------------------------- //
   arguments: argument arguments |;
   argument:
-    WORD {
-      Path::unescape($1);
-      if (Env::expand(&$1) || Env::tilde(&$1)) { error = 1; }
-      DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", $1);
-      SimpleCommand::current -> push($1);
-    }
-    ;
+    WORD                             { parser -> partial_arg($1);     } ;
 
   // ----------------------------------------------------------------------- //
   // IO Redirects                                                            //
@@ -115,77 +83,11 @@
   // ----------------------------------------------------------------------- //
   redirects: redirect redirects |;
   redirect:
-  	GT WORD {
-      char *out = CompoundCommand::current -> out;
-      char *err = CompoundCommand::current -> err;
-
-      if (out) {
-        COMPLAIN("Ambiguous output redirect.");
-        error = 1;
-      }
-      else {
-        DBG_VERBOSE("Yacc: Redirect stdout to \"%s\"\n", $2);
-        CompoundCommand::current -> out = $2;
-      }
-  	} |
-    GTGT WORD {
-      char *out = CompoundCommand::current -> out;
-      char *err = CompoundCommand::current -> err;
-
-      if (out) {
-        COMPLAIN("Ambiguous output redirect.");
-        error = 1;
-      }
-      else {
-        DBG_VERBOSE("Yacc: Append stdout to \"%s\"\n", $2);
-        CompoundCommand::current -> append =  1;
-        CompoundCommand::current -> out    = $2;
-      }
-    } |
-    GTAMP WORD {
-      char *out = CompoundCommand::current -> out;
-      char *err = CompoundCommand::current -> err;
-
-      if (out) {
-        COMPLAIN("Ambiguous output redirect.");
-        error = 1;
-      }
-      else {
-        DBG_VERBOSE("Yacc: Redirect stdout and stderr to \"%s\"\n", $2);
-        CompoundCommand::current -> out = $2;
-        CompoundCommand::current -> err = $2;
-      }
-
-    } |
-    GTGTAMP WORD {
-
-      char *out = CompoundCommand::current -> out;
-      char *err = CompoundCommand::current -> err;
-
-      if (out) {
-        COMPLAIN("Ambiguous output redirect.");
-        error = 1;
-      }
-      else {
-        DBG_VERBOSE("Yacc: Append stdout and stderr to \"%s\"\n", $2);
-        CompoundCommand::current -> append =  1;
-        CompoundCommand::current -> out    = $2;
-        CompoundCommand::current -> err    = $2;
-      }
-
-    } |
-    LT WORD {
-
-      if (CompoundCommand::current -> in) {
-        COMPLAIN("Ambiguous input redirect.");
-        error = 1;
-      }
-      else {
-        DBG_VERBOSE("Yacc: Redirect stdin from \"%s\"\n", $2);
-        CompoundCommand::current -> in  = $2;
-      }
-    }
-  	;
+  	GT WORD                           { parser -> out_file($2, 0, 0); } |
+    GTGT WORD                         { parser -> out_file($2, 0, 1); } |
+    GTAMP WORD                        { parser -> out_file($2, 1, 0); } |
+    GTGTAMP WORD                      { parser -> out_file($2, 1, 1); } |
+    LT WORD                           { parser -> in_file ($2);       } ;
 
   // ----------------------------------------------------------------------- //
   // Background flag                                                         //
@@ -194,20 +96,6 @@
   //                                                                         //
   // ----------------------------------------------------------------------- //
   background:
-    AMP {
-      DBG_VERBOSE("Yacc: Enabling command backround flag\n");
-      CompoundCommand::current -> bg = 1;
-    } |
-    /* empty */
-    ;
+    AMP                              { parser -> background();        } |
+                                       /* DELIBERATELY LEFT EMPTY */    ;
 %%
-
-void yyerror(const char *s) {
-  COMPLAIN("%s", s);
-  CompoundCommand::current -> clear();
-  prompt();
-}
-
-#if 0
-  main() { yyparse(); }
-#endif

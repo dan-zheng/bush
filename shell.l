@@ -1,55 +1,49 @@
-
-/*
- *
- * CS-252 Spring 2015
- * shell.l: lexical analyzer for shell
- * You have to extend it.
- *
- * cmd [arg]* [ | cmd [arg]* ]* [ [> filename] [< filename] [ >& filename] [>> filename] [>>& filename] ]* [&]
- */
+/* ------------------------------------------------------------------------- //
+//                                                                           //
+// CS252 Lab03 - Shell                                                       //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+//                                                                           //
+// shell.l                                                                   //
+// This file contains lexical analysis rules for the shell commands.         //
+//                                                                           //
+// ------------------------------------------------------------------------- */
 
 %{
 
 #include <string.h>
+#include "path.hpp"
 #include "y.tab.h"
-
-static void yyunput(int, char*);
-
-void myunputc(int c) { unput(c); }
 
 %}
 
-wordchar    ([^ |><\t\n]|\\[^\n\t])
+char        ([^ |><\t\n]|\\[^\n\t])
 
 %%
 
-\n 	        { return LF; }
+\n 	        { return LF;         }
 
-">>&"       { return GTGTAMP; }
+">>&"       { return GTGTAMP;    }
 
-">>"        { return GTGT; }
+">>"        { return GTGT;       }
 
-">&"        { return GTAMP; }
+">&"        { return GTAMP;      }
 
-">"         { return GT; }
+">"         { return GT;         }
 
-"<"         { return LT; }
+"<"         { return LT;         }
 
-"&"         { return AMP; }
+"&"         { return AMP;        }
 
-"|"         { return PIPE; }
+"|"         { return PIPE;       }
 
-\"[^\"]*\"      {
-              yylval.string_val = strdup(yytext + 1);
-              if (yylval.string_val[yyleng - 2] == '"') {
-                yylval.string_val[yyleng - 2] = 0;
-              }
+[ \t] 	    { /* discard */      }
+
+\"[^\"]*\"  {
+              yylval.string_val = Path::trim(yytext, '"');
               return WORD;
             }
 
-[ \t] 	    { /* discard */ }
-
-{wordchar}{wordchar}* {
-	yylval.string_val = strdup(yytext);
-	return WORD;
-}
+{char}+     {
+            	yylval.string_val = strdup(yytext);
+            	return WORD;
+            }

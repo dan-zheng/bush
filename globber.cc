@@ -3,23 +3,25 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <errno.h>
+#include "trace.hpp"
+#include "command.hpp"
 #include "globber.hpp"
 
 Globber::Globber(const char* pattern) {
-  matches = new Queue();
+  matches = new MatchList();
   glob    = new Path(pattern);
 
   // If pattern is an absolute path, the root should be '/'
   // otherwise, the root is current directory.
   root    = glob -> isAbsolute() ? new Path("/") : Globber::cwd();
   // Push root directory into the queue
-  matches -> push(new Path());
+  matches -> push_back(new Path());
 }
 
 Globber::~Globber() {
   while (!matches -> empty()) {
     Path *p = matches -> front();
-    matches -> pop();
+    matches -> pop_front();
     delete p;
   }
   delete matches;
@@ -38,8 +40,17 @@ Globber::run() {
 }
 
 void
+Globber::output(ArgList *args) {
+  MatchList::iterator it = matches -> begin();
+  for (; it != matches -> end(); ++it) {
+    (*it) -> setAbsolute(glob -> isAbsolute());
+    args -> push_back((*it) -> str());
+  }
+}
+
+void
 Globber::glob_segment(char* segment) {
-  Queue *iteration = new Queue();
+  MatchList *iteration = new MatchList();
 
   // If the segment is a glob pattern, convert to regex and match it
   if (strstr(segment, "*") || strstr(segment, "?")) {
@@ -50,7 +61,7 @@ Globber::glob_segment(char* segment) {
     // For each match out there...
     while (!matches -> empty()) {
       Path *match = matches -> front();
-      matches -> pop();
+      matches -> pop_front();
       glob_regex(match, regex, iteration);
       delete match;
     }
@@ -62,7 +73,7 @@ Globber::glob_segment(char* segment) {
   else {
     while (!matches -> empty()) {
       Path *match = matches -> front();
-      matches -> pop();
+      matches -> pop_front();
       glob_single(match, segment, iteration);
     }
   }
@@ -73,12 +84,15 @@ Globber::glob_segment(char* segment) {
 }
 
 void
-Globber::glob_single(Path *match, char *segment, Queue *iteration) {
+Globber::glob_single(Path *match, char *segment, MatchList *iteration) {
   // Push in current glob segment
   match -> pushd(segment);
+  match -> print();
 
   // Compute the absolute path of the match
   char *full_path  = match -> resolve(root);
+
+  DBG_VERBOSE("Globber::glob_single(): full-path: %s\n", full_path);
 
   // Check whether the match exists
   DirStat d_stat;
@@ -90,13 +104,15 @@ Globber::glob_single(Path *match, char *segment, Queue *iteration) {
   free(full_path);
 
   // Push the match into iteration queue
-  iteration -> push(match -> print());
+  iteration -> push_back(match);
 }
 
 void
-Globber::glob_regex(Path *match, Regex *regex, Queue *iteration) {
+Globber::glob_regex(Path *match, Regex *regex, MatchList *iteration) {
   // Compute full path of this match
   char *full_match = match -> resolve(root);
+
+  DBG_VERBOSE("Globber::glob_regex(): full-match: %s\n", full_match);
 
   // Open the matching directory for file listing
   // Bail if cannot open the directory
@@ -121,7 +137,7 @@ Globber::glob_regex(Path *match, Regex *regex, Queue *iteration) {
     if (regexec(regex, ent->d_name, 1, &m, 0)) { continue; }
 
     // Compute the full path of the sub-match
-    Path *submatch = match -> clone() -> pushd(ent -> d_name) -> print();
+    Path *submatch = match -> clone() -> pushd(ent -> d_name);
     char *sub_path = submatch -> resolve(root);
 
     // Get stats to determine whether this is a directory
@@ -141,7 +157,7 @@ Globber::glob_regex(Path *match, Regex *regex, Queue *iteration) {
     }
 
     // Push the match into iteration queue
-    iteration -> push(submatch);
+    iteration -> push_back(submatch);
   }
 }
 

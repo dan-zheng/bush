@@ -40,6 +40,8 @@ SimpleCommand::SimpleCommand() {
 // SimpleCommand destructor.                                                 //
 // ------------------------------------------------------------------------- //
 SimpleCommand::~SimpleCommand() {
+	ArgList::iterator it = args -> begin();
+	for (; it != args -> end(); ++it) { free(*it); }
 	delete args;
 }
 
@@ -141,6 +143,11 @@ CompoundCommand::CompoundCommand() {
 	in     = NULL;
 	out    = NULL;
 	err    = NULL;
+}
+
+CompoundCommand::~CompoundCommand() {
+	PartialList::iterator it = args -> begin();
+	for (; it != args -> end(); ++it) { delete *it; }
 }
 
 // ------------------------------------------------------------------------- //

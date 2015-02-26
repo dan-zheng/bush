@@ -10,6 +10,7 @@
 // ------------------------------------------------------------------------- //
 
 #include <stdlib.h>
+#include <vector>
 #include <map>
 
 #include "env.hpp"
@@ -87,6 +88,17 @@ void
 __debug(char* args[]) {
   Globber *g = new Globber(args[1]);
   g -> run();
+
+  std::vector<char*> *result = new std::vector<char*>();
+  g -> output(result);
+
+  std::vector<char*>::iterator it = result -> begin();
+  for (; it != result -> end(); ++it) {
+    printf("%s\n", *it);
+    free(*it);
+  }
+
+  delete result;
   delete g;
 
 }
