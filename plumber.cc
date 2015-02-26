@@ -109,7 +109,6 @@ Plumber::push() {
 
   // Close the input end of output pipe to signify end of stream
   close(_ipipe[1]);
-  close(_ipipe[0]);
 
   // Move output pipe to input pipe
   _ipipe[0] = _opipe[0];
