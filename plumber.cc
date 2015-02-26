@@ -105,10 +105,11 @@ Plumber::clear() {
 // ------------------------------------------------------------------------- //
 void
 Plumber::push() {
-  DBG_VERBOSE("Plubmer::swap()\n");
+  DBG_VERBOSE("Plubmer::push()\n");
 
   // Close the input end of output pipe to signify end of stream
   close(_ipipe[1]);
+  close(_ipipe[0]);
 
   // Move output pipe to input pipe
   _ipipe[0] = _opipe[0];
@@ -175,6 +176,7 @@ Plumber::file(char* in, char* out, char* err, int append) {
   }
 
   // stdout
+  _file[1] = _def[1];
   if (out) {
     DBG_VERBOSE("Plumber::file() : stdout -> %s\n", out);
     _file[1] = open(out, append ? (F_APPEND) : (F_TRUNC), F_FLAGS);
@@ -188,6 +190,7 @@ Plumber::file(char* in, char* out, char* err, int append) {
   // stderr
   // XXX Per project constraints, oes not support redirecting to a file
   // different than stdout. Easy enough to change this, though.
+  _file[2] = _def[2];
   if (err) {
     DBG_VERBOSE("Plumber::file() : stderr -> %s\n", err);
     _file[2] = _file[1];
