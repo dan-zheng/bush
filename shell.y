@@ -83,7 +83,7 @@
   // ----------------------------------------------------------------------- //
   redirects: redirect redirects |;
   redirect:
-  	GT WORD                           { parser -> out_file($2, 0, 0); } |
+    GT WORD                           { parser -> out_file($2, 0, 0); } |
     GTGT WORD                         { parser -> out_file($2, 0, 1); } |
     GTAMP WORD                        { parser -> out_file($2, 1, 0); } |
     GTGTAMP WORD                      { parser -> out_file($2, 1, 1); } |

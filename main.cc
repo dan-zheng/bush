@@ -9,6 +9,7 @@
 // in the shell.y file.                                                      //
 //                                                                           //
 // ------------------------------------------------------------------------- //
+#include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -17,6 +18,7 @@
 #include "main.hpp"
 #include "path.hpp"
 #include "trace.hpp"
+#include "globber.hpp"
 #include "command.hpp"
 #include "builtin.hpp"
 #include "plumber.hpp"
@@ -115,8 +117,17 @@ void
 Parser::partial_arg(char *arg) {
   Path::unescape(arg);
   if (Env::expand(&arg) || Env::tilde(&arg)) { error = 1; }
-  DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", arg);
-  partial -> push(arg);
+  // Glob if it looks like a glob pattern
+  if (strstr(arg, "*") || strstr(arg, "?")) {
+    Globber *g = new Globber(arg);
+    g -> run();
+    g -> output(partial -> args);
+    delete g;
+    free(arg);
+  } else {
+    DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", arg);
+    partial -> push(arg);
+  }
 }
 
 // ------------------------------------------------------------------------- //
