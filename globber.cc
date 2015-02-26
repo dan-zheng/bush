@@ -69,6 +69,11 @@ Globber::output(ArgList *args) {
   delete tmp;
 }
 
+int
+Globber::count() {
+  return matches -> size();
+}
+
 void
 Globber::glob_segment(char* segment) {
   MatchList *iteration = new MatchList();

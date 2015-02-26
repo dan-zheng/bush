@@ -121,9 +121,17 @@ Parser::partial_arg(char *arg) {
   if (strstr(arg, "*") || strstr(arg, "?")) {
     Globber *g = new Globber(arg);
     g -> run();
-    g -> output(partial -> args);
+    // If there are matches, insert them into arguments
+    if (g -> count()) {
+      g -> output(partial -> args);
+      free(arg);
+    }
+    // No matches, so just insert the pattern
+    else {
+      DBG_WARN("Parser::partial_arg(): No wildcard match.\n");
+      partial -> push(arg);
+    }
     delete g;
-    free(arg);
   } else {
     DBG_VERBOSE("Yacc: Insert argument \"%s\"\n", arg);
     partial -> push(arg);
