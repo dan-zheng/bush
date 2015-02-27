@@ -41,7 +41,7 @@ then
       pgray "  $testname"
     }
     function fail    {
-      pred "✘"
+      predf "✘"
       echo "  $testname"
       if [ ! -z $errmessage ]; then
         it $errmessage

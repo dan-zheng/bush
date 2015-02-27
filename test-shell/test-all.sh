@@ -14,6 +14,7 @@ source ./test-ctrlc.sh
 source ./test-misc.sh
 source ./test-subsh.sh
 source ./test-tilde.sh
+source ./test-bug.sh
 
 total=`expr $grade1 + $grade2 + $grade3 + $grade4 + $grade5 + \
         $grade6 + $grade7 + $grade8 + $grade9 + $grade10 + \
@@ -38,6 +39,9 @@ function report_row() {
   fi
 }
 
+echo
+echo
+report_row "Previously Fixed Issues" $grade_bug $grade_bug_max
 echo
 echo
 report_row "IO Redirection"          $grade1  $grade1max

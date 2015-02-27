@@ -178,6 +178,7 @@ Globber::glob_regex(Path *match, Regex *regex, MatchList *iteration) {
 
     // If this is a file, and we still have unprocessed segments, no match
     if (glob -> count() && !S_ISDIR(d_stat.st_mode)) {
+      DBG_WARN("Path::glob(): %s: %s\n", sub_path, "Cannot match dirs at this point, skipping.");
       free(submatch);
       continue;
     }
@@ -210,8 +211,8 @@ Globber::toRegex(const char *glob) {
       pos += 2;
     }
     else {
-      result -> replace(pos, 1, "[^.].*");
-      pos += 6;
+      result -> replace(pos, 1, "([^.]*|[^.].*)");
+      pos += 14;
     }
   }
   pos = 0;
