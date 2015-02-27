@@ -9,7 +9,6 @@
 #include "globber.hpp"
 #include "subshell.hpp"
 
-
 char *Subshell::me;
 
 void
