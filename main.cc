@@ -22,6 +22,7 @@
 #include "command.hpp"
 #include "builtin.hpp"
 #include "plumber.hpp"
+#include "subshell.hpp"
 
 #ifndef OS_X
 #include "lib/tty.h"
@@ -140,6 +141,29 @@ Parser::partial_arg(char *arg) {
 }
 
 // ------------------------------------------------------------------------- //
+// Pushes a subshell into the partial.                                       //
+// ------------------------------------------------------------------------- //
+void
+Parser::subshell_arg(char *arg) {
+  DBG_VERBOSE("Parser::subshell_arg(): %s\n", arg);
+  char *output = Subshell::run(arg);
+  // Split arguments
+  char *ps = output,
+       *pe = output;
+  while (*pe) {
+    if (*pe == '\n') {
+      char *one = strndup(ps, pe - ps);
+      partial -> push(one);
+      ps = pe + 1;
+    }
+    pe++;
+  }
+  if (pe) { partial -> push(strdup(pe)); }
+
+  free(output);
+}
+
+// ------------------------------------------------------------------------- //
 // Specifies input file redirection (more specifically, `< filename`).       //
 // ------------------------------------------------------------------------- //
 void
@@ -212,6 +236,7 @@ prompt(void) {
 int
 main(int argc, char **argv) {
 
+
   // Handle signals if feature level is above FL_PART3
   #if FEATURE_LEVEL >= FL_PART3
   sigset(SIGINT,  signal);
@@ -238,7 +263,8 @@ main(int argc, char **argv) {
     DBG_ERR_N("\n\n");
   }
 
-  // Initialize Plumber and BuiltIn
+  // Initialize the shell
+  Subshell::init(argv[0]);
   Plumber::capture();
   BuiltIn::init();
   parser = new Parser();
@@ -246,5 +272,9 @@ main(int argc, char **argv) {
   // Do the YACC magic...
   prompt();
   yyparse();
+
+  // Clean up
+  delete parser;
+
   return 0;
 }

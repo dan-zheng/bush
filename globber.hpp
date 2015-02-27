@@ -23,7 +23,6 @@ private:
   void   glob_regex(Path*, Regex*, MatchList*);
   void   glob_single(Path*, char*, MatchList*);
 
-  static Path*  cwd();
   static Regex* toRegex(const char*);
 
 public:
@@ -34,6 +33,8 @@ public:
   void run();
   void output(ArgList*);
   int  count();
+
+  static Path*  cwd();
 };
 
 #endif

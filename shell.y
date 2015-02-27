@@ -9,6 +9,7 @@
 // ------------------------------------------------------------------------- //
 
 %token	<string_val> WORD
+%token  <string_val> SUBSHELL
 %token  LF
 %token  GT
 %token  LT
@@ -67,7 +68,8 @@
   // ----------------------------------------------------------------------- //
   arguments: argument arguments |;
   argument:
-    WORD                             { parser -> partial_arg($1);     } ;
+    WORD                             { parser -> partial_arg($1);     } |
+    SUBSHELL                         { parser -> subshell_arg($1);    } ;
 
   // ----------------------------------------------------------------------- //
   // IO Redirects                                                            //

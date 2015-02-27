@@ -38,6 +38,11 @@ char        ([^ |><\t\n]|\\[^\n\t])
 
 [ \t] 	    { /* discard */      }
 
+\`.*\`   {
+              yylval.string_val = Path::trim(yytext, '`');
+              return SUBSHELL;
+            }
+
 \"[^\"]*\"  {
               yylval.string_val = Path::trim(yytext, '"');
               return WORD;

@@ -36,6 +36,7 @@ public:
   void partial_end();                // Pushes the partial into the command.
   void partial_make(char*);          // Creates a partial.
   void partial_arg(char*);           // Pushes an argument into the partial.
+  void subshell_arg(char*);          // Pushes a subshell into the partial.
 
   void in_file(char*);               // Specifies input file redirection.
   void out_file(char*, int, int);    // Specifies output file redirection.

@@ -14,7 +14,7 @@
 ### Part 3
  - [x] Ctrl-C
  - [x] `printenv`
- - [ ] Wildcard Expansion
+ - [x] Wildcard Expansion
  - [ ] Zombie Processes
  - [x] `setenv`
  - [x] `unsetenv`
@@ -25,4 +25,7 @@
  - [x] Tilde Expansion
  - [x] Prompt only in TTY
  - [ ] Link LibTTY
- - [ ] Subshell
+ - [x] Subshell
+
+### Part 4
+ - [ ] FIZ Integration
