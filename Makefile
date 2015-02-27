@@ -19,10 +19,19 @@ CCFLAGS  = -g $(CFLAGS) -DDEBUG=$(DEBUG) -DFEATURE_LEVEL=$(FEATURES)
 
 # OS detection, since -lfl on OS X is -ll
 UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
 ifeq ($(UNAME_S),Darwin)
 	LFL = -ll
 	CCFLAGS += -DOS_X
 endif
+
+ifeq ($(UNAME_S),Linux)
+ifeq ($(UNAME_M),x86_64)
+	CCFLAGS += -DLTTY_A_
+	LFL += lib/libtty.a
+endif
+endif
+
 
 # --------------------------------------------------------------------------- #
 # shell: aliases & additional files                       								    #
