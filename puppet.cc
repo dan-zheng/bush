@@ -1,3 +1,14 @@
+// ------------------------------------------------------------------------- //
+//                                                                           //
+// CS252 Lab03 - Shell                                                       //
+// Copyright © 2015 Denis Luchkin-Zhou                                       //
+//                                                                           //
+// puppet.cc                                                                 //
+// This file contains the logic for the Puppet class that executes any       //
+// program in a child process, while providing an interface for parent       //
+// to access its exit status and read its output.                            //
+//                                                                           //
+// ------------------------------------------------------------------------- //
 #include <string>
 #include <errno.h>
 #include <stdlib.h>
@@ -8,19 +19,26 @@
 #include "plumber.hpp"
 #include "globber.hpp"
 #include "puppet.hpp"
+#include "command.hpp"
 
-Path *Puppet::root;
+// Forward declarations
+Path *Puppet::_root;
+Path *Puppet::_self;
 
+// ------------------------------------------------------------------------- //
+// Constructor. Creates a puppet instance from an executable path.           //
+// ------------------------------------------------------------------------- //
 Puppet::Puppet(const char* exe) {
-  if (!Puppet::root) {
+  if (!Puppet::_root) {
     PANIC("You must call Puppet::init() first!\n");
   }
 
   finalized = false;
+  _status   = -1;
 
   // Compute executable path
   Path *path = new Path(exe);
-  executable = path -> resolve(Puppet::root);
+  executable = path -> resolve(Puppet::_root);
   delete path;
 
   // Create pipes
@@ -37,30 +55,36 @@ Puppet::Puppet(const char* exe) {
   def[2] = dup(2);
 }
 
+// ------------------------------------------------------------------------- //
+// Destructor. Closes read ends of stdout and stderr pipes.                  //
+// ------------------------------------------------------------------------- //
 Puppet::~Puppet() {
   free(executable);
   close(opipe[0]);
   close(epipe[0]);
 }
 
-size_t
-Puppet::write(char *str) {
+// ------------------------------------------------------------------------- //
+// Writes a string to the stdin of the puppet process.                       //
+// Returns pointer to itself for easy chaining.                              //
+// ------------------------------------------------------------------------- //
+Puppet*
+Puppet::write(const char *str) {
   if (finalized) {
     COMPLAIN("puppet: write: Cannot write to a finalized puppet.\n");
-    return 0;
+    _status = -1;
+    return this;
   }
   dprintf(ipipe[1], "%s", str);
+  return this;
 }
 
-size_t
-Puppet::write(char *buffer, size_t count) {
-  if (finalized) {
-    COMPLAIN("puppet: write: Cannot write to a finalized puppet.\n");
-    return 0;
-  }
-  return s_write(ipipe[1], buffer, count);
-}
-
+// ------------------------------------------------------------------------- //
+// Reads entire content of the puppet's stdout or stderr depending on the    //
+// value of `type`. Possible values are IO_OUT or IO_ERR. Does not close     //
+// pipe after reading, but lseeks to the beginning. Blocks until the puppet  //
+// closes the pipe that is being read from.                                  //
+// ------------------------------------------------------------------------- //
 char*
 Puppet::read(int type) {
   // Figure out which stream to read
@@ -77,7 +101,7 @@ Puppet::read(int type) {
 
   // Read the entire buffer
   int count;
-  while ((count = s_read(fd, buffer, PUPPET_BUFFER_SIZE))) {
+  while ((count = ::read(fd, buffer, PUPPET_BUFFER_SIZE))) {
     temp -> append(buffer, count);
   }
 
@@ -92,23 +116,38 @@ Puppet::read(int type) {
   return result;
 }
 
-size_t
-Puppet::read(int type, char *buffer, size_t count) {
-  // Figure out which stream to read
-  int fd;
-  switch (type) {
-    case IO_OUT: fd = opipe[0]; break;
-    case IO_ERR: fd = epipe[0]; break;
-    default: COMPLAIN("puppet: read: bad stream type [%d]", type);
+// ------------------------------------------------------------------------- //
+// Reads entire content of the puppet's stdout, splits it by likes and       //
+// pushes them into a SimpleCommand as arguments.                            //
+// ------------------------------------------------------------------------- //
+int
+Puppet::readTo(SimpleCommand *partial) {
+  char *output = read(IO_OUT);
+  char *ps = output,
+       *pe = output;
+  while (*pe) {
+    if (*pe == '\n') {
+      char *one = strndup(ps, pe - ps);
+      partial -> push(one);
+      ps = pe + 1;
+    }
+    pe++;
   }
-  return s_read(fd, buffer, count);
+  if (pe) { partial -> push(strdup(pe)); }
+  free(output);
+  return _status;
 }
 
-int
+// ------------------------------------------------------------------------- //
+// Executes the puppet program. Takes care of piping and forking.            //
+// Returns pointer to itself for easy chaining.                              //
+// ------------------------------------------------------------------------- //
+Puppet*
 Puppet::run() {
   if (finalized) {
     COMPLAIN("puppet: finalized: Cannot run a finalized puppet.");
-    return -1;
+    _status = -1;
+    return this;
   }
 
   // Prevent repeated execution
@@ -121,7 +160,8 @@ Puppet::run() {
   int pid = fork();
   if (pid == -1) {
     COMPLAIN("puppet: fork: %s", strerror(errno));
-    return -1;
+    _status = -1;
+    return this;
   }
 
   // Redirect IO
@@ -136,6 +176,7 @@ Puppet::run() {
   if (pid == 0) {
     execlp(executable, executable, NULL);
     COMPLAIN("puppet: exec: %s", strerror(errno));
+    exit(EXIT_FAILURE);
   }
 
   // Restore IO
@@ -151,13 +192,44 @@ Puppet::run() {
   close(opipe[1]);
   close(epipe[1]);
 
-  // Wait for process to exit and return its exit status
-  int status;
-  if (pid != -1) { waitpid(pid, &status, 0); }
-  return status;
+  // Wait for process to exit and return its exit _status
+  if (pid != -1) { waitpid(pid, &_status, 0); }
+  return this;
 }
 
+// ------------------------------------------------------------------------- //
+// Returns the exit status of the puppet process.                            //
+// ------------------------------------------------------------------------- //
+int
+Puppet::status() {
+  return _status;
+}
+
+// ------------------------------------------------------------------------- //
+// Initializes the path resolution mechanism of the Puppet.                  //
+// Essentially, it will set cwd() as the root path for the resolution.       //
+// ------------------------------------------------------------------------- //
 void
-Puppet::init() {
-  Puppet::root  = Globber::cwd();
+Puppet::init(char *path) {
+  Puppet::_self = new Path(path);
+  if (Puppet::_self -> isAbsolute()) {
+    // CWD cannot be used as root here
+    Puppet::_root = Puppet::_self -> clone() -> pushd("..");
+  }
+  else {
+    // Relative path, so CWD can be used as root
+    Puppet::_root = Globber::cwd() -> push(Puppet::_self) -> pushd("..");
+  }
+  printf("root = %s\n", Puppet::_root -> str());
+}
+
+// ------------------------------------------------------------------------- //
+// Creates an puppet instance of the parent process.                         //
+// ------------------------------------------------------------------------- //
+Puppet*
+Puppet::self() {
+  char *path = Puppet::_self -> str();
+  Puppet *p = new Puppet(pathm);
+  free(path);
+  return p;
 }

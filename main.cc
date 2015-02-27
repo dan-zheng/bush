@@ -19,11 +19,11 @@
 #include "main.hpp"
 #include "path.hpp"
 #include "trace.hpp"
+#include "puppet.hpp"
 #include "globber.hpp"
 #include "command.hpp"
 #include "builtin.hpp"
 #include "plumber.hpp"
-#include "subshell.hpp"
 
 #ifdef LTTY_A_
 #include "lib/tty.h"
@@ -148,21 +148,9 @@ Parser::partial_arg(char *arg) {
 void
 Parser::subshell_arg(char *arg) {
   DBG_VERBOSE("Parser::subshell_arg(): %s\n", arg);
-  char *output = Subshell::run(arg);
-  // Split arguments
-  char *ps = output,
-       *pe = output;
-  while (*pe) {
-    if (*pe == '\n') {
-      char *one = strndup(ps, pe - ps);
-      partial -> push(one);
-      ps = pe + 1;
-    }
-    pe++;
-  }
-  if (pe) { partial -> push(strdup(pe)); }
-
-  free(output);
+  Puppet *p = Puppet::self();
+  p -> write(arg) -> write("\n") -> run() -> readTo(partial);
+  delete p;
 }
 
 // ------------------------------------------------------------------------- //
@@ -170,8 +158,18 @@ Parser::subshell_arg(char *arg) {
 // ------------------------------------------------------------------------- //
 void
 Parser::fiz_arg(char *arg) {
-  printf(YELLOW("FIZ script integration not implemented yet.\n"));
-  error = 1;
+  Puppet *puppet = new Puppet("fiz");
+  int status = puppet -> write(arg) -> run() -> readTo(partial);
+  if (puppet -> status()) {
+    char *err = puppet -> read(IO_ERR);
+    COMPLAIN("fiz: %s\n", err);
+    delete puppet;
+    free(err);
+    error = 1;
+    return;
+  }
+
+  delete puppet;
 }
 
 // ------------------------------------------------------------------------- //
@@ -226,7 +224,9 @@ signal(int n) {
       int pid = wait3(&status, WNOHANG, NULL);
       if (pid != -1) {
         kill(getpid(), n);
+        #ifndef OS_X
         if (isatty(0)) { printf("[%d] exited.\n", pid); }
+        #endif
       }
     }
 
@@ -314,7 +314,7 @@ main(int argc, char **argv) {
   }
 
   // Initialize the shell
-  Subshell::init(argv[0]);
+  Puppet::init(argv[0]);
   Plumber::capture();
   BuiltIn::init();
   parser = new Parser();
