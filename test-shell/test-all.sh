@@ -38,11 +38,11 @@ function report_row() {
     pred "  $1    ($2 / $3)"
   fi
 }
-
+clear
 echo
+echo $'\e[4;37m'"                     TEST REPORT                    "$'\e[0m'
 echo
 report_row "Previously Fixed Issues" $grade_bug $grade_bug_max
-echo
 echo
 report_row "IO Redirection"          $grade1  $grade1max
 report_row "Pipes"                   $grade2  $grade2max

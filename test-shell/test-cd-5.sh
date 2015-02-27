@@ -1,10 +1,10 @@
 #!/bin/bash
 
 source ./utils.sh
-it "CD-05: cd /etc"
+it "CD-05: cd ~"
 
 rm -f $CSH_OUT $BUSH_OUT
-echo "cd /etc" > $BUSH_IN
+echo "cd ~" > $BUSH_IN
 echo "pwd" >> $BUSH_IN
 
 /bin/sh < $BUSH_IN > $CSH_OUT 2>&1
