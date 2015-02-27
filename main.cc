@@ -217,7 +217,7 @@ signal(int n) {
       int pid = wait3(&status, WNOHANG, NULL);
       if (pid != -1) {
         kill(getpid(), n);
-        printf("[%d] exited.\n", pid);
+        if (isatty(0)) { printf("[%d] exited.\n", pid); }
       }
     }
 
