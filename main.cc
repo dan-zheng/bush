@@ -25,7 +25,7 @@
 #include "plumber.hpp"
 #include "subshell.hpp"
 
-#ifndef OS_X
+#ifdef LTTY_A_
 #include "lib/tty.h"
 #endif
 
@@ -166,6 +166,15 @@ Parser::subshell_arg(char *arg) {
 }
 
 // ------------------------------------------------------------------------- //
+// Pushes a FIZ script into the partial.                                     //
+// ------------------------------------------------------------------------- //
+void
+Parser::fiz_arg(char *arg) {
+  printf(YELLOW("FIZ script integration not implemented yet.\n"));
+  error = 1;
+}
+
+// ------------------------------------------------------------------------- //
 // Specifies input file redirection (more specifically, `< filename`).       //
 // ------------------------------------------------------------------------- //
 void
@@ -243,12 +252,29 @@ prompt(void) {
   fflush(stdout);
 }
 
+void cleanup() {
+
+  #ifdef LTTY_A_
+
+  ttyteardown();
+
+  #endif
+
+}
+
 // ------------------------------------------------------------------------- //
 // main() function for the shell.                                            //
 // ------------------------------------------------------------------------- //
 int
 main(int argc, char **argv) {
 
+  atexit(cleanup);
+
+  #ifdef LTTY_A_
+
+  ttyinit(SH_NAME, ".bush_history");
+
+  #endif
 
   // Handle signals if feature level is above FL_PART3
   #if FEATURE_LEVEL >= FL_PART3

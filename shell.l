@@ -14,41 +14,74 @@
 #include "path.hpp"
 #include "y.tab.h"
 
+#ifdef LTTY_A_
+
+  #include <errno.h>
+  #include <stdlib.h>
+  #include <unistd.h>
+  #include <signal.h>
+  #include <sys/wait.h>
+  #include "lib/tty.h"
+
+  static
+  void yyunput(int, char*);
+  void myunputc(int c) { unput(c); }
+
+  int read(FILE *f) {
+    static char *pr;
+    if (!isatty(0)) { return getc(f); }
+    if (!pr || !*pr) { pr = ttygetline(TTY_MAX_LINEBUFFER); }
+    return *pr++;
+  }
+
+  #undef getc
+  #define getc(f) read(f)
+
+#endif
+
 %}
 
-char        ([^ |><\t\n]|\\[^\n\t])
+char                         ([^ |><\t\n]|\\[^\n\t])
+fizchar                      ([^\[\]])
 
 %%
 
-\n 	        { return LF;         }
+\n 	                         { return LF;         }
 
-">>&"       { return GTGTAMP;    }
+">>&"                        { return GTGTAMP;    }
 
-">>"        { return GTGT;       }
+">>"                         { return GTGT;       }
 
-">&"        { return GTAMP;      }
+">&"                         { return GTAMP;      }
 
-">"         { return GT;         }
+">"                          { return GT;         }
 
-"<"         { return LT;         }
+"<"                          { return LT;         }
 
-"&"         { return AMP;        }
+"&"                          { return AMP;        }
 
-"|"         { return PIPE;       }
+"|"                          { return PIPE;       }
 
-[ \t] 	    { /* discard */      }
+[ \t] 	                     { /* discard */      }
 
-\`.*\`   {
-              yylval.string_val = Path::trim(yytext, '`');
-              return SUBSHELL;
-            }
+\[\[{fizchar}*\]\]           {
+                               char *tmp = Path::trim(yytext, '[');
+                               yylval.string_val = Path::trim(tmp, ']');
+                               free(tmp);
+                               return FIZ;
+                             }
 
-\"[^\"]*\"  {
-              yylval.string_val = Path::trim(yytext, '"');
-              return WORD;
-            }
+\`.*\`                       {
+                               yylval.string_val = Path::trim(yytext, '`');
+                               return SUBSHELL;
+                             }
 
-{char}+     {
-            	yylval.string_val = strdup(yytext);
-            	return WORD;
-            }
+\"[^\"]*\"                   {
+                               yylval.string_val = Path::trim(yytext, '"');
+                               return WORD;
+                             }
+
+{char}+                      {
+                               yylval.string_val = strdup(yytext);
+                               return WORD;
+                             }

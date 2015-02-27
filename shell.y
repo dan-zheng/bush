@@ -8,6 +8,7 @@
 //                                                                           //
 // ------------------------------------------------------------------------- //
 
+%token  <string_val> FIZ
 %token	<string_val> WORD
 %token  <string_val> SUBSHELL
 %token  LF
@@ -69,7 +70,8 @@
   arguments: argument arguments |;
   argument:
     WORD                             { parser -> partial_arg($1);     } |
-    SUBSHELL                         { parser -> subshell_arg($1);    } ;
+    SUBSHELL                         { parser -> subshell_arg($1);    } |
+    FIZ                              { parser -> fiz_arg($1);         } ;
 
   // ----------------------------------------------------------------------- //
   // IO Redirects                                                            //

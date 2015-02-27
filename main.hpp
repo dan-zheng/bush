@@ -38,6 +38,7 @@ public:
   void partial_make(char*);          // Creates a partial.
   void partial_arg(char*);           // Pushes an argument into the partial.
   void subshell_arg(char*);          // Pushes a subshell into the partial.
+  void fiz_arg(char*);               // Pushes a FIZ script into the partial.
 
   void in_file(char*);               // Specifies input file redirection.
   void out_file(char*, int, int);    // Specifies output file redirection.
