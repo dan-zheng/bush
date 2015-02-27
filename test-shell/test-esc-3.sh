@@ -1,16 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "ESC-03: touch \"hello world.tmp.txt\""
 
-rm -f csh-out shell-out "hello world"
+rm -f $CSH_OUT $BUSH_OUT "hello world.tmp.txt"
 
-pgray "ESC-03: touch \"hello world\""
-echo "touch \"hello world\"" > shell-in
-echo "ls" >>  shell-in
+echo "touch \"hello world.tmp.txt\"" > $BUSH_IN
+echo "ls" >>  $BUSH_IN
 
-$SHELL < shell-in > shell-out 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-if [ ! -f "hello world" ]; then
+if [ ! -f "hello world.tmp.txt" ]; then
   fail
 fi
 succeed

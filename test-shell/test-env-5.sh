@@ -1,18 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 source ./utils.sh
+it "ENV-05: Enviroment variable expansion"
 
-rm -f csh-out shell-out
-pgray "ENV-05: Enviroment variable expansion"
-echo "setenv A hello" > shell-in
-echo "setenv B world" >> shell-in
-echo "echo \${A} \${B}" >> shell-in
-echo "A=hello" > csh-in
-echo "B=world" >> csh-in
-echo "echo \${A} \${B}" >> csh-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "setenv A hello" > $BUSH_IN
+echo "setenv B world" >> $BUSH_IN
+echo "echo \${A} \${B}" >> $BUSH_IN
+echo "A=hello" > $CSH_IN
+echo "B=world" >> $CSH_IN
+echo "echo \${A} \${B}" >> $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-$SHELL < shell-in > shell-out
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

@@ -1,18 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "ESC-01: cd; echo lll \">\" "
 
-rm -f csh-out shell-out
-pgray "ESC-01: cd; echo lll \">\" "
-echo "cd" > shell-in
-echo "echo lll \">\"" >> shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "cd" > $BUSH_IN
+echo "echo lll \">\"" >> $BUSH_IN
 
-echo "cd" >  csh-in
-echo "echo lll \">\"" >> csh-in
+echo "cd" >  $CSH_IN
+echo "echo lll \">\"" >> $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

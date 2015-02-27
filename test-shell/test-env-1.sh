@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "ENV-01: Enviroment: Set variable"
 
-rm -f shell-out
-pgray "ENV-01: Enviroment: Set variable"
-echo "setenv aaa bbbb" > shell-in
-echo "printenv" >> shell-in
+rm -f $BUSH_OUT
+echo "setenv aaa bbbb" > $BUSH_IN
+echo "printenv" >> $BUSH_IN
 
-$SHELL < shell-in > shell-out
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-grep aaa=bbbb shell-out > out 2>&1
+grep aaa=bbbb $BUSH_OUT > out.tmp.txt 2>&1
 check $?
 succeed

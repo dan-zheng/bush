@@ -1,17 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "SUBSH-01: test subshell"
 
-pgray "SUBSH-01: test subshell"
+filelist=filelist.tmp.txt
 
-echo "ls test3* > file-list " > shell-in
-echo "ls -al \`cat file-list\` " >> shell-in
-$SHELL < shell-in > shell-out
+echo "ls test3* > $filelist " > $BUSH_IN
+echo "ls -al \`cat $filelist\` " >> $BUSH_IN
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-echo "ls test3* > file-list" > csh-in
-echo "ls -al \`cat file-list\` " >> csh-in
-/bin/sh < csh-in > csh-out
+echo "ls test3* > $filelist" > $CSH_IN
+echo "ls -al \`cat $filelist\` " >> $CSH_IN
+/bin/sh < $CSH_IN > $CSH_OUT
 
-diff csh-out shell-out > /dev/null 2>&1
+diff $CSH_OUT $BUSH_OUT > /dev/null 2>&1
 check $?
 succeed

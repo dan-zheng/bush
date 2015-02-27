@@ -1,24 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "IO-05: ls notfound >& err..."
 
-rm -f csh-out shell-out
-pgray "IO-05: ls notfound >& err..."
-echo "/bin/ls notfound >& err1" > shell-in
-echo "/bin/ls notfound > err2 2>&1" > csh-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "/bin/ls notfound >& $CSH_ERR" > $BUSH_IN
+echo "/bin/ls notfound > $BUSH_ERR 2>&1" > $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-../shell < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+../shell < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff err1 err2
+diff $CSH_ERR $BUSH_ERR
 check $?
 
-echo "ls notfound >>& err1" > shell-in
-echo "ls notfound >> err2 2>&1" > csh-in
+echo "ls notfound >>& $CSH_ERR" > $BUSH_IN
+echo "ls notfound >> $BUSH_ERR 2>&1" > $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-../shell < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+../shell < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff err1 err2
+diff $CSH_ERR $BUSH_ERR
 check $?
 succeed

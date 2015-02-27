@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "IO-03: Error redirection..."
 
-rm -f err1 err2
-rm -f csh-out shell-out
-pgray "IO-03: Error redirection..."
-echo "ls /none >& err1" > shell-in
-echo "ls /none >err2 2>&1" > csh-in
-/bin/sh < csh-in > csh-out
-$SHELL < shell-in > shell-out
+rm -f $CSH_ERR $BUSH_ERR
+rm -f $CSH_OUT $BUSH_OUT
+echo "ls /none >& $CSH_ERR" > $BUSH_IN
+echo "ls /none >$BUSH_ERR 2>&1" > $CSH_IN
+/bin/sh < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff err1 err2
+diff $CSH_ERR $BUSH_ERR
 check $?
 succeed

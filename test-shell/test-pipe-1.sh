@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "PIPE-01: 2 Pipes"
 
-rm -f csh-out shell-out
-pgray "PIPE-01: 2 Pipes"
-echo "cat file1.cc | grep malloc" > shell-in
-/bin/sh < shell-in > csh-out
-$SHELL < shell-in > shell-out
+rm -f $CSH_OUT $BUSH_OUT
+echo "cat file1.cc | grep malloc" > $BUSH_IN
+/bin/sh < $BUSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

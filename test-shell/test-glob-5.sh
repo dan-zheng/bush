@@ -1,20 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "GLOB-05: cd; echo *"
 
-rm -f csh-out shell-out
-pgray "GLOB-05: cd; echo *"
-echo "cd" > shell-in
-echo "echo *" >> shell-in
-echo "echo .*" >> shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "cd" > $BUSH_IN
+echo "echo *" >> $BUSH_IN
+echo "echo .*" >> $BUSH_IN
 
-echo "cd" >  csh-in
-echo "echo *" >> csh-in
-echo "echo .*" >> csh-in
+echo "cd" >  $CSH_IN
+echo "echo *" >> $CSH_IN
+echo "echo .*" >> $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

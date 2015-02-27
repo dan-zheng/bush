@@ -1,17 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "CD-02: cd pwd"
 
-rm csh-out shell-out
-pgray "CD-02: cd pwd"
-echo "cd" > shell-in
-echo "/bin/pwd" >> shell-in
-echo "cd" > csh-in
-echo "/bin/pwd" >> csh-in
+rm $CSH_OUT $BUSH_OUT
+echo "cd" > $BUSH_IN
+echo "/bin/pwd" >> $BUSH_IN
+echo "cd" > $CSH_IN
+echo "/bin/pwd" >> $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

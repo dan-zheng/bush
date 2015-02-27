@@ -1,15 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
 
-rm -f csh-out shell-out
-pgray "BG-01: Background"
-echo "sleep 5 &" > shell-in
-echo "touch bgfile" >> shell-in
-$SHELL < shell-in > shell-out &
+it "BG-01: Background"
+
+rm -f $CSH_OUT $BUSH_OUT
+echo "sleep 5 &" > $BUSH_IN
+echo "touch bgfile.tmp.txt" >> $BUSH_IN
+$SHELL < $BUSH_IN > $BUSH_OUT &
 
 sleep 1
-if [ ! -f bgfile ]
+if [ ! -f bgfile.tmp.txt ]
 then
   fail
 fi

@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+describe "File Globbing"
 
 grade7=0
 grade7max=14
-echo "--- File Globbing -----------------------------------"
 ./test-glob-1.sh && grade7=`expr $grade7 "+" 2`
 ./test-glob-2.sh && grade7=`expr $grade7 "+" 1`
 ./test-glob-3.sh && grade7=`expr $grade7 "+" 1`

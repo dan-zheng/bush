@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "ESC-04: Escape Chars"
 
-rm -f csh-out shell-out
-pgray "ESC-04: Escape Chars"
-echo "echo lll\< kkkk\\\\\\ uuuu\&" > shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "echo lll\< kkkk\\\\\\ uuuu\&" > $BUSH_IN
 
-$SHELL < shell-in > shell-out 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-grep "lll< kkkk[\] uuuu&" shell-out
+grep "lll< kkkk[\] uuuu&" $BUSH_OUT
 check $?
 succeed

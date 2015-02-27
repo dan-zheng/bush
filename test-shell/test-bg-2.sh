@@ -1,32 +1,32 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "BG-02: Zombie processes"
 
-rm -f shell-out
+rm -f $BUSH_OUT
 myname=`whoami`
-pgray "BG-02: Zombie processes"
 
 before=`/bin/ps -u $myname | grep -c defunc`
-echo "ls &" > shell-in
-echo "ls &" >> shell-in
-echo "ls &" >> shell-in
-echo "ls &" >> shell-in
-echo "ls &" >> shell-in
-echo "ls &" >> shell-in
-echo "ls &" >> shell-in
-echo "sleep 5" >> shell-in
-$SHELL < shell-in > shell-out &
+echo "ls &" > $BUSH_IN
+echo "ls &" >> $BUSH_IN
+echo "ls &" >> $BUSH_IN
+echo "ls &" >> $BUSH_IN
+echo "ls &" >> $BUSH_IN
+echo "ls &" >> $BUSH_IN
+echo "ls &" >> $BUSH_IN
+echo "sleep 5" >> $BUSH_IN
+$SHELL < $BUSH_IN > $BUSH_OUT &
 
 sleep 1
 
-grep test shell-out > out2 2>&1
+grep test $BUSH_OUT > $CSH_OUT 2>&1
 check $?
 
 after=`/bin/ps -u $myname | grep -c defunc`
 
 if [ $before -ne $after ]
 then
-    echo "Zombie processes still around ($before, $after)"
+    panic "Zombie processes still around ($before, $after)"
     fail
 fi
 succeed

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
 
@@ -25,18 +25,17 @@ totalmax=`expr $grade1max + $grade2max + $grade3max + $grade4max \
 
 function report_row() {
   if [ $2 = $3 ]; then
-    pgreen "✔  \c"
+    echo -e "\e[1;32m✔\e[0m\c"
   else
-    pred "✘  \c"
+    echo -e "\e[1;31m✘\e[0m\c"
   fi
 
-  echo "$1 (\c"
+
   if [ $2 = $3 ]; then
-    pgreen "$2\c"
+    echo -e "  \e[1;30m$1\e[0m"
   else
-    pred "$2\c"
+    echo -e "\e[1;31m  $1  ($2 / $3)\e[0m"
   fi
-  echo " / $3)"
 }
 
 echo
@@ -55,3 +54,5 @@ report_row "Subshell"                $grade11 $grade11max
 report_row "Tilde Expansion"         $grade12 $grade12max
 echo   "----------------------------------------------------"
 report_row "Total"                   $total   $totalmax
+
+cleanup

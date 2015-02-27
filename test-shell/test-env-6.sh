@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 source ./utils.sh
+it "ENV-06: Enviroment variable expansion"
 
-rm -f csh-out shell-out
-pgray "ENV-06: Enviroment variable expansion"
-echo "setenv C ap" > shell-in
-echo "setenv D le" >> shell-in
-echo "echo I like \${C}p\${D}" >> shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "setenv C ap" > $BUSH_IN
+echo "setenv D le" >> $BUSH_IN
+echo "echo I like \${C}p\${D}" >> $BUSH_IN
 
-$SHELL < shell-in > shell-out
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-grep "I like apple" shell-out
+grep "I like apple" $BUSH_OUT
 check $?
 succeed

@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "GLOB-06: echo /etc/r*/*s* "
 
-rm -f csh-out shell-out
-pgray "GLOB-06: echo /etc/r*/*s* "
-echo "echo /etc/r*/*s*" > shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "echo /etc/r*/*s*" > $BUSH_IN
 
-/bin/sh < shell-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $BUSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

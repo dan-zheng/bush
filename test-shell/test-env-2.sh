@@ -1,23 +1,23 @@
-#!/bin/sh
+#!/bin/bash
 source ./utils.sh
+it "ENV-02: Enviroment: Redirect printenv"
 
-rm -f csh-out shell-out
-pgray "ENV-02: Enviroment: Redirect printenv"
-echo "/usr/bin/printenv | grep PATH" > csh-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "/usr/bin/printenv | grep PATH" > $CSH_IN
 
 #Make sure that printenv is a built in command
 (
 PATH=/bin
 export PATH
-echo "printenv | grep PATH" > shell-in
+echo "printenv | grep PATH" > $BUSH_IN
 )
 
-$SHELL < shell-in > shell-out
-/bin/sh < csh-in > csh-out
+$SHELL < $BUSH_IN > $BUSH_OUT
+/bin/sh < $CSH_IN > $CSH_OUT
 
-sort shell-out -o shell-out
-sort csh-out -o csh-out
+sort $BUSH_OUT -o $BUSH_OUT
+sort $CSH_OUT -o $CSH_OUT
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "IO-01: Output redirection..."
 
-pgray "IO-01: Output redirection..."
-rm -f out1 out2
-echo "ls files > out1" > shell-in
-echo "ls files > out2" > csh-in
-/bin/sh < csh-in > csh-out
-$SHELL < shell-in > shell-out
+rm -f $BUSH_OUT $CSH_OUT
+echo "ls files > $BUSH_OUT" > $BUSH_IN
+echo "ls files > $CSH_OUT" > $CSH_IN
+/bin/sh < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff out1 out2
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

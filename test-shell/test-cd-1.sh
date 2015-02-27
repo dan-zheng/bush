@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "CD-01: cd /etc; pwd"
 
-rm -f csh-out shell-out
-pgray "CD-01: cd /etc; pwd"
-echo "cd /etc" > shell-in
-echo "pwd" >> shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "cd /etc" > $BUSH_IN
+echo "pwd" >> $BUSH_IN
 
-/bin/sh < shell-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $BUSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

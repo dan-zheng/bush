@@ -1,21 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "TILDE-01: Tilde expansion"
 
-pgray "TILDE-01: Tilde expansion"
+echo "ls ~ > $CSH_OUT" > $CSH_IN
+echo "ls ~cs180 >> $CSH_OUT" >> $CSH_IN
+echo "ls ~cs180/share >> $CSH_OUT" >> $CSH_IN
 
-echo "ls ~ > out1" > csh-in
-echo "ls ~cs180 >> out1" >> csh-in
-echo "ls ~cs180/share >> out1" >> csh-in
+echo "ls ~ > $BUSH_OUT" > $BUSH_IN
+echo "ls ~cs180 >> $BUSH_OUT" >> $BUSH_IN
+echo "ls ~cs180/share >> $BUSH_OUT" >> $BUSH_IN
 
-echo "ls ~ > out2" > shell-in
-echo "ls ~cs180 >> out2" >> shell-in
-echo "ls ~cs180/share >> out2" >> shell-in
-
-/bin/bash < csh-in > csh-out
-$SHELL < shell-in > shell-out
+/bin/bash < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
 
-diff out1 out2 > /dev/null 2>&1
+diff $BUSH_OUT $CSH_OUT > /dev/null 2>&1
 check $?
 succeed

@@ -1,16 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "GLOB-01: echo *"
 
-rm -f csh-out shell-out
-pgray "GLOB-01: echo *"
-touch shell-in csh-in shell-out csh-out
-echo "echo *" > shell-in
-echo "echo *" > csh-in
+rm -f $CSH_OUT $BUSH_OUT
+touch $BUSH_IN $CSH_IN $BUSH_OUT $CSH_OUT
+echo "echo *" > $BUSH_IN
+echo "echo *" > $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+describe "IO Redirection"
 
 grade1=0
 grade1max=15
-echo "---- IO Redirection ---------------------------------"
 ./test-io-1.sh && grade1=`expr $grade1 "+" 3`
 ./test-io-2.sh && grade1=`expr $grade1 "+" 3`
 ./test-io-3.sh && grade1=`expr $grade1 "+" 3`

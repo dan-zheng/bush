@@ -1,19 +1,19 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "IO-04: Appending output..."
 
-rm -f err1 err2 out1 out2 csh-out shell-out
-pgray "IO-04: Appending output..."
-echo "ls files > out1" > shell-in
-echo "ls files > out1" >> shell-in
-echo "ls files >> out1" >> shell-in
-echo "ls files > out2" > csh-in
-echo "ls files > out2" >> csh-in
-echo "ls files >> out2" >> csh-in
+rm -f $CSH_ERR $BUSH_ERR $BUSH_OUT $CSH_OUT $CSH_OUT $BUSH_OUT
+echo "ls files > $BUSH_OUT" > $BUSH_IN
+echo "ls files > $BUSH_OUT" >> $BUSH_IN
+echo "ls files >> $BUSH_OUT" >> $BUSH_IN
+echo "ls files > $CSH_OUT" > $CSH_IN
+echo "ls files > $CSH_OUT" >> $CSH_IN
+echo "ls files >> $CSH_OUT" >> $CSH_IN
 
-/bin/sh < csh-in > csh-out
-$SHELL < shell-in > shell-out
+/bin/sh < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff out1 out2
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

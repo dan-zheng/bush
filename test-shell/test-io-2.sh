@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "IO-02: Test stdin redirection..."
 
-pgray "IO-02: Test stdin redirection..."
-echo "cat < files/aaa" > shell-in
-echo "cat < files/aaa" > csh-in
-/bin/sh < csh-in > csh-out
-$SHELL < shell-in > shell-out
+echo "cat < files/aaa" > $BUSH_IN
+echo "cat < files/aaa" > $CSH_IN
+/bin/sh < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff csh-out shell-out
+diff $CSH_OUT $BUSH_OUT
 check $?
 succeed

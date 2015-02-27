@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 source utils.sh
+it "PIPE-03: Pipes and output redirection"
 
-rm -f out1 out2 csh-out shell-out
-pgray "PIPE-03: Pipes and output redirection"
-echo "cat file1.cc | grep malloc > out1" > shell-in
-echo "cat file1.cc | grep malloc > out2" > csh-in
-/bin/sh < csh-in > csh-out
-$SHELL < shell-in > shell-out
+rm -f $BUSH_OUT $CSH_OUT $CSH_OUT $BUSH_OUT
+echo "cat file1.cc | grep malloc > $BUSH_OUT" > $BUSH_IN
+echo "cat file1.cc | grep malloc > $CSH_OUT" > $CSH_IN
+/bin/sh < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff out1 out2
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

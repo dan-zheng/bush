@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "GLOB-04: echo /usr/lib/*ck*"
 
-rm -f csh-out shell-out
-pgray "GLOB-04: echo /usr/lib/*ck*"
-echo "echo /usr/lib/*ck*" > shell-in
-echo "echo /usr/lib/*ck*" > csh-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "echo /usr/lib/*ck*" > $BUSH_IN
+echo "echo /usr/lib/*ck*" > $CSH_IN
 
-/bin/sh < csh-in > csh-out 2>&1
-$SHELL < shell-in > shell-out 2>&1
+/bin/sh < $CSH_IN > $CSH_OUT 2>&1
+$SHELL < $BUSH_IN > $BUSH_OUT 2>&1
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

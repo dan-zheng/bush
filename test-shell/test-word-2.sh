@@ -1,14 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+it "WORD-02: Parsing words and special characters"
 
-rm csh-out shell-out
-pgray "WORD-02: Parsing words and special characters"
-echo "ls|grep fil" > shell-in
-echo "ls|grep fil" > csh-in
-/bin/sh < csh-in > csh-out
-$SHELL < shell-in > shell-out
+rm $CSH_OUT $BUSH_OUT
+echo "ls|grep fil" > $BUSH_IN
+echo "ls|grep fil" > $CSH_IN
+/bin/sh < $CSH_IN > $CSH_OUT
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-diff shell-out csh-out
+diff $BUSH_OUT $CSH_OUT
 check $?
 succeed

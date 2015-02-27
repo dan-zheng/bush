@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 source ./utils.sh
+describe "Quotes and Escape characters"
 
 grade8=0
 grade8max=5
-echo "--- Quotes and Escape characters --------------------"
 ./test-esc-1.sh && grade8=`expr $grade8 "+" 1`
 ./test-esc-2.sh && grade8=`expr $grade8 "+" 1`
 ./test-esc-3.sh && grade8=`expr $grade8 "+" 1`

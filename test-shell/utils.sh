@@ -9,45 +9,65 @@ then
     UTILS_SH_=yes
 
     SHELL=../shell
-    
+
     CSH_IN=cshin.tmp.sh
     CSH_OUT=cshout.tmp.txt
+    CSH_ERR=csherr.tmp.txt
     BUSH_IN=bushin.tmp.sh
     BUSH_OUT=bushout.tmp.txt
+    BUSH_ERR=busherr.tmp.txt
+
+
+    # Mocha Style
+    function it {
+      testname="$1"
+    }
+    function describe {
+      echo -e "\e[4;37m$1\e[0m"
+    }
+    function panic {
+      errmessage = $errmessage"\n"$1
+    }
 
     function check {
       if [ $1 -ne 0 ]
       then
-        fail
+        fail $2
       fi
     }
 
     function succeed {
-      pgreen "✔  OK"
+      pgreen "✔\c"
+      pgray "  $testname"
     }
     function fail    {
-      pred "✘  FAIL"
+      pred "✘\c"
+      echo "  $testname"
+      if [ ! -z $errmessage ]; then
+        it $errmessage
+      fi
       kill -s TERM $TOP_PID
     }
-
-    function pgray {
-      echo "\033[1;30m$1\033[0m"
-    }
-
-    function pgreen {
-      echo "\033[1;32m$1\033[0m"
-    }
-
-    function pred {
-      echo "\033[1;31m$1\033[0m"
-    }
-
     function suit {
       if [ $1 = $2 ]; then
-        pgreen "✔  $1 / $1 pts"
+        pgreen "✔  $1 / $2 pts"
       else
         pred "✘  $1 / $2 pts"
       fi
+    }
+
+    function pgray {
+      echo -e "\e[1;30m$1\e[0m"
+    }
+    function pgreen {
+      echo -e "\e[1;32m$1\e[0m"
+    }
+    function pred {
+      echo -e "\e[1;31m$1\e[0m"
+    }
+
+    function cleanup {
+      rm -f *.tmp.*
     }
 
 fi

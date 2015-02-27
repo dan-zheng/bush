@@ -1,16 +1,16 @@
-#!/bin/sh
+#!/bin/bash
 source ./utils.sh
+it "ENV-04: Enviroment: delete variable"
 
-rm -f csh-out shell-out
-pgray "ENV-04: Enviroment: delete variable"
-echo "setenv aaa pppp" > shell-in
-echo "printenv" >> shell-in
-echo "unsetenv aaa" >> shell-in
-echo "printenv" >> shell-in
+rm -f $CSH_OUT $BUSH_OUT
+echo "setenv aaa pppp" > $BUSH_IN
+echo "printenv" >> $BUSH_IN
+echo "unsetenv aaa" >> $BUSH_IN
+echo "printenv" >> $BUSH_IN
 
-$SHELL < shell-in > shell-out
+$SHELL < $BUSH_IN > $BUSH_OUT
 
-res=`grep -c aaa= shell-out`
+res=`grep -c aaa= $BUSH_OUT`
 if [ $res -ne 1 ]
 then
   fail
