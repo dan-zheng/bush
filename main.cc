@@ -9,6 +9,7 @@
 // in the shell.y file.                                                      //
 //                                                                           //
 // ------------------------------------------------------------------------- //
+#include <errno.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -30,6 +31,7 @@
 
 // Forward declaration
 Parser *parser;
+struct sigaction sigAction;
 
 // ------------------------------------------------------------------------- //
 // Constructor. Nothing fancy here.                                          //
@@ -201,13 +203,24 @@ Parser::out_file(char *file, int err, int append) {
 // ------------------------------------------------------------------------- //
 void
 signal(int n) {
+
   switch (n) {
-    case SIGINT:
-    case SIGCHLD: {
+
+    case SIGINT: {
       int status;
       int pid = wait(&status);
       if (pid != -1) { kill(getpid(), n); }
     } break;
+
+    case SIGCHLD: {
+      int status;
+      int pid = wait3(&status, WNOHANG, NULL);
+      if (pid != -1) {
+        kill(getpid(), n);
+        printf("[%d] exited.\n", pid);
+      }
+    }
+
   }
 }
 
@@ -239,9 +252,20 @@ main(int argc, char **argv) {
 
   // Handle signals if feature level is above FL_PART3
   #if FEATURE_LEVEL >= FL_PART3
-  sigset(SIGINT,  signal);
-  sigset(SIGCHLD, signal);
+
+  sigAction.sa_handler = signal;
+  sigemptyset(&sigAction.sa_mask);
+  sigAction.sa_flags = SA_RESTART;
+
+  int fail = sigaction(SIGINT, &sigAction, NULL);
+  if (fail) {
+    COMPLAIN("%s: %s: %s\n", "sigaction", "SIGINT", strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+
   #endif
+
+
 
   // If in TTY, print enabled debug flags for reference
   // This block is no-op if DEBUG is set to DBG_LVL_NONE

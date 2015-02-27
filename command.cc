@@ -114,7 +114,7 @@ SimpleCommand::push(char *arg) {
 		free(arg);
 	}
 	else {
-		args -> push_back(arg); 
+		args -> push_back(arg);
 	}
 }
 
@@ -259,6 +259,12 @@ CompoundCommand::execute() {
 
 	// Unless &, wait for child to finish
 	if (pid != -1 && !bg) { waitpid(pid, 0, 0); }
+
+	int fail = sigaction(SIGCHLD, &sigAction, NULL);
+	if (fail) {
+		COMPLAIN("%s: %s: %s\n", "sigaction", "SIGCHLD", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
 	#endif
 

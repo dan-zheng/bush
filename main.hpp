@@ -13,6 +13,7 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#include <signal.h>
 #include "command.hpp"
 
 // ------------------------------------------------------------------------- //
@@ -46,6 +47,8 @@ public:
 // Global instance of Parser mostly just for shell.y to access.              //
 // ------------------------------------------------------------------------- //
 extern Parser *parser;
+
+extern struct sigaction sigAction;
 
 // ------------------------------------------------------------------------- //
 // Called to start the YACC parsing process.                                 //
