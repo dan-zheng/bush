@@ -88,9 +88,6 @@ SimpleCommand::execute() {
 
 	// Fork OK, go ahead
 	if (pid == 0) {
-		// Close unnecessary descriptors
-		Plumber::clear();
-
 		// Execute the program
 		execvp(first(), &args->front());
 
@@ -103,7 +100,9 @@ SimpleCommand::execute() {
 		}
 		exit(EXIT_FAILURE);
 	}
-	else { return pid; }
+	else {
+		return pid;
+	}
 }
 
 // ------------------------------------------------------------------------- //
@@ -225,64 +224,36 @@ CompoundCommand::execute() {
 	if (!strcmp(first() -> first(), "exit")) { BuiltIn::_exit(); }
 
 	// CompoundCommand is empty, no point in executing it
-	if (args -> empty()) {
-		DBG_VERBOSE("CompoundCommand::execute() : Skipping empty command.");
-		clear();
-		return;
-	}
+	if (args -> empty()) { return; }
 
 	// Print contents of Command data structure
-	// Prints nothing when DEBUG LEVEL is lower than DBG_LVL_INFO
+	// No-op when DEBUG LEVEL is lower than DBG_LVL_INFO
+	// No-op when FEATURE_LEVEL is higher than FLVL_PART1
 	print();
 
 	#if FEATURE_LEVEL >= FLVL_PART2
 
-	// Capture the I/O state
-	Plumber::capture();
+	// Initialize Plumber for the new command
+	if (!Plumber::setup(in, out, err, append)) { return; }
 
-	// Open input/output files
-	if (Plumber::file(in, out, err, append)) {
-		DBG_ERR("Failed to open one of the files.\n");
-		clear();
-		return;
-	}
-
-	// Number of simple commands
+	// Execute commands
 	int argc = args -> size();
-
-	// Execute command s
 	int pid  = -1;
-	if (argc == 1) {
-		// One and only command.. redirect both ends to files
-		Plumber::redirect(PLB_NONE, PLB_NONE, PLB_NONE);
-		pid = first() -> execute();
+
+	for (int i = 0; i < argc; i++) {
+
+		Plumber::push(i == argc - 1 ? PLB_NONE : PLB_PIPE);
+
+		// Execute and pass on PID
+		int _pid = args -> at(i) -> execute();
+		if (_pid != -1) { pid = _pid; }
 	}
-	else {
-		// Multiple, let's work on it
-		for (int i = 0; i < argc; i++) {
-			DBG_VERBOSE("Command loop: %d / %d\n", i + 1, argc);
 
-			// Let Plumber lay down pipes
-			Plumber::redirect(
-				i == 0        ? PLB_NONE : PLB_PIPE,
-				i == argc - 1 ? PLB_NONE : PLB_PIPE,
-				PLB_NONE
-			);
-
-			// Execute and pass on PID
-			int _pid = args -> at(i) -> execute();
-			if (_pid != -1) { pid = _pid; }
-
-			// Push new pipe into Plumber
-			Plumber::push();
-		}
-	}
+	// Restore I/O state
+	Plumber::teardown();
 
 	// Unless &, wait for child to finish
 	if (pid != -1 && !bg) { waitpid(pid, 0, 0); }
-
-	// Restore I/O state
-	Plumber::restore();
 
 	#endif
 

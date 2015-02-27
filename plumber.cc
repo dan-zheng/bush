@@ -19,185 +19,89 @@
 #include "plumber.hpp"
 
 // Forward declarations
-int Plumber::_def[3];
-int Plumber::_file[3];
-int Plumber::_ipipe[2];
-int Plumber::_opipe[2];
+char *Plumber::_out;
+bool  Plumber::_append;
+int   Plumber::_def[3];
+int   Plumber::_std[3];
 
 // ------------------------------------------------------------------------- //
 // Initializes the pipe and performs an initial capture.                     //
 // ------------------------------------------------------------------------- //
 void
-Plumber::init() {
-  DBG_VERBOSE("Plubmer::init()\n");
-
-  // Capture current stdin, stdout and stderr
-  _def[0]  = dup(0);
-  _def[1]  = dup(1);
-  _def[2]  = dup(2);
-
-  // Initialize pipes
-  if (pipe(_opipe) == -1 || pipe(_ipipe) == -1) {
-    perror("Plumber::capture()");
-    exit(EXIT_FAILURE);
-  }
-}
-
-// ------------------------------------------------------------------------- //
-// Captures current standard I/O state.                                      //
-// ------------------------------------------------------------------------- //
-void
 Plumber::capture() {
-  DBG_VERBOSE("Plubmer::capture()\n");
-
-  // Close the previous capture
-  close(_def[0]);
-  close(_def[1]);
-  close(_def[2]);
+  DBG_INFO("Plubmer::init()\n");
 
   // Capture current stdin, stdout and stderr
   _def[0]  = dup(0);
   _def[1]  = dup(1);
   _def[2]  = dup(2);
-
-  // Duplicate those to file redirects (default no file)
-  _file[0] = dup(0);
-  _file[1] = dup(1);
-  _file[2] = dup(2);
 }
 
 // ------------------------------------------------------------------------- //
-// Restores last captured standard I/O state, closing all pipes and files.   //
+// Configures the Plumber to execute the next command.                       //
+// ------------------------------------------------------------------------- //
+bool
+Plumber::setup(char *in, char *out, char *err, int append) {
+  // Initialize Plumber for the new command
+  Plumber::capture();
+
+  // Set up initial input/error redirects
+  if (!Plumber::_iofile(IO_IN,  in,  append)) { return false; }
+  if (!Plumber::_iofile(IO_ERR, err, append)) { return false; }
+
+  // Let plumber redirect stderr as necessary
+  Plumber::_redirect(IO_ERR);
+
+  // Save output file information
+  Plumber::_out    = out;
+  Plumber::_append = append;
+
+  return true;
+}
+
+// ------------------------------------------------------------------------- //
+// Cleans up the old configuration and restores altered IO settings.         //
 // ------------------------------------------------------------------------- //
 void
-Plumber::restore() {
-  DBG_VERBOSE("Plubmer::restore()\n");
+Plumber::teardown() {
+  DBG_INFO("Plubmer::restore()\n");
 
-  dup2(_def[0],  0);
+  // Restore default IO
+  dup2(_def[0], 0);
   dup2(_def[1], 1);
   dup2(_def[2], 2);
 
-  Plumber::clear();
-}
-
-// ------------------------------------------------------------------------- //
-// Closes all stored I/O states, pipes and files.                            //
-// ------------------------------------------------------------------------- //
-void
-Plumber::clear() {
-  DBG_VERBOSE("Plubmer::clear()\n");
-
+  // Close backup IO descriptors
   close(_def[0]);
   close(_def[1]);
   close(_def[2]);
-  close(_file[0]);
-  close(_file[1]);
-  close(_ipipe[0]);
-  close(_ipipe[1]);
-  close(_opipe[0]);
-  close(_opipe[1]);
+
+  // Clean output information
+  Plumber::_out    = NULL;
+  Plumber::_append = false;
 }
 
 // ------------------------------------------------------------------------- //
-// Pushes a new pipe into Plumber.                                           //
-// This function makes output pipe become input pipe, and creates a new      //
-// output pipe. Call this function before executing a new command.           //
+// Pushes a new Plumber state for the next partial command.                  //
 // ------------------------------------------------------------------------- //
-void
-Plumber::push() {
-  DBG_VERBOSE("Plubmer::push()\n");
+bool
+Plumber::push(int type) {
+  DBG_INFO("Plubmer::push()\n");
 
-  // Close the input end of output pipe to signify end of stream
-  close(_ipipe[1]);
+  Plumber::_redirect(IO_IN);
 
-  // Move output pipe to input pipe
-  _ipipe[0] = _opipe[0];
-  _ipipe[1] = _opipe[1];
-
-  // Create a new output pipe
-  if (pipe(_opipe) == -1) {
-    perror("Plumber::swap()");
-    exit(2);
+  // If not pushing to pipe, try to redirect stdout to outfile (if there is one)
+  if (type == PLB_NONE) {
+    if (!Plumber::_iofile(IO_OUT, Plumber::_out, Plumber::_append)) { return false; }
   }
+  // Otherwise, push another pipe and redirect stdout there
+  else if (!Plumber::_pushpipe()) { return false; }
+
+  // Apply stdout redirect created above
+  Plumber::_redirect(IO_OUT);
+  return true;
 }
 
-// ------------------------------------------------------------------------- //
-// Redirects standard I/O as specified by arguments.                         //
-// ------------------------------------------------------------------------- //
-void
-Plumber::redirect(int in, int out, int err) {
-  DBG_VERBOSE("Plubmer::redirect()\n");
-
-  // Redirect stdin
-  switch (in) {
-    case PLB_NONE: { dup2(_file[0],  0); } break;
-    case PLB_PIPE: { dup2(_ipipe[0], 0); } break;
-    default:       { dup2(in,        0); } break;
-  }
-
-  // Redirect stdout
-  switch (out) {
-    case PLB_NONE: { dup2(_file[1],  1); } break;
-    case PLB_PIPE: { dup2(_opipe[1], 1); } break;
-    default:       { dup2(out,       1); } break;
-  }
-
-  // Redirect stderr
-  switch (err) {
-    case PLB_NONE: { dup2(_file[2],  2); } break;
-    case PLB_PIPE: { dup2(_opipe[1], 2); } break;
-    default:       { dup2(err,       2); } break;
-  }
-}
-
-// ------------------------------------------------------------------------- //
-// Sets up files for redirecting I/O.                                        //
-// If any argument is not null, a file will be opened, and all output to the //
-// corresponding std I/O will be read from/sent to the file instead of the   //
-// std as appropriate.                                                       //
-// ------------------------------------------------------------------------- //
-int
-Plumber::file(char* in, char* out, char* err, int append) {
-
-  // Flag indicating error
-  int f = 0;
-
-  // stdin
-  _file[0] = _def[0];
-  if (in) {
-    DBG_VERBOSE("Plumber::file() : stdin -> %s\n", in);
-    _file[0] = open(in, F_READ, F_FLAGS);
-    // Check if we ran into problems
-    if (_file[0] == -1) {
-      COMPLAIN("%s: %s\n", in, strerror(errno));
-      f = 1;
-    }
-  }
-
-  // stdout
-  _file[1] = _def[1];
-  if (out) {
-    DBG_VERBOSE("Plumber::file() : stdout -> %s\n", out);
-    _file[1] = open(out, append ? (F_APPEND) : (F_TRUNC), F_FLAGS);
-    // Check if we ran into problems
-    if (_file[1] == -1) {
-      COMPLAIN("%s: %s\n", out, strerror(errno));
-      f = 1;
-    }
-  }
-
-  // stderr
-  // XXX Per project constraints, oes not support redirecting to a file
-  // different than stdout. Easy enough to change this, though.
-  _file[2] = _def[2];
-  if (err) {
-    DBG_VERBOSE("Plumber::file() : stderr -> %s\n", err);
-    _file[2] = _file[1];
-  }
-
-  // Return the error flag (1 if there is something wrong)
-  return f;
-}
 
 // ------------------------------------------------------------------------- //
 // Gets the corresponding std I/O from the previousy captured state.         //
@@ -205,4 +109,66 @@ Plumber::file(char* in, char* out, char* err, int append) {
 int
 Plumber::std(int i) {
   return _def[i];
+}
+
+
+// ------------------------------------------------------------------------- //
+// Redirects an std IO to the specified file.                                //
+// ------------------------------------------------------------------------- //
+bool
+Plumber::_iofile(int type, char *path, bool append) {
+
+  // Compute open flags for the file
+  int flags;
+  switch (type) {
+    case IO_IN:  { flags = F_READ; } break;
+    case IO_ERR:
+    case IO_OUT: { flags = append ? F_APPEND : F_TRUNC; } break;
+    default: { PANIC("Plumber::_iofile(): Unexpected iofile type: %d\n", type); }
+  }
+
+  // If the path is not null, open the file and redirect stdin from it
+  if (path) {
+    DBG_INFO("Plubmer::_iofile(): [%d] %s\n", type, path);
+
+    _std[type] = open(path, flags, S_IRUSR | S_IWUSR | S_IXUSR);
+
+    // Fail miserably if the file refuses to open
+    if (_std[type] == -1) {
+      COMPLAIN("%s: %s\n", path, strerror(errno));
+      return false;
+    }
+
+  }
+  // Otherwise, just read from stdin as always
+  else {
+    DBG_INFO("Plubmer::_iofile(): [%d] default\n", type);
+    _std[type] = dup(_def[type]);
+  }
+  return true;
+}
+
+// ------------------------------------------------------------------------- //
+// Applies a redirect to the specified std IO.                               //
+// ------------------------------------------------------------------------- //
+void
+Plumber::_redirect(int i) {
+  DBG_INFO("Plubmer::apply(): %d\n", i);
+  dup2(_std[i], i);
+  close(_std[i]);
+}
+
+// ------------------------------------------------------------------------- //
+// Creates a new pipe and pushes it as the new Plumber state.                //
+// ------------------------------------------------------------------------- //
+bool
+Plumber::_pushpipe() {
+  int fdpipe[2];
+  if (pipe(fdpipe) == -1) {
+    COMPLAIN("%s: %s\n", "pipe", strerror(errno));
+    return false;
+  }
+  _std[1] = fdpipe[1];
+  _std[0] = fdpipe[0];
+  return true;
 }

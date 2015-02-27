@@ -14,7 +14,6 @@
 // Shorthands for open() flags.                                              //
 // ------------------------------------------------------------------------- //
 #define F_READ   O_RDONLY
-#define F_FLAGS  S_IRUSR  | S_IWUSR | S_IXUSR
 #define F_TRUNC  O_WRONLY | O_CREAT | O_TRUNC
 #define F_APPEND O_WRONLY | O_CREAT | O_APPEND
 
@@ -27,26 +26,36 @@
 #define PLB_PIPE  -2
 
 // ------------------------------------------------------------------------- //
+// Plumber std IO constants. Self explanatory.                               //
+// ------------------------------------------------------------------------- //
+#define IO_IN      0
+#define IO_OUT     1
+#define IO_ERR     2
+
+// ------------------------------------------------------------------------- //
 // Plumber the pipe master.                                                  //
 // ------------------------------------------------------------------------- //
 class Plumber {
 private:
-  static int       _def[3];              // Default I/O handles
-  static int       _file[3];             // File I/O handles
-  static int       _ipipe[2];            // Input pipe
-  static int       _opipe[2];            // Output pipe
+  static int       _std[3];             // Final output handles. DO NOT DUP!
+  static int       _def[3];             // Default I/O handles
+  static char     *_out;                // Output file path (if any)
+  static bool      _append;             // Truncate vs Append?
+
+  static bool      _pushpipe();         // Pushes a new pipe to Plumber
+  static bool      _iofile(int, char*,  // Redirects an std IO to a file
+                           bool);
+  static void      _redirect(int);      // Applies redirect to an std IO
 public:
-  static void init();                   // Initializes the Plumber
 
   static void capture();                // Captures current I/O handles
-  static void restore();                // Restores captured I/O handles
-  static void clear();                  // Clears handles managed by Plumber
-  static void push();                   // Push a new pipe into the Plumber
-  static void redirect(int, int, int);  // Redirect I/O as specified
+  static bool push(int);                // Push a new pipe into the Plumber
 
-  static int  file(char*, char*, char*, int); // Specify standard I/O files
+  static bool setup(char*, char*,       // Sets up the Plumber for a specific
+                    char*, int);        // CompoundCommand execution.
+  static void teardown();               // Restores redirected IO and cleans up
 
-  static int  std(int);                 // Get a default I/O handle
+  static int  std(int);                 // Gets a captured I/O handle
 };
 
 #endif

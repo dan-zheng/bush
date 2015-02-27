@@ -68,6 +68,7 @@ Parser::execute() {
   } else {
     DBG_VERBOSE("Yacc: Execute command\n");
     command -> execute();
+    command -> clear();
     prompt();
   }
 }
@@ -238,7 +239,7 @@ main(int argc, char **argv) {
   }
 
   // Initialize Plumber and BuiltIn
-  Plumber::init();
+  Plumber::capture();
   BuiltIn::init();
   parser = new Parser();
 
