@@ -119,7 +119,15 @@ Env::tilde(char** str) {
 
   // No username specified, get currently logged-in user
   if (!pe || pe - ps == 1) {
-    pw = getpwuid(geteuid());
+    char *envhome = getenv("HOME");
+    if (envhome) {
+      result -> append(envhome);
+    }
+    else {
+      pw = getpwuid(geteuid());
+      result -> append(pw -> pw_dir);
+    }
+
   }
   // Copy the username and get user entry
   else {
@@ -132,10 +140,11 @@ Env::tilde(char** str) {
       return 1;
     }
     free(uname);
+    result -> append(pw -> pw_dir);
   }
 
   // Copy home path to result and append the rest of argument
-  result -> append(pw -> pw_dir);
+
   if (pe) { result -> append(pe); }
 
   // Clean up, convert result to C string and return
