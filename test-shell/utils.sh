@@ -23,7 +23,7 @@ then
       testname="$1"
     }
     function describe {
-      echo -e "\e[4;37m$1\e[0m"
+      echo $'\e[4;37m'"$1"$'\e[0m'
     }
     function panic {
       errmessage = $errmessage"\n"$1
@@ -37,11 +37,11 @@ then
     }
 
     function succeed {
-      pgreen "✔\c"
+      pgreenf "✔"
       pgray "  $testname"
     }
     function fail    {
-      pred "✘\c"
+      pred "✘"
       echo "  $testname"
       if [ ! -z $errmessage ]; then
         it $errmessage
@@ -56,14 +56,23 @@ then
       fi
     }
 
+    function pgrayf {
+      printf $'\e[1;30m'"$1"$'\e[0m'
+    }
+    function pgreenf {
+      printf $'\e[1;32m'"$1"$'\e[0m'
+    }
+    function predf {
+      printf $'\e[1;31m'"$1"$'\e[0m'
+    }
     function pgray {
-      echo -e "\e[1;30m$1\e[0m"
+      printf $'\e[1;30m'"$1"$'\e[0m\n'
     }
     function pgreen {
-      echo -e "\e[1;32m$1\e[0m"
+      printf $'\e[1;32m'"$1"$'\e[0m\n'
     }
     function pred {
-      echo -e "\e[1;31m$1\e[0m"
+      printf $'\e[1;31m'"$1"$'\e[0m\n'
     }
 
     function cleanup {

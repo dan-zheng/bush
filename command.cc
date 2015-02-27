@@ -110,7 +110,12 @@ SimpleCommand::execute() {
 // ------------------------------------------------------------------------- //
 void
 SimpleCommand::push(char *arg) {
-	args -> push_back(arg);
+	if (strlen(arg) == 0) {
+		free(arg);
+	}
+	else {
+		args -> push_back(arg); 
+	}
 }
 
 // ------------------------------------------------------------------------- //

@@ -25,16 +25,16 @@ totalmax=`expr $grade1max + $grade2max + $grade3max + $grade4max \
 
 function report_row() {
   if [ $2 = $3 ]; then
-    echo -e "\e[1;32m✔\e[0m\c"
+    pgreenf "✔"
   else
-    echo -e "\e[1;31m✘\e[0m\c"
+    predf "✘"
   fi
 
 
   if [ $2 = $3 ]; then
-    echo -e "  \e[1;30m$1\e[0m"
+    pgray "  $1"
   else
-    echo -e "\e[1;31m  $1  ($2 / $3)\e[0m"
+    pred "  $1    ($2 / $3)"
   fi
 }
 

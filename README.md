@@ -1,6 +1,37 @@
-# Shell
+# BUSH
+*Blatantly Useless Shell: yet another imitation of CSH.*
 
-## TODO List
+
+My take on writing the shell in C++, done as a part of CS252 Operating Systems
+course at Purdue University.
+
+Even though this shell used some scaffolding files provided by instructors,
+I took liberty to clean up the code that I considered messy. I also implemented
+the shell using the modular structure that I personally prefer. In addition to
+that, the entire test suit provided by instructors has been revamped for better
+user experience.
+
+**TL;DR** This shell was written in a way that is significantly different from
+what instructors expected.
+
+## Building
+You can build the shell by using:
+```
+$ make
+```
+There are also `debug` and `release` targets, that make the executable print
+(or not to print) debug messages. You can fine tune the level of debugging
+detail printed by specifying `DEBUG` flag like this:
+```
+$ make DEBUG=4
+```
+You can run the test suit by using the following (which will force a
+release rebuild):
+```
+$ make test
+```
+
+## Features
 
 ### Part 1
  - [x] Lex
@@ -13,19 +44,43 @@
 
 ### Part 3
  - [x] Ctrl-C
- - [x] `printenv`
- - [x] Wildcard Expansion
- - [ ] Zombie Processes
+ - [x] Subshell
  - [x] `setenv`
+ - [x] `printenv`
  - [x] `unsetenv`
  - [x] `cd [ dir ]`
  - [x] Allow Quotes
- - [x] Escape Characters
- - [x] Environment Variable Expansion
+ - [x] File Globbing
  - [x] Tilde Expansion
+ - [x] Zombie Processes
+ - [x] Escape Characters
  - [x] Prompt only in TTY
- - [ ] Link LibTTY
- - [x] Subshell
+ - [x] Environment Variable Expansion
+
+ - [ ] Link LibTTY (Linux Only)
 
 ### Part 4
- - [ ] FIZ Integration
+ - [ ] [FIZ](https://github.com/jluchiji/fiz) Integration
+
+## License
+### The MIT License
+
+Copyright (c) 2015 Denis Luchkin-Zhou
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
