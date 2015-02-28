@@ -36,7 +36,7 @@ endif
 # shell: aliases & additional files                       								    #
 # --------------------------------------------------------------------------- #
 # Aliases
-all:     shell
+all:     shell fiz
 test:    release
 	$(MAKE) -C test-shell
 force:   clean shell
@@ -58,6 +58,8 @@ y.tab.o:   shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
 
 fiz:
+	git submodule init
+	git submodule update
 	$(MAKE) -C fiz-src CFLAGS="-DSTRICT"
 	cp fiz-src/fiz ./
 
