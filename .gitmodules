@@ -1,3 +1,3 @@
 [submodule "fiz"]
-	path = fiz
+	path = fiz-src
 	url = https://github.com/jluchiji/fiz

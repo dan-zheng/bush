@@ -58,10 +58,14 @@ y.tab.o:   shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
 
+fiz:
+	$(MAKE) -C fiz-src
+	cp fiz-src/fiz ./
+
 # --------------------------------------------------------------------------- #
 # clean: get rid of all that messy mess                    								    #
 # --------------------------------------------------------------------------- #
 clean:
-	rm -f shell ctrl-c regular cat_grep
+	rm -f shell ctrl-c regular cat_grep fiz
 	rm -f *.yy.* *.tab.* *.tab.* *.o *.tmp.*
 	rm -rf *.dSYM

@@ -13,6 +13,7 @@ cat_grep
 ctrl-c
 regular
 shell
+fiz
 
 test-shell/*-in
 test-shell/*-out
