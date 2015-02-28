@@ -39,8 +39,7 @@ Puppet::Puppet(const char* exe) {
   // Compute executable path
   Path *path = new Path(exe);
   executable = path -> resolve(Puppet::_root);
-  delete path;
-
+  
   // Create pipes
   if (pipe(ipipe) == -1 ||
       pipe(opipe) == -1 ||
@@ -48,12 +47,6 @@ Puppet::Puppet(const char* exe) {
     COMPLAIN("Puppet: pipe: %s\n", strerror(errno));
     finalized = true;
   }
-
-  // Set up plumber
-  plumber   = new Plumber();
-  plumber -> file(IO_IN, ipipe[0]);
-  plumber -> file(IO_OUT, opipe[1]);
-  plumber -> file(IO_ERR, epipe[1]);
 }
 
 // ------------------------------------------------------------------------- //
@@ -151,8 +144,16 @@ Puppet::run() {
     return this;
   }
 
+  close(ipipe[1]);
+
   // Prevent repeated execution
   finalized = true;
+
+  // Set up plumber
+  Plumber *plumber = new Plumber();
+  plumber -> file(IO_IN, ipipe[0]);
+  plumber -> file(IO_OUT, opipe[1]);
+  plumber -> file(IO_ERR, epipe[1]);
 
   // Fork
   int pid = fork();
@@ -208,6 +209,7 @@ Puppet::init(char *path) {
     // Relative path, so CWD can be used as root
     Puppet::_root = Globber::cwd() -> push(Puppet::_self) -> pushd("..");
   }
+  while (Puppet::_self -> count() > 1) { free(Puppet::_self -> popd()); }
 }
 
 // ------------------------------------------------------------------------- //
