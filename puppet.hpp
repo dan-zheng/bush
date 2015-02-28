@@ -22,16 +22,29 @@
 #define PUPPET_BUFFER_SIZE 1024
 
 // ------------------------------------------------------------------------- //
+// Puppet's child process exit code when there is an error.                  //
+// ------------------------------------------------------------------------- //
+#define PUPPET_EXIT_BASE 128
+
+// ------------------------------------------------------------------------- //
+// Struct representing exit state of the puppet process.                     //
+// ------------------------------------------------------------------------- //
+typedef struct {
+  int   exit;                        // Exit code emitted by the child process
+  int   error;                       // Error number that caused the error
+} PuppetStatus;
+
+// ------------------------------------------------------------------------- //
 // Puppet class, runs a program with all kinds of strings attached.          //
 // ------------------------------------------------------------------------- //
 class Puppet {
 private:
   char     *executable;              // Absolute path of the puppet executable
-  
-  int       ipipe[2];                // Puppet's stdin
-  int       opipe[2];                // Puppet's stdout
-  int       epipe[2];                // Puppet's stderr
-  int       _status;                 // Exit status of the puppet process
+
+  int          ipipe[2];             // Puppet's stdin
+  int          opipe[2];             // Puppet's stdout
+  int          epipe[2];             // Puppet's stderr
+  PuppetStatus _status;              // Exit status of the puppet process
 
   bool      finalized;               // Flag that indicates whether the puppet
                                      // input is writable
@@ -42,15 +55,15 @@ public:
                                      // from an executable path
   ~Puppet();                         // Destructor, cleans up the mess
 
-  Puppet* write(const char*);        // Writes data to the puppet's stdin
-  char*   read(int);                 // Reads entire content of puppet's stdout
+  Puppet*        write(const char*); // Writes data to the puppet's stdin
+  char*          read(int);          // Reads entire content of puppet's stdout
                                      // or stderr, depending on its parameter
-  int     readTo(SimpleCommand*);    // Reads, splits and pushes output lines
+  PuppetStatus*  readTo(SimpleCommand*); // Reads, splits and pushes output lines
                                      // as arguments into a SimpleCommand
-  Puppet* run();                     // Executes the puppet program. Note that
+  Puppet*        run();              // Executes the puppet program. Note that
                                      // after calling this function, all writes
                                      // to the puppet's stdin are disabled.
-  int     status();                  // Returns the exit status of puppet process
+  PuppetStatus*  status();           // Returns the exit status of puppet process
 
   static void    init(char*);        // Initializes the Puppet's path resolution
                                      // Pass in the argv[0] from the main()

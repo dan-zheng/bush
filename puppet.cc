@@ -11,6 +11,7 @@
 // ------------------------------------------------------------------------- //
 #include <string>
 #include <errno.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <sys/wait.h>
 
@@ -33,12 +34,22 @@ Puppet::Puppet(const char* exe) {
     PANIC("You must call Puppet::init() first!\n");
   }
 
-  finalized = false;
-  _status   = -1;
+  finalized     = false;
+  _status.exit  = 0;
+  _status.error = 0;
 
   // Compute executable path
   Path *path = new Path(exe);
-  executable = path -> resolve(Puppet::_root);
+  if (path -> isAbsolute()) {
+    executable = path -> str();
+  }
+  else {
+    executable = path -> resolve(Puppet::_root);
+  }
+
+
+  DBG_INFO("Puppet::Puppet(): executable: %s\n", executable);
+  delete path;
 
   // Create pipes
   if (pipe(ipipe) == -1 ||
@@ -66,7 +77,6 @@ Puppet*
 Puppet::write(const char *str) {
   if (finalized) {
     COMPLAIN("puppet: write: Cannot write to a finalized puppet.\n");
-    _status = -1;
     return this;
   }
   dprintf(ipipe[1], "%s", str);
@@ -81,6 +91,7 @@ Puppet::write(const char *str) {
 // ------------------------------------------------------------------------- //
 char*
 Puppet::read(int type) {
+
   // Figure out which stream to read
   int fd;
   switch (type) {
@@ -114,7 +125,7 @@ Puppet::read(int type) {
 // Reads entire content of the puppet's stdout, splits it by likes and       //
 // pushes them into a SimpleCommand as arguments.                            //
 // ------------------------------------------------------------------------- //
-int
+PuppetStatus*
 Puppet::readTo(SimpleCommand *partial) {
   char *output = read(IO_OUT);
   char *ps = output,
@@ -129,7 +140,7 @@ Puppet::readTo(SimpleCommand *partial) {
   }
   if (pe) { partial -> push(strdup(pe)); }
   free(output);
-  return _status;
+  return &_status;
 }
 
 // ------------------------------------------------------------------------- //
@@ -140,7 +151,7 @@ Puppet*
 Puppet::run() {
   if (finalized) {
     COMPLAIN("puppet: finalized: Cannot run a finalized puppet.");
-    _status = -1;
+    _status.exit = -1;
     return this;
   }
 
@@ -155,24 +166,32 @@ Puppet::run() {
   plumber -> file(IO_OUT, opipe[1]);
   plumber -> file(IO_ERR, epipe[1]);
 
-  // Fork
-  int pid = fork();
-  if (pid == -1) {
-    COMPLAIN("puppet: fork: %s", strerror(errno));
-    _status = -1;
-    return this;
+  // Check whether executable exists
+  if (access(executable, X_OK)) {
+    _status.exit = -1;
+    _status.error = errno;
   }
 
-  // Redirect IO
-  plumber -> redirect(IO_IN);
-  plumber -> redirect(IO_OUT);
-  plumber -> redirect(IO_ERR);
+  // Fork if everything looks good
+  int pid = -1;
+  if (!_status.exit && !_status.error) {
+    pid = fork();
+    if (pid == -1) {
+      COMPLAIN("puppet: fork: %s", strerror(errno));
+      _status.exit = -1;
+      return this;
+    }
 
-  // Execute
-  if (pid == 0) {
-    execlp(executable, executable, NULL);
-    COMPLAIN("puppet: exec: %s", strerror(errno));
-    exit(EXIT_FAILURE);
+    // Redirect IO
+    plumber -> redirect(IO_IN);
+    plumber -> redirect(IO_OUT);
+    plumber -> redirect(IO_ERR);
+
+    // Execute
+    if (pid == 0) {
+      execlp(executable, executable, NULL);
+      exit(PUPPET_EXIT_BASE + errno);
+    }
   }
 
   // Restore IO
@@ -182,16 +201,26 @@ Puppet::run() {
   close(epipe[1]);
 
   // Wait for process to exit and return its exit _status
-  if (pid != -1) { waitpid(pid, &_status, 0); }
+  if (pid != -1) {
+    int exit_status;
+    waitpid(pid, &exit_status, 0);
+    if (WIFEXITED(exit_status)) { _status.exit = WEXITSTATUS(exit_status); }
+    else { _status.exit = 1; }
+    if (_status.exit > PUPPET_EXIT_BASE) {
+      _status.error = _status.exit - PUPPET_EXIT_BASE;
+      _status.exit  = 1;
+    }
+  }
+
   return this;
 }
 
 // ------------------------------------------------------------------------- //
 // Returns the exit status of the puppet process.                            //
 // ------------------------------------------------------------------------- //
-int
+PuppetStatus*
 Puppet::status() {
-  return _status;
+  return &_status;
 }
 
 // ------------------------------------------------------------------------- //

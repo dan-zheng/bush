@@ -21,6 +21,7 @@
  *   -- J.R.R. Tolkien
  */
 
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
@@ -277,6 +278,18 @@ Path::clone() {
     np -> segments -> push_back(strdup(*it));
   }
   return np;
+}
+
+
+// ------------------------------------------------------------------------- //
+// Returns a value that indicates whether the given path exists in the file  //
+// system.                                                                   //
+// ------------------------------------------------------------------------- //
+bool
+Path::exists(const char *path) {
+  struct stat d_stat;
+  if (stat(path, &d_stat)) { return true; }
+  else { return false; }
 }
 
 // ------------------------------------------------------------------------- //

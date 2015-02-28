@@ -92,11 +92,15 @@ SimpleCommand::execute() {
 		execvp(first(), &args->front());
 
 		// We shouldn't be here, panic!
-		if (errno != ENOENT) {
-			COMPLAIN("SimpleCommand::execute(): %s", strerror(errno));
-		}
-		else {
-			COMPLAIN("%s: command not found", first());
+		switch (errno) {
+			case ENOENT:
+				COMPLAIN("%s: command not found", first());
+				break;
+			case EACCES:
+				COMPLAIN("%s: permission denied", first());
+				break;
+			default:
+				COMPLAIN("SimpleCommand::execute(): %s", strerror(errno));
 		}
 		exit(EXIT_FAILURE);
 	}

@@ -56,6 +56,10 @@ public:
   // ----------------------------------------------------------------------- //
   // STATIC METHODS: mostly utility methods used by Path.                    //
   // ----------------------------------------------------------------------- //
+
+  static
+  bool  exists(const char*);   // Checks whether the path exists
+
   static
   void  unescape(char*);       // Removes backslashes from escape sequences.
                                // Does not interpret excape sequences such as
