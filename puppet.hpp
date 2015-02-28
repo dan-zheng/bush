@@ -14,7 +14,7 @@
 #define PUPPET_H_
 
 #include "command.hpp"
-
+#include "plumber.hpp"
 
 // ------------------------------------------------------------------------- //
 // Buffer size for reading puppet output.                                    //
