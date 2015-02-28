@@ -314,9 +314,8 @@ main(int argc, char **argv) {
   }
 
   // Initialize the shell
-  Puppet::init(argv[0]);
-  Plumber::capture();
   BuiltIn::init();
+  Puppet::init(argv[0]);
   parser = new Parser();
 
   // Do the YACC magic...

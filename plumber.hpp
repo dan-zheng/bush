@@ -37,25 +37,17 @@
 // ------------------------------------------------------------------------- //
 class Plumber {
 private:
-  static int       _std[3];             // Final output handles. DO NOT DUP!
-  static int       _def[3];             // Default I/O handles
-  static char     *_out;                // Output file path (if any)
-  static bool      _append;             // Truncate vs Append?
+  int       _std[3];                   // Final output handles. DO NOT DUP!
+  int       _def[3];                   // Default I/O handles
 
-  static bool      _pushpipe();         // Pushes a new pipe to Plumber
-  static bool      _iofile(int, char*,  // Redirects an std IO to a file
-                           bool);
-  static void      _redirect(int);      // Applies redirect to an std IO
 public:
+  Plumber();                           // Constructor. Captures current IO
+  ~Plumber();                          // Destructor. Restores captured IO
 
-  static void capture();                // Captures current I/O handles
-  static bool push(int);                // Push a new pipe into the Plumber
-
-  static bool setup(char*, char*,       // Sets up the Plumber for a specific
-                    char*, int);        // CompoundCommand execution.
-  static void teardown();               // Restores redirected IO and cleans up
-
-  static int  std(int);                 // Gets a captured I/O handle
+  bool push();                         // Push a new pipe into the Plumber
+  void file(int, int);                 // Queues a descriptor for redirect
+  bool file(int, char*, bool);         // Queues a file for redirect
+  void redirect(int);                  // Applies redirect to an std IO
 };
 
 #endif

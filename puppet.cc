@@ -49,10 +49,11 @@ Puppet::Puppet(const char* exe) {
     finalized = true;
   }
 
-  // Capture current output state
-  def[0] = dup(0);
-  def[1] = dup(1);
-  def[2] = dup(2);
+  // Set up plumber
+  plumber   = new Plumber();
+  plumber -> file(IO_IN, ipipe[0]);
+  plumber -> file(IO_OUT, opipe[1]);
+  plumber -> file(IO_ERR, epipe[1]);
 }
 
 // ------------------------------------------------------------------------- //
@@ -153,9 +154,6 @@ Puppet::run() {
   // Prevent repeated execution
   finalized = true;
 
-  // Close the writing end of input pipe
-  close(ipipe[1]);
-
   // Fork
   int pid = fork();
   if (pid == -1) {
@@ -165,12 +163,9 @@ Puppet::run() {
   }
 
   // Redirect IO
-  dup2(ipipe[0], 0);
-  dup2(opipe[1], 1);
-  dup2(epipe[1], 2);
-  close(ipipe[0]);
-  close(opipe[1]);
-  close(epipe[1]);
+  plumber -> redirect(IO_IN);
+  plumber -> redirect(IO_OUT);
+  plumber -> redirect(IO_ERR);
 
   // Execute
   if (pid == 0) {
@@ -180,14 +175,7 @@ Puppet::run() {
   }
 
   // Restore IO
-  dup2(def[0], 0);
-  dup2(def[1], 1);
-  dup2(def[2], 2);
-
-  // Close unused descriptors
-  close(def[0]);
-  close(def[1]);
-  close(def[2]);
+  delete plumber;
   close(ipipe[0]);
   close(opipe[1]);
   close(epipe[1]);
@@ -220,7 +208,6 @@ Puppet::init(char *path) {
     // Relative path, so CWD can be used as root
     Puppet::_root = Globber::cwd() -> push(Puppet::_self) -> pushd("..");
   }
-  printf("root = %s\n", Puppet::_root -> str());
 }
 
 // ------------------------------------------------------------------------- //
@@ -229,7 +216,7 @@ Puppet::init(char *path) {
 Puppet*
 Puppet::self() {
   char *path = Puppet::_self -> str();
-  Puppet *p = new Puppet(pathm);
+  Puppet *p = new Puppet(path);
   free(path);
   return p;
 }

@@ -14,7 +14,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
-#include "plumber.hpp"
 
 // ------------------------------------------------------------------------- //
 // Name of this shell as displayed in prompt.                                //
@@ -114,48 +113,48 @@
 #endif
 
 #if DEBUG >= DBG_LVL_ERROR
-  #define DBG_ERR(...)  dprintf(Plumber::std(1), COLOR_DGRAY "  [%d] ", getpid());\
-                        dprintf(Plumber::std(1), COLOR_LRED "E:  " COLOR_NONE __VA_ARGS__);
-  #define DBG_ERR_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
+  #define DBG_ERR(...)   dprintf(1, COLOR_DGRAY "  [%d] ", getpid());\
+                         dprintf(1, COLOR_LRED "E:  " COLOR_NONE __VA_ARGS__);
+  #define DBG_ERR_N(...) dprintf(1, __VA_ARGS__);
 #else
   #define DBG_ERR(...)
   #define DBG_ERR_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_WARN
-  #define DBG_WARN(...) dprintf(Plumber::std(1), COLOR_DGRAY "  [%d] ", getpid());\
-                        dprintf(Plumber::std(1), COLOR_YELLOW "W:  " COLOR_NONE __VA_ARGS__);
-  #define DBG_WARN_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
+  #define DBG_WARN(...)   dprintf(1, COLOR_DGRAY "  [%d] ", getpid());\
+                          dprintf(1, COLOR_YELLOW "W:  " COLOR_NONE __VA_ARGS__);
+  #define DBG_WARN_N(...) dprintf(1, __VA_ARGS__);
 #else
   #define DBG_WARN(...)
   #define DBG_WARN_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_INFO
-  #define DBG_INFO(...) dprintf(Plumber::std(1), COLOR_DGRAY "  [%d] ", getpid());\
-                        dprintf(Plumber::std(1), COLOR_LBLUE "I:  "  COLOR_NONE __VA_ARGS__);
-  #define DBG_INFO_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
+  #define DBG_INFO(...)   dprintf(1, COLOR_DGRAY "  [%d] ", getpid());\
+                          dprintf(1, COLOR_LBLUE "I:  "  COLOR_NONE __VA_ARGS__);
+  #define DBG_INFO_N(...) dprintf(1, __VA_ARGS__);
 #else
   #define DBG_INFO(...)
   #define DBG_INFO_N(...)
 #endif
 
 #if DEBUG >= DBG_LVL_VERBOSE
-  #define DBG_VERBOSE(...) dprintf(Plumber::std(1), COLOR_DGRAY "  [%d] ", getpid());\
-                           dprintf(Plumber::std(1), COLOR_DGRAY "V:  "  COLOR_NONE __VA_ARGS__);
-  #define DBG_VERBOSE_N(...) dprintf(Plumber::std(1), __VA_ARGS__);
+  #define DBG_VERBOSE(...)   dprintf(1, COLOR_DGRAY "  [%d] ", getpid());\
+                             dprintf(1, COLOR_DGRAY "V:  "  COLOR_NONE __VA_ARGS__);
+  #define DBG_VERBOSE_N(...) dprintf(1, __VA_ARGS__);
 #else
   #define DBG_VERBOSE(...)
   #define DBG_VERBOSE_N(...)
 #endif
 
-#define WARN(...)   dprintf(Plumber::std(2), COLOR_YELLOW "\u2691     " __VA_ARGS__);\
-                    dprintf(Plumber::std(2), " (%s:%d)\n", __FILE__, __LINE__);\
-                    dprintf(Plumber::std(2), COLOR_NONE);
+#define WARN(...)   dprintf(2, COLOR_YELLOW "\u2691     " __VA_ARGS__);\
+                    dprintf(2, " (%s:%d)\n", __FILE__, __LINE__);\
+                    dprintf(2, COLOR_NONE);
 
-#define PANIC(...)  dprintf(Plumber::std(2), COLOR_LRED "\u2717     " __VA_ARGS__);\
-                    dprintf(Plumber::std(2), " (%s:%d)\n", __FILE__, __LINE__);\
-                    dprintf(Plumber::std(2), COLOR_NONE);\
+#define PANIC(...)  dprintf(2, COLOR_LRED "\u2717     " __VA_ARGS__);\
+                    dprintf(2, " (%s:%d)\n", __FILE__, __LINE__);\
+                    dprintf(2, COLOR_NONE);\
                     exit(1);
 
 #define COMPLAIN(...) fprintf(stderr, "-" SH_NAME ": ");\

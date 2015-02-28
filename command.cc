@@ -238,16 +238,24 @@ CompoundCommand::execute() {
 
 	#if FEATURE_LEVEL >= FLVL_PART2
 
-	// Initialize Plumber for the new command
-	if (!Plumber::setup(in, out, err, append)) { return; }
+	// Create Plumber and setup initial redirects
+	Plumber *plumber = new Plumber();
+	if (!plumber -> file(IO_IN,  in,  append)) { return; }
+	if (!plumber -> file(IO_ERR, err, append)) { return; }
+	plumber -> redirect(IO_ERR);
 
 	// Execute commands
-	int argc = args -> size();
-	int pid  = -1;
+	int pid  = -1,
+			argc = args -> size();
 
 	for (int i = 0; i < argc; i++) {
 
-		Plumber::push(i == argc - 1 ? PLB_NONE : PLB_PIPE);
+		plumber -> redirect(IO_IN);
+		// Last partial, pipe out to file (or stdout if no file)
+		if (i == argc - 1) { if (!plumber -> file(IO_OUT, out, append)) { return; } }
+		// There are still commands down the line, push a new pipe
+		else if (!plumber -> push()) { return; }
+		plumber -> redirect(IO_OUT);
 
 		// Execute and pass on PID
 		int _pid = args -> at(i) -> execute();
@@ -255,7 +263,7 @@ CompoundCommand::execute() {
 	}
 
 	// Restore I/O state
-	Plumber::teardown();
+  delete plumber;
 
 	// Unless &, wait for child to finish
 	if (pid != -1 && !bg) { waitpid(pid, 0, 0); }

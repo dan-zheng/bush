@@ -28,10 +28,10 @@ class Puppet {
 private:
   char     *executable;              // Absolute path of the puppet executable
 
+  Plumber  *plumber;
   int       ipipe[2];                // Puppet's stdin
   int       opipe[2];                // Puppet's stdout
   int       epipe[2];                // Puppet's stderr
-  int       def[3];                  // Standard IO of the parent process
   int       _status;                 // Exit status of the puppet process
 
   bool      finalized;               // Flag that indicates whether the puppet
