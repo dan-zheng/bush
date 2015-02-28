@@ -9,7 +9,6 @@ YACC     = yacc
 MAKE     = make
 
 # Platform-specific libraries
-#LFL     = -lfl -L./lib -ltty
 LFL      = -lfl
 
 # Debug logging level (0 - None, 4 - Max)
@@ -69,3 +68,4 @@ clean:
 	rm -f shell ctrl-c regular cat_grep fiz
 	rm -f *.yy.* *.tab.* *.tab.* *.o *.tmp.*
 	rm -rf *.dSYM
+	$(MAKE) clean -C fiz-src

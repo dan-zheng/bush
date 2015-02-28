@@ -39,7 +39,7 @@ Puppet::Puppet(const char* exe) {
   // Compute executable path
   Path *path = new Path(exe);
   executable = path -> resolve(Puppet::_root);
-  
+
   // Create pipes
   if (pipe(ipipe) == -1 ||
       pipe(opipe) == -1 ||
@@ -151,7 +151,7 @@ Puppet::run() {
 
   // Set up plumber
   Plumber *plumber = new Plumber();
-  plumber -> file(IO_IN, ipipe[0]);
+  plumber -> file(IO_IN,  ipipe[0]);
   plumber -> file(IO_OUT, opipe[1]);
   plumber -> file(IO_ERR, epipe[1]);
 
