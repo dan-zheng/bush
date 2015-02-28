@@ -204,8 +204,12 @@ Puppet::run() {
   if (pid != -1) {
     int exit_status;
     waitpid(pid, &exit_status, 0);
-    if (WIFEXITED(exit_status)) { _status.exit = WEXITSTATUS(exit_status); }
-    else { _status.exit = 1; }
+    if (WIFEXITED(exit_status)) {
+      _status.exit = WEXITSTATUS(exit_status);
+    }
+    else {
+      _status.exit = 1;
+    }
     if (_status.exit > PUPPET_EXIT_BASE) {
       _status.error = _status.exit - PUPPET_EXIT_BASE;
       _status.exit  = 1;

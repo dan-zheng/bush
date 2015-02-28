@@ -327,7 +327,7 @@ Path::replace(std::string *str, const char *find, const char *replace) {
 // ------------------------------------------------------------------------- //
 void
 Path::trimend(char* str, char c) {
-  char *pw = str + strlen(str);
+  char *pw = str + strlen(str) - 1;
   while (*pw == c) { *pw-- = 0; }
 }
 

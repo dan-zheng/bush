@@ -58,7 +58,7 @@ y.tab.o:   shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
 
 fiz:
-	$(MAKE) -C fiz-src
+	$(MAKE) -C fiz-src CFLAGS="-DSTRICT"
 	cp fiz-src/fiz ./
 
 # --------------------------------------------------------------------------- #

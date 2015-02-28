@@ -171,7 +171,8 @@ Parser::fiz_arg(char *arg) {
     // Positive status is an error thrown by fiz executable, so read its stderr
     if (!status -> error) {
       char *err = puppet -> read(IO_ERR);
-      fprintf(stderr, "%s", err);
+      Path::trimend(err, '\n');
+      COMPLAIN("fiz: %s", err);
       free(err);
     }
     // Error caused by bush subprocess

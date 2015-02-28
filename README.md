@@ -1,3 +1,12 @@
+```
+       |
+     \|/|/      ______     __  __     ______     __  __
+   \|\\|//|/   /\  == \   /\ \/\ \   /\  ___\   /\ \_\ \
+    \|\|/|/    \ \  __<   \ \ \_\ \  \ \___  \  \ \  __ \  
+     \\|//      \ \_____\  \ \_____\  \/\_____\  \ \_\ \_\
+ _\|/__|_\|/__   \/_____/   \/_____/   \/_____/   \/_/\/_/
+```
+
 # BUSH
 *Blatantly Useless Shell: yet another imitation of CSH.*
 
@@ -30,6 +39,68 @@ release rebuild):
 ```
 $ make test
 ```
+
+## Inline FIZ Integration
+BUSH supports inline [FIZ](https://github.com/jluchiji/fiz) scripts using a syntax like this:
+```
+bush> echo [[ (inc 1) ; This is a comment ]]
+```
+
+Multiline FIZ scripts are supported. For example, you can do something like this:
+```
+bush> echo [[
+
+; x + y
+(define (add x y)
+  (ifz y
+       x
+      (add
+        (inc x)
+        (dec y)
+      )
+  )
+)
+
+; outputs 5
+(add 2 3)
+
+]]
+```
+
+If your FIZ script has multiple outputs, then each one of them will be inserted as a separate argument.
+```
+# This line will print "2 3"
+bush> echo [[ (inc 1) (inc 2) ]]
+```
+
+Invocation of FIZ halt usually results in the exit code of 1, which is considered an error. Therefore
+BUSH will refuse to execute you command if
+
+**NOTE:** Depending on your FIZ interpreter, some functionality may not be available.
+
+### Supply your own FIZ interpreter
+ If you have your own FIZ interpreter that you wish to use, you can set the `FIZ` environment
+ variable to the path of your FIZ interpreter. You can also supply a path relative to the directory
+ where BUSH executable is located. Example:
+```
+ # Assuming that your FIZ interpreter is /bin/fiz
+bush> setenv FIZ /bin/fiz
+bush> echo [[ (dec 2) ]]
+```
+
+### Use my FIZ interpreter
+ If you want to use my [FIZ interpreter](https://github.com/jluchiji/fiz), then you need to
+ get the `fiz-src` submodule of this repository. You will need to do the following in the root
+ directory of the BUSH repository:
+```
+$ git submodule init
+$ git submodule update
+```
+After that, you can set up FIZ integration by simply:
+```
+$ make fiz
+```
+Which will build the FIZ interpreter and copy it to the BUSH repository root.
 
 ## Features
 
