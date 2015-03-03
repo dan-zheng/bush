@@ -162,65 +162,24 @@ Parser::subshell_arg(char *arg) {
 // ------------------------------------------------------------------------- //
 void
 Parser::fiz_arg(char *arg) {
-  /*
-  // Determine where is FIZ
-  const char *fizpath = getenv("FIZ");
-  if (!fizpath) { fizpath = "fiz"; }
-
-  // Create a puppet process
-  Puppet *puppet = new Puppet(fizpath);
-  PuppetStatus *status = puppet -> write(arg) -> run() -> readTo(partial);
-
-  // Check whether the evaluation was successful
-  if (status -> exit) {
-    // Positive status is an error thrown by fiz executable, so read its stderr
-    if (!status -> error) {
-      char *err = puppet -> read(IO_ERR);
-      Path::trimend(err, '\n');
-      COMPLAIN("fiz: %s", err);
-      free(err);
-    }
-    // Error caused by bush subprocess
-    else if (status -> error == ENOENT) {
-      COMPLAIN("fiz: Cannot locate the FIZ interpreter.");
-      fprintf(stderr, YELLOW("Please put your FIZ interpreter into the BUSH root directory or set\n"
-                      "your FIZ environment variable to the path of your FIZ executable.\n")
-              );
-    }
-    // Error caused by execute permission
-    else if (status -> error == EACCES) {
-      COMPLAIN("fiz: Cannot execute the FIZ interpreter.");
-      fprintf(stderr, YELLOW("Please check execute permissions of your FIZ interpreter executable.\n"));
-    }
-    // Unexpected error
-    else {
-      COMPLAIN("puppet: fiz: %s\n", strerror(status -> error));
-    }
-
-    // Clean up the mess and stop current command from executing.
-    delete puppet;
-    error = 1;
-    return;
-  }
-
-  delete puppet;
-  */
-
   Fiz *fiz = new Fiz();
   try {
     int c = fiz -> eval(arg);
 
     int  tmp;
     while (fiz -> read(&tmp, 1)) {
+      
       char str[FIZ_BUF_SIZE];
       memset(str, 0, FIZ_BUF_SIZE);
+
       sprintf(str, "%d", tmp);
       partial -> push(strdup(str));
     }
 
   }
-  catch (FizError error) {
-    COMPLAIN("fiz: %s", FIZ_STRERR(error))
+  catch (FizError err) {
+    COMPLAIN("fiz: %s", FIZ_STRERR(err))
+    error = 1;
   }
 }
 
