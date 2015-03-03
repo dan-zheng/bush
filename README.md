@@ -10,106 +10,112 @@
 # BUSH
 *Blatantly Useless Shell: yet another imitation of CSH.*
 
+My take on writing the shell in C++ using Flex and Bison, done as a part of CS252 Operating Systems course at Purdue University.
 
-My take on writing the shell in C++, done as a part of CS252 Operating Systems
-course at Purdue University.
+Even though this shell used some scaffolding files provided by instructors, I took liberty to clean up the code that I considered messy. I also implemented the shell using the modular structure that I personally prefer. In addition to that, the entire test suit provided by instructors has been revamped for better user experience.
 
-Even though this shell used some scaffolding files provided by instructors,
-I took liberty to clean up the code that I considered messy. I also implemented
-the shell using the modular structure that I personally prefer. In addition to
-that, the entire test suit provided by instructors has been revamped for better
-user experience.
+**TL;DR** This shell was written in a way that may be significantly different from what instructors expected.
 
-**TL;DR** This shell was written in a way that is significantly different from
-what instructors expected.
+## Table of Contents
 
 ## Building
 You can build the shell by using:
 ```
 $ make
 ```
-There are also `debug` and `release` targets, that make the executable print
-(or not to print) debug messages. You can fine tune the level of debugging
-detail printed by specifying `DEBUG` flag like this:
+There are also `debug` and `release` targets, that make the executable print (or not to print) debug messages. You can fine tune the level of debugging detail printed by specifying `DEBUG` flag like this:
 ```
 $ make DEBUG=4
 ```
-You can run the test suit by using the following (which will force a
-release rebuild):
+You can run the test suit by using the following (which will force a release rebuild):
 ```
 $ make test
 ```
+
+**NOTE: BUSH requires [LibFIZ](https://github.com/jluchiji/fiz) to build correctly. LibFIZ is included as a git submodule, which has to be downloaded and built, therefore the building process above requires an Internet connection.**
 
 ## Inline FIZ Integration
 BUSH supports inline [FIZ](https://github.com/jluchiji/fiz) scripts using a syntax like this:
 ```
 bush> echo [[ (inc 1) ; This is a comment ]]
+2
+```
+FIZ integration is powered by the newest version of the FIZ project that generates the static library version of FIZ with a minimalistic public API. BUSH repository includes a `fiz-src` submodule that builds into `libfiz.a`.
+
+FIZ supported by the BUSH is a superset of the official syntax, with the following differences:
+
+ - Unlike the official version, does not limit the number of function arguments and user-defined functions.
+ - Supports environment variables via the `$` prefix.
+
+### Inline FIZ Features
+
+#### Environment Variables
+Environment variables visible to the BUSH are also visible to its inline interpreter, which are accessible by prefixing variable names with a single `$`.
+```
+bush> setenv VAR 17
+bush> echo [[ (inc $VAR) ; results in VAR + 1 ]]
+18
+```
+Environment variables can be used anywhere a FIZ expression is used. Only environment variables with integer values are supported: attempting to use an environment variable with a string value in FIZ will result in error.
+```
+bush> setenv VAR string
+bush> echo [[ (inc $VAR) ]]
+-bush: fiz: Environment variable value not supported.
+```
+Attempting to reference an environment that does not exist will result in the same error as using an undefined variable.
+```
+bush> unsetenv VAR
+bush> echo [[ (inc $VAR) ]]
+-bush: fiz: Variable is not defined.
 ```
 
+#### Multiline FIZ Scripts
 Multiline FIZ scripts are supported. For example, you can do something like this:
 ```
 bush> echo [[
+import math.f
 
 ; x + y
 (define (add x y)
-  (ifz y
-       x
-      (add
-        (inc x)
-        (dec y)
-      )
+  (ifz y x (add
+             (inc x)
+             (dec y)
+           )
   )
 )
 
 ; outputs 5
 (add 2 3)
-
 ]]
+5
 ```
 
+#### Multiple FIZ Outputs
 If your FIZ script has multiple outputs, then each one of them will be inserted as a separate argument.
 ```
-# This line will print "2 3"
 bush> echo [[ (inc 1) (inc 2) ]]
+2 3
 ```
 
-Invocation of FIZ halt usually results in the exit code of 1, which is considered an error. Therefore
-BUSH will refuse to execute you command if
-
-**NOTE:** Depending on your FIZ interpreter, some functionality may not be available.
-
-### Supply your own FIZ interpreter
- If you have your own FIZ interpreter that you wish to use, you can set the `FIZ` environment
- variable to the path of your FIZ interpreter. You can also supply a path relative to the directory
- where BUSH executable is located. Example:
+#### FIZ Errors and `(halt)`
+Any error in the FIZ script will print an error message and block the shell command from executing.
+Invocation of `(halt)` in FIZ is considered an error, which will also block the shell command from executing.
 ```
- # Assuming that your FIZ interpreter is /bin/fiz
-bush> setenv FIZ /bin/fiz
-bush> echo [[ (dec 2) ]]
+bush> echo [[ (halt) ]]
+-bush: fiz: Halted.
+bush> echo [[ ))) ]]
+-bush: fiz: Syntax error.
 ```
 
-### Use my FIZ interpreter
- If you want to use my [FIZ interpreter](https://github.com/jluchiji/fiz), then you need to
- get the `fiz-src` submodule of this repository. You will need to do the following in the root
- directory of the BUSH repository:
-```
-$ git submodule init
-$ git submodule update
-```
-After that, you can set up FIZ integration by simply:
-```
-$ make fiz
-```
-Which will build the FIZ interpreter and copy it to the BUSH repository root.
 
 ## Features
 
 ### Part 1
- - [x] Lex
- - [x] Yacc
+ - [x] Lexical Analysis
+ - [x] Grammar Rules
 
 ### Part 2
- - [x] Simple Commands
+ - [x] Simple Command Redirection
  - [x] File Redirection
  - [x] Pipes
 
@@ -127,31 +133,18 @@ Which will build the FIZ interpreter and copy it to the BUSH repository root.
  - [x] Escape Characters
  - [x] Prompt only in TTY
  - [x] Environment Variable Expansion
-
- - [ ] Link LibTTY (Linux Only)
+ - [x] Link LibTTY (Linux Only)
 
 ### Part 4
- - [ ] [FIZ](https://github.com/jluchiji/fiz) Integration
+ - [x] [FIZ](https://github.com/jluchiji/fiz) Integration
 
 ## License
 ### The MIT License
 
 Copyright (c) 2015 Denis Luchkin-Zhou
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
