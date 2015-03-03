@@ -36,7 +36,7 @@ endif
 # shell: aliases & additional files                       								    #
 # --------------------------------------------------------------------------- #
 # Aliases
-all:     shell fiz
+all:     shell
 test:    release
 	$(MAKE) -C test-shell
 force:   clean shell
@@ -45,8 +45,8 @@ debug:   force
 release: DEBUG = 0
 release: force
 
-shell: y.tab.o lex.yy.o main.o builtin.o command.o plumber.o env.o globber.o path.o puppet.o
-	$(CC) $(CCFLAGS) -o shell *.o $(LFL)
+shell: libfiz.a y.tab.o lex.yy.o main.o builtin.o command.o plumber.o env.o globber.o path.o puppet.o
+	$(CC) $(CCFLAGS) -o shell *.o libfiz.a $(LFL)
 
 %.o:       %.cc
 	$(CC) $(CCFLAGS) -c $^
@@ -56,16 +56,20 @@ lex.yy.o:  shell.l
 y.tab.o:   shell.y
 	$(YACC) -d shell.y
 	$(CC) -x c++ $(CCFLAGS) -c y.tab.c
-
-fiz:
-	git submodule init
-	git submodule update
+libfiz.a:  submodules
 	$(MAKE) -C fiz-src CFLAGS="-DSTRICT"
-	cp fiz-src/fiz ./
+	cp fiz-src/libfiz.a ./
 
 # --------------------------------------------------------------------------- #
 # clean: get rid of all that messy mess                    								    #
 # --------------------------------------------------------------------------- #
+.PHONY: submodules clean
+
+submodules:
+	git submodule init
+	git submodule update
+	git submodule foreach git pull origin master
+
 clean:
 	rm -f shell ctrl-c regular cat_grep fiz
 	rm -f *.yy.* *.tab.* *.tab.* *.o *.tmp.*

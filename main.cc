@@ -25,9 +25,13 @@
 #include "builtin.hpp"
 #include "plumber.hpp"
 
+#include "fiz-src/fiz.h"
+
 #ifdef LTTY_A_
 #include "lib/tty.h"
 #endif
+
+#define FIZ_BUF_SIZE 1024
 
 // Forward declaration
 Parser *parser;
@@ -158,6 +162,7 @@ Parser::subshell_arg(char *arg) {
 // ------------------------------------------------------------------------- //
 void
 Parser::fiz_arg(char *arg) {
+  /*
   // Determine where is FIZ
   const char *fizpath = getenv("FIZ");
   if (!fizpath) { fizpath = "fiz"; }
@@ -199,6 +204,24 @@ Parser::fiz_arg(char *arg) {
   }
 
   delete puppet;
+  */
+
+  Fiz *fiz = new Fiz();
+  try {
+    int c = fiz -> eval(arg);
+
+    int  tmp;
+    while (fiz -> read(&tmp, 1)) {
+      char str[FIZ_BUF_SIZE];
+      memset(str, 0, FIZ_BUF_SIZE);
+      sprintf(str, "%d", tmp);
+      partial -> push(strdup(str));
+    }
+
+  }
+  catch (FizError error) {
+    COMPLAIN("fiz: %s", FIZ_STRERR(error))
+  }
 }
 
 // ------------------------------------------------------------------------- //
