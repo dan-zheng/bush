@@ -32,7 +32,7 @@ You can run the test suit by using the following (which will force a release reb
 ```
 $ make test
 ```
-
+ 
 **NOTE: BUSH requires [LibFIZ](https://github.com/jluchiji/fiz) to build correctly. LibFIZ is included as a git submodule, which has to be downloaded and built, therefore the building process above requires an Internet connection.**
 
 ## Inline FIZ Integration
